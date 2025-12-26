@@ -1,4 +1,5 @@
 import Analytics from './pages/Analytics';
+import CrawlReport from './pages/CrawlReport';
 import Crawls from './pages/Crawls';
 import Issues from './pages/Issues';
 import PageDetail from './pages/PageDetail';
@@ -6,12 +7,13 @@ import Pages from './pages/Pages';
 import Reports from './pages/Reports';
 import SiteOverview from './pages/SiteOverview';
 import Sites from './pages/Sites';
-import CrawlReport from './pages/CrawlReport';
+import HealthReport from './pages/HealthReport';
 import __Layout from './Layout.jsx';
 
 
 export const PAGES = {
     "Analytics": Analytics,
+    "CrawlReport": CrawlReport,
     "Crawls": Crawls,
     "Issues": Issues,
     "PageDetail": PageDetail,
@@ -19,7 +21,7 @@ export const PAGES = {
     "Reports": Reports,
     "SiteOverview": SiteOverview,
     "Sites": Sites,
-    "CrawlReport": CrawlReport,
+    "HealthReport": HealthReport,
 }
 
 export const pagesConfig = {

@@ -369,6 +369,8 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
             let statusCode = 0;
             let html = null;
             let finalUrl = url;
+            let loadTimeMs = 0;
+            const fetchStart = Date.now();
 
             try {
                 if (useJs) {
@@ -398,8 +400,11 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
                         html = await response.text();
                     }
                 }
+                
+                loadTimeMs = Date.now() - fetchStart;
             } catch (error) {
                 console.error(`Fetch error for ${url}:`, error.message);
+                loadTimeMs = Date.now() - fetchStart;
             }
 
             // Handle redirects from JS rendering

@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import StatCard from "@/components/dashboard/StatCard";
-import { AlertCircle, AlertTriangle, Info, ArrowLeft, Clock, FileText, Bug, ExternalLink, Play } from "lucide-react";
+import { AlertCircle, AlertTriangle, Info, ArrowLeft, Clock, FileText, Bug, ExternalLink, Play, BarChart3 } from "lucide-react";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 
@@ -222,7 +222,7 @@ export default function SiteOverview() {
       </div>
 
       {/* Quick Links */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Link to={createPageUrl(`Crawls?siteId=${siteId}`)}>
           <Card className="p-5 hover:border-slate-300 transition-colors cursor-pointer group">
             <div className="flex items-center justify-between">
@@ -273,7 +273,28 @@ export default function SiteOverview() {
             </div>
           </Card>
         </Link>
-      </div>
+        </div>
+
+        {/* Health Report Link */}
+        {latestCrawl && (
+        <Link to={createPageUrl(`HealthReport?siteId=${siteId}`)}>
+          <Card className="p-5 hover:border-slate-300 transition-colors cursor-pointer group">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                  <BarChart3 className="w-5 h-5 text-purple-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-slate-900">Health Report</p>
+                  <p className="text-sm text-slate-500">View performance trends</p>
+                </div>
+              </div>
+              <ArrowLeft className="w-5 h-5 text-slate-300 rotate-180 group-hover:text-slate-500 transition-colors" />
+            </div>
+          </Card>
+        </Link>
+        )}
+        </div>
 
       {/* Recent Critical Issues */}
       {criticalCount > 0 && (
