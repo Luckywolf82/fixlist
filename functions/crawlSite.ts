@@ -1,12 +1,15 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { parseHTML } from 'npm:linkedom@0.18.5';
+import { chromium } from 'npm:playwright@1.48.0';
 
 const USER_AGENT = 'FixlistBot/1.0';
+
+let _browser = null;
 
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
-        const { site_id } = await req.json();
+        const { site_id, render_js } = await req.json();
 
         if (!site_id) {
             return Response.json({ error: 'site_id is required' }, { status: 400 });
@@ -26,7 +29,7 @@ Deno.serve(async (req) => {
             pages_crawled: 0
         });
 
-        crawlWebsite(base44.asServiceRole, site, crawl.id).catch(console.error);
+        crawlWebsite(base44.asServiceRole, site, crawl.id, !!render_js).catch(console.error);
 
         return Response.json({
             success: true,
@@ -261,10 +264,82 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// ============ Playwright Browser Management ============
+async function getBrowser() {
+    if (_browser) return _browser;
+    _browser = await chromium.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+    });
+    return _browser;
+}
+
+async function fetchHtmlRendered(url, userAgent, opts = {}) {
+    const timeoutMs = opts.timeoutMs || 20000;
+    const waitUntil = opts.waitUntil || 'domcontentloaded';
+    const extraWaitMs = opts.extraWaitMs || 800;
+    const blockResources = opts.blockResources !== false;
+
+    const browser = await getBrowser();
+    const context = await browser.newContext({
+        userAgent,
+        viewport: { width: 1280, height: 720 }
+    });
+
+    let page = null;
+    try {
+        page = await context.newPage();
+
+        if (blockResources) {
+            await page.route('**/*', (route) => {
+                const type = route.request().resourceType();
+                if (type === 'image' || type === 'font' || type === 'media') {
+                    return route.abort();
+                }
+                return route.continue();
+            });
+        }
+
+        let mainStatus = 0;
+        page.on('response', (resp) => {
+            if (resp.url() === page?.url()) {
+                mainStatus = resp.status();
+            }
+        });
+
+        const resp = await page.goto(url, { waitUntil, timeout: timeoutMs });
+        const statusCode = resp?.status() || mainStatus || 0;
+
+        if (extraWaitMs > 0) {
+            await page.waitForTimeout(extraWaitMs);
+        }
+
+        const finalUrl = page.url();
+        const html = await page.content();
+        
+        await context.close();
+        return { statusCode, finalUrl, html, timedOut: false };
+    } catch (e) {
+        await context.close();
+        const finalUrl = page?.url?.() || url;
+        const msg = String(e?.message || e);
+        const timedOut = msg.toLowerCase().includes('timeout');
+        return { statusCode: 0, finalUrl, html: null, timedOut };
+    }
+}
+
+async function closeRenderer() {
+    if (_browser) {
+        await _browser.close();
+        _browser = null;
+    }
+}
+
 // ============ Main Crawler ============
-async function crawlWebsite(base44ServiceRole, site, crawlId) {
+async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) {
     const domain = `https://${site.domain}`;
     const maxPages = 50;
+    const useJs = renderJs;
     let pagesCrawled = 0;
 
     const queue = [];
@@ -293,21 +368,47 @@ async function crawlWebsite(base44ServiceRole, site, crawlId) {
 
             let statusCode = 0;
             let html = null;
+            let finalUrl = url;
 
             try {
-                const response = await fetch(url, {
-                    headers: { 'User-Agent': USER_AGENT },
-                    redirect: 'follow'
-                });
+                if (useJs) {
+                    const result = await fetchHtmlRendered(url, USER_AGENT, {
+                        timeoutMs: 20000,
+                        waitUntil: 'domcontentloaded',
+                        extraWaitMs: 800,
+                        blockResources: true
+                    });
+                    statusCode = result.statusCode;
+                    html = result.html;
+                    finalUrl = result.finalUrl;
+                    
+                    if (result.timedOut) {
+                        console.log(`Timeout rendering ${url}`);
+                    }
+                } else {
+                    const response = await fetch(url, {
+                        headers: { 'User-Agent': USER_AGENT },
+                        redirect: 'follow'
+                    });
 
-                statusCode = response.status;
-                const contentType = response.headers.get('content-type') || '';
-                
-                if (contentType.includes('text/html')) {
-                    html = await response.text();
+                    statusCode = response.status;
+                    const contentType = response.headers.get('content-type') || '';
+                    
+                    if (contentType.includes('text/html')) {
+                        html = await response.text();
+                    }
                 }
             } catch (error) {
                 console.error(`Fetch error for ${url}:`, error.message);
+            }
+
+            // Handle redirects from JS rendering
+            if (finalUrl !== url && !seen.has(finalUrl)) {
+                const normalized = normalizeUrl(finalUrl);
+                if (normalized && normalized !== url) {
+                    url = normalized;
+                    seen.add(normalized);
+                }
             }
 
             let page = {
@@ -501,5 +602,10 @@ async function crawlWebsite(base44ServiceRole, site, crawlId) {
             finished_at: new Date().toISOString(),
             pages_crawled: pagesCrawled
         });
+    } finally {
+        // Clean up browser if JS rendering was used
+        if (useJs) {
+            await closeRenderer();
+        }
     }
 }
