@@ -219,6 +219,11 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.error('Error generating report:', error);
-    return Response.json({ error: error.message }, { status: 500 });
+    console.error('Error stack:', error.stack);
+    console.error('Error details:', JSON.stringify(error, null, 2));
+    return Response.json({ 
+      error: error.message || 'Unknown error',
+      details: error.toString()
+    }, { status: 500 });
   }
 });
