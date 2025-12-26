@@ -5,15 +5,6 @@ Deno.serve(async (req) => {
   try {
     console.log('Starting report generation...');
     const base44 = createClientFromRequest(req);
-    
-    console.log('Checking authentication...');
-    const user = await base44.auth.me();
-    console.log('User authenticated:', user?.email);
-
-    if (!user) {
-      console.error('No user found');
-      return Response.json({ error: 'Unauthorized' }, { status: 401 });
-    }
 
     const { site_id, period_days = 30 } = await req.json();
     console.log('Generating report for site_id:', site_id, 'period_days:', period_days);
