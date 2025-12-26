@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { usePermissions } from "@/components/usePermissions";
-import { Globe, LayoutDashboard, Bug, FileText, Search, BarChart3, Settings, Users } from "lucide-react";
+import { Globe, LayoutDashboard, Bug, FileText, Search, BarChart3, Settings, Users, CreditCard } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
   const { canAccessSettings, canManageUsers } = usePermissions();
@@ -12,6 +12,7 @@ export default function Layout({ children, currentPageName }) {
     { name: "Analytics", page: "Analytics", icon: BarChart3, show: true },
     { name: "Reports", page: "Reports", icon: FileText, show: true },
     { name: "Users", page: "UserManagement", icon: Users, show: canManageUsers },
+    { name: "Billing", page: "Billing", icon: CreditCard, show: true },
     { name: "Settings", page: "Settings", icon: Settings, show: canAccessSettings },
   ].filter(item => item.show);
 
