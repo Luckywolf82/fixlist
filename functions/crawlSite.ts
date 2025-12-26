@@ -668,7 +668,7 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
                         timeoutMs: 20000,
                         waitUntil: 'domcontentloaded',
                         extraWaitMs: 800,
-                        blockResources: true,
+                        blockResources: false,
                         collectVitals: true
                     });
                     statusCode = result.statusCode;
