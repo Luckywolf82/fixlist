@@ -444,6 +444,9 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
                 page.h1 = parsed.h1;
                 page.h1_count = parsed.h1Count;
                 page.word_count_estimate = parsed.wordCount;
+                page.images = parsed.images;
+                page.outdatedElements = parsed.outdatedElements;
+                page.hasLang = parsed.hasLang;
                 console.log(`Parsed - Title: "${page.title}", H1: "${page.h1}", Words: ${page.word_count_estimate}`);
 
                 // Collect links
