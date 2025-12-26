@@ -7,8 +7,6 @@ import { createPageUrl } from "@/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import StatCard from "@/components/dashboard/StatCard";
 import { AlertCircle, AlertTriangle, Info, ArrowLeft, Clock, FileText, Bug, ExternalLink, Play, BarChart3 } from "lucide-react";
 import { format } from "date-fns";
@@ -16,7 +14,6 @@ import toast from "react-hot-toast";
 
 export default function SiteOverview() {
   const [isCrawling, setIsCrawling] = useState(false);
-  const [renderJs, setRenderJs] = useState(false);
   const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(window.location.search);
   const siteId = urlParams.get("siteId");
@@ -60,8 +57,8 @@ export default function SiteOverview() {
   });
 
   const crawlMutation = useMutation({
-    mutationFn: async ({ siteId, renderJs }) => {
-      const response = await base44.functions.invoke('crawlSite', { site_id: siteId, render_js: renderJs });
+    mutationFn: async ({ siteId }) => {
+      const response = await base44.functions.invoke('crawlSite', { site_id: siteId, render_js: false });
       return response.data;
     },
     onSuccess: (data) => {
@@ -96,7 +93,7 @@ export default function SiteOverview() {
 
   const handleStartCrawl = () => {
     setIsCrawling(true);
-    crawlMutation.mutate({ siteId, renderJs });
+    crawlMutation.mutate({ siteId });
   };
 
   const latestCrawl = crawls[0];

@@ -18,7 +18,6 @@ import toast from "react-hot-toast";
 
 export default function Sites() {
   const [crawlingIds, setCrawlingIds] = useState(new Set());
-  const [renderJsMap, setRenderJsMap] = useState({});
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newDomain, setNewDomain] = useState("");
   const queryClient = useQueryClient();
@@ -59,8 +58,8 @@ export default function Sites() {
   });
 
   const crawlMutation = useMutation({
-    mutationFn: async ({ siteId, renderJs }) => {
-      const response = await base44.functions.invoke('crawlSite', { site_id: siteId, render_js: renderJs });
+    mutationFn: async ({ siteId }) => {
+      const response = await base44.functions.invoke('crawlSite', { site_id: siteId, render_js: false });
       return { ...response.data, siteId };
     },
     onSuccess: (data) => {
@@ -111,8 +110,7 @@ export default function Sites() {
 
   const handleStartCrawl = (siteId) => {
     setCrawlingIds(prev => new Set(prev).add(siteId));
-    const renderJs = renderJsMap[siteId] || false;
-    crawlMutation.mutate({ siteId, renderJs });
+    crawlMutation.mutate({ siteId });
   };
 
   const handleAddSite = () => {
@@ -285,17 +283,6 @@ export default function Sites() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-3">
-                        <div className="flex items-center gap-2">
-                          <Checkbox 
-                            id={`renderJs-${site.id}`}
-                            checked={renderJsMap[site.id] || false}
-                            onCheckedChange={(checked) => setRenderJsMap(prev => ({ ...prev, [site.id]: checked }))}
-                            disabled={crawlingIds.has(site.id)}
-                          />
-                          <Label htmlFor={`renderJs-${site.id}`} className="text-xs text-slate-500 cursor-pointer whitespace-nowrap">
-                            Render JS
-                          </Label>
-                        </div>
                         <Button 
                           variant="outline" 
                           size="sm" 
