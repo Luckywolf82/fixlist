@@ -457,7 +457,9 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
 
                 // Page-level issues
                 const pageIssues = checkPageIssues(page);
+                console.log(`Page: ${page.url} - Found ${pageIssues.length} issues:`, pageIssues);
                 for (const issue of pageIssues) {
+                    console.log(`Creating issue: ${issue.type} - ${issue.message}`);
                     await base44ServiceRole.entities.Issue.create({
                         crawl_id: crawlId,
                         type: issue.type,
@@ -491,6 +493,8 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
         }
 
         // ============ Global Rules ============
+        console.log(`Crawl complete. Total pages: ${pages.length}. Starting global checks...`);
+        
         // Duplicate titles
         const titleMap = new Map();
         for (const p of pages) {
@@ -499,8 +503,10 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
             if (!titleMap.has(key)) titleMap.set(key, []);
             titleMap.get(key).push(p.url);
         }
+        console.log(`Duplicate title check: Found ${titleMap.size} unique titles`);
         for (const [title, urls] of titleMap.entries()) {
             if (urls.length > 1) {
+                console.log(`Duplicate title: "${title}" appears ${urls.length} times`);
                 for (const u of urls) {
                     await base44ServiceRole.entities.Issue.create({
                         crawl_id: crawlId,
@@ -523,8 +529,10 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
             if (!h1Map.has(key)) h1Map.set(key, []);
             h1Map.get(key).push(p.url);
         }
+        console.log(`Duplicate H1 check: Found ${h1Map.size} unique H1s`);
         for (const [h1, urls] of h1Map.entries()) {
             if (urls.length > 1) {
+                console.log(`Duplicate H1: "${h1}" appears ${urls.length} times`);
                 for (const u of urls) {
                     await base44ServiceRole.entities.Issue.create({
                         crawl_id: crawlId,
@@ -548,9 +556,11 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
             inboundCount.set(link.to_url, (inboundCount.get(link.to_url) || 0) + 1);
         }
         
+        console.log(`Orphan page check: Checking ${pages.length} pages for orphans`);
         for (const p of pages) {
             const count = inboundCount.get(p.url) || 0;
             if (count === 0 && p.url !== seed) { // Exclude homepage from orphan check
+                console.log(`Orphan page found: ${p.url}`);
                 await base44ServiceRole.entities.Issue.create({
                     crawl_id: crawlId,
                     type: 'orphan_page',
@@ -565,6 +575,7 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
 
         // Check for broken internal links
         const crawledUrls = new Set(pages.map(p => p.url));
+        console.log(`Broken link check: Checking ${internalLinks.length} internal links`);
 
         for (const link of internalLinks) {
             if (!crawledUrls.has(link.to_url)) {
@@ -578,6 +589,7 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
                     });
 
                     if (response.status === 404) {
+                        console.log(`Broken link found: ${link.from_url} -> ${link.to_url}`);
                         await base44ServiceRole.entities.Issue.create({
                             crawl_id: crawlId,
                             type: 'broken_internal_link',
@@ -595,6 +607,7 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
             }
         }
 
+        console.log(`Crawl finished successfully. Pages crawled: ${pagesCrawled}`);
         await base44ServiceRole.entities.Crawl.update(crawlId, {
             status: 'done',
             finished_at: new Date().toISOString(),
