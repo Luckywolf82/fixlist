@@ -168,7 +168,28 @@ function parseHtml(url, html) {
         if (abs) hrefs.push(abs);
     });
 
-    return { title, metaDesc, canonical, h1, h1Count, wordCount, hrefs };
+    // Parse images
+    const images = [];
+    document.querySelectorAll('img').forEach(img => {
+        const src = img.getAttribute('src') || '';
+        const alt = img.getAttribute('alt');
+        images.push({ src, alt });
+    });
+
+    // Check for outdated HTML elements
+    const outdatedElements = [];
+    const deprecatedTags = ['font', 'center', 'marquee', 'blink', 'big', 'strike', 'tt'];
+    for (const tag of deprecatedTags) {
+        if (document.querySelector(tag)) {
+            outdatedElements.push(tag);
+        }
+    }
+
+    // Check for lang attribute on html element
+    const htmlEl = document.querySelector('html');
+    const hasLang = htmlEl ? htmlEl.hasAttribute('lang') : false;
+
+    return { title, metaDesc, canonical, h1, h1Count, wordCount, hrefs, images, outdatedElements, hasLang };
 }
 
 // ============ SEO Rules ============
@@ -254,6 +275,49 @@ function checkPageIssues(page) {
             severity: 'high',
             message: `HTTP status ${page.status_code}`,
             how_to_fix: 'Sørg for at siden returnerer 200 OK. Fiks serverfeil eller redirect-problemer.'
+        });
+    }
+
+    // Check for missing alt text on images
+    if (page.images) {
+        const missingAlt = page.images.filter(img => img.alt === null || img.alt.trim() === '');
+        if (missingAlt.length > 0) {
+            issues.push({
+                type: 'missing_image_alt',
+                severity: 'high',
+                message: `${missingAlt.length} bilde(r) mangler alt-tekst`,
+                how_to_fix: 'Legg til beskrivende alt-tekst på alle bilder for bedre tilgjengelighet og SEO. Alt-tekst skal beskrive bildets innhold og hensikt.'
+            });
+        }
+    }
+
+    // Check for outdated HTML elements
+    if (page.outdatedElements && page.outdatedElements.length > 0) {
+        issues.push({
+            type: 'outdated_html',
+            severity: 'medium',
+            message: `Bruker utdaterte HTML-elementer: ${page.outdatedElements.join(', ')}`,
+            how_to_fix: `Erstatt utdaterte elementer med moderne CSS/HTML5. F.eks.: <font> → CSS styling, <center> → text-align eller flexbox, <strike> → <del> eller <s>.`
+        });
+    }
+
+    // Check for WCAG - missing lang attribute
+    if (page.hasLang === false) {
+        issues.push({
+            type: 'missing_lang_attribute',
+            severity: 'high',
+            message: 'HTML-elementet mangler lang-attributt (WCAG 3.1.1)',
+            how_to_fix: 'Legg til lang="nb" (eller relevant språkkode) på <html>-taggen. Dette er kritisk for skjermlesere og tilgjengelighet.'
+        });
+    }
+
+    // Check for readability - very long pages
+    if (page.word_count_estimate > 3000) {
+        issues.push({
+            type: 'excessive_content',
+            severity: 'medium',
+            message: `Svært høyt ordantall (${page.word_count_estimate} ord) kan påvirke lesbarhet`,
+            how_to_fix: 'Vurder å dele innholdet opp i flere undersider, bruke innholdsfortegnelse, eller gruppere i seksjoner med navigasjon for bedre brukeropplevelse.'
         });
     }
 
