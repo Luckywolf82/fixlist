@@ -1,13 +1,14 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Globe, LayoutDashboard, Bug, FileText, Search, BarChart3 } from "lucide-react";
+import { Globe, LayoutDashboard, Bug, FileText, Search, BarChart3, Settings } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
   const navigation = [
     { name: "Sites", page: "Sites", icon: Globe },
     { name: "Analytics", page: "Analytics", icon: BarChart3 },
     { name: "Reports", page: "Reports", icon: FileText },
+    { name: "Settings", page: "Settings", icon: Settings },
   ];
 
   return (

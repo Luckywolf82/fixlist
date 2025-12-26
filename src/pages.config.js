@@ -8,6 +8,7 @@ import Pages from './pages/Pages';
 import Reports from './pages/Reports';
 import SiteOverview from './pages/SiteOverview';
 import Sites from './pages/Sites';
+import Settings from './pages/Settings';
 import __Layout from './Layout.jsx';
 
 
@@ -22,6 +23,7 @@ export const PAGES = {
     "Reports": Reports,
     "SiteOverview": SiteOverview,
     "Sites": Sites,
+    "Settings": Settings,
 }
 
 export const pagesConfig = {
