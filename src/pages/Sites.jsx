@@ -12,14 +12,16 @@ import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Globe, ExternalLink, Play, AlertCircle, Clock, FileText, Plus, Trash2 } from "lucide-react";
+import { Globe, ExternalLink, Play, AlertCircle, Clock, FileText, Plus, Trash2, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
+import ScheduleCrawlDialog from "@/components/ScheduleCrawlDialog";
 
 export default function Sites() {
   const [crawlingIds, setCrawlingIds] = useState(new Set());
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newDomain, setNewDomain] = useState("");
+  const [scheduleDialogSite, setScheduleDialogSite] = useState(null);
   const queryClient = useQueryClient();
 
   const { data: sites = [], isLoading: sitesLoading } = useQuery({
@@ -54,6 +56,37 @@ export default function Sites() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sites"] });
+    },
+  });
+
+  const updateScheduleMutation = useMutation({
+    mutationFn: async ({ siteId, scheduleData }) => {
+      // Calculate next_crawl_at
+      const now = new Date();
+      const [hours, minutes] = scheduleData.schedule_time.split(':').map(Number);
+      const nextCrawl = new Date();
+      nextCrawl.setHours(hours, minutes, 0, 0);
+      
+      if (scheduleData.schedule_enabled) {
+        if (nextCrawl <= now) {
+          nextCrawl.setDate(nextCrawl.getDate() + 1);
+        }
+        
+        return base44.entities.Site.update(siteId, {
+          ...scheduleData,
+          next_crawl_at: nextCrawl.toISOString()
+        });
+      } else {
+        return base44.entities.Site.update(siteId, {
+          ...scheduleData,
+          next_crawl_at: null
+        });
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sites"] });
+      setScheduleDialogSite(null);
+      toast.success("Schedule updated");
     },
   });
 
@@ -225,7 +258,7 @@ export default function Sites() {
             <TableHeader>
               <TableRow className="bg-slate-50/50">
                 <TableHead className="font-semibold text-slate-700">Domain</TableHead>
-                <TableHead className="font-semibold text-slate-700">Crawls</TableHead>
+                <TableHead className="font-semibold text-slate-700">Schedule</TableHead>
                 <TableHead className="font-semibold text-slate-700">Last Crawl</TableHead>
                 <TableHead className="font-semibold text-slate-700">Open Issues</TableHead>
                 <TableHead className="font-semibold text-slate-700 text-right">Actions</TableHead>
@@ -255,10 +288,22 @@ export default function Sites() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1.5 text-slate-600">
-                        <FileText className="w-4 h-4 text-slate-400" />
-                        {stats.crawlCount}
-                      </div>
+                      {site.schedule_enabled ? (
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 text-slate-600">
+                            <Calendar className="w-4 h-4 text-green-600" />
+                            <span className="text-xs font-medium text-green-600">Enabled</span>
+                          </div>
+                          <p className="text-xs text-slate-500 capitalize">{site.schedule_frequency} at {site.schedule_time}</p>
+                          {site.next_crawl_at && (
+                            <p className="text-xs text-slate-400">
+                              Next: {format(new Date(site.next_crawl_at), "MMM d, HH:mm")}
+                            </p>
+                          )}
+                        </div>
+                      ) : (
+                        <span className="text-slate-400 text-sm">Not scheduled</span>
+                      )}
                     </TableCell>
                     <TableCell>
                       {stats.lastCrawl ? (
@@ -282,7 +327,16 @@ export default function Sites() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-3">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-8"
+                          onClick={() => setScheduleDialogSite(site)}
+                        >
+                          <Calendar className="w-3.5 h-3.5 mr-1.5" />
+                          Schedule
+                        </Button>
                         <Button 
                           variant="outline" 
                           size="sm" 
@@ -295,11 +349,11 @@ export default function Sites() {
                           ) : (
                             <Play className="w-3.5 h-3.5 mr-1.5" />
                           )}
-                          {crawlingIds.has(site.id) ? 'Crawling...' : 'Start Crawl'}
+                          {crawlingIds.has(site.id) ? 'Crawling...' : 'Crawl Now'}
                         </Button>
                         <Link to={createPageUrl(`SiteOverview?siteId=${site.id}`)}>
                           <Button size="sm" className="h-8 bg-slate-900 hover:bg-slate-800">
-                            View Site
+                            View
                           </Button>
                         </Link>
                         <Button
@@ -320,6 +374,18 @@ export default function Sites() {
           </Table>
         </Card>
       )}
+
+      <ScheduleCrawlDialog
+        site={scheduleDialogSite}
+        open={!!scheduleDialogSite}
+        onOpenChange={(open) => !open && setScheduleDialogSite(null)}
+        onSave={(scheduleData) => {
+          updateScheduleMutation.mutate({ 
+            siteId: scheduleDialogSite.id, 
+            scheduleData 
+          });
+        }}
+      />
     </div>
   );
 }
