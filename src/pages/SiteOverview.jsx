@@ -1,6 +1,7 @@
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Card } from "@/components/ui/card";
@@ -11,6 +12,8 @@ import { AlertCircle, AlertTriangle, Info, ArrowLeft, Clock, FileText, Bug, Exte
 import { format } from "date-fns";
 
 export default function SiteOverview() {
+  const [isCrawling, setIsCrawling] = useState(false);
+  const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(window.location.search);
   const siteId = urlParams.get("siteId");
 
@@ -51,6 +54,26 @@ export default function SiteOverview() {
     },
     enabled: crawls.length > 1,
   });
+
+  const crawlMutation = useMutation({
+    mutationFn: async (siteId) => {
+      const response = await base44.functions.invoke('crawlSite', { site_id: siteId });
+      return response.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["crawls", siteId] });
+      queryClient.invalidateQueries({ queryKey: ["issues", siteId] });
+      setTimeout(() => setIsCrawling(false), 3000);
+    },
+    onError: () => {
+      setIsCrawling(false);
+    }
+  });
+
+  const handleStartCrawl = () => {
+    setIsCrawling(true);
+    crawlMutation.mutate(siteId);
+  };
 
   const latestCrawl = crawls[0];
   const openIssues = issues.filter(i => i.status === "open");
@@ -122,9 +145,17 @@ export default function SiteOverview() {
             </p>
           )}
         </div>
-        <Button disabled className="bg-slate-900 hover:bg-slate-800">
-          <Play className="w-4 h-4 mr-2" />
-          Start New Crawl
+        <Button 
+          onClick={handleStartCrawl}
+          disabled={isCrawling}
+          className="bg-slate-900 hover:bg-slate-800"
+        >
+          {isCrawling ? (
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          ) : (
+            <Play className="w-4 h-4 mr-2" />
+          )}
+          {isCrawling ? 'Starting Crawl...' : 'Start New Crawl'}
         </Button>
       </div>
 

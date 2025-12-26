@@ -1,6 +1,7 @@
-import React from "react";
-import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Card } from "@/components/ui/card";
@@ -11,6 +12,9 @@ import { Globe, ExternalLink, Play, AlertCircle, Clock, FileText } from "lucide-
 import { format } from "date-fns";
 
 export default function Sites() {
+  const [crawlingIds, setCrawlingIds] = useState(new Set());
+  const queryClient = useQueryClient();
+
   const { data: sites = [], isLoading: sitesLoading } = useQuery({
     queryKey: ["sites"],
     queryFn: () => base44.entities.Site.list("-created_date"),
@@ -25,6 +29,36 @@ export default function Sites() {
     queryKey: ["issues"],
     queryFn: () => base44.entities.Issue.list(),
   });
+
+  const crawlMutation = useMutation({
+    mutationFn: async (siteId) => {
+      const response = await base44.functions.invoke('crawlSite', { site_id: siteId });
+      return response.data;
+    },
+    onSuccess: (data, siteId) => {
+      queryClient.invalidateQueries({ queryKey: ["crawls"] });
+      queryClient.invalidateQueries({ queryKey: ["issues"] });
+      setTimeout(() => {
+        setCrawlingIds(prev => {
+          const next = new Set(prev);
+          next.delete(siteId);
+          return next;
+        });
+      }, 3000);
+    },
+    onError: (error, siteId) => {
+      setCrawlingIds(prev => {
+        const next = new Set(prev);
+        next.delete(siteId);
+        return next;
+      });
+    }
+  });
+
+  const handleStartCrawl = (siteId) => {
+    setCrawlingIds(prev => new Set(prev).add(siteId));
+    crawlMutation.mutate(siteId);
+  };
 
   const getSiteStats = (siteId) => {
     const siteCrawls = crawls.filter(c => c.site_id === siteId);
@@ -140,9 +174,19 @@ export default function Sites() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Button variant="outline" size="sm" className="h-8" disabled>
-                          <Play className="w-3.5 h-3.5 mr-1.5" />
-                          Start Crawl
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="h-8"
+                          onClick={() => handleStartCrawl(site.id)}
+                          disabled={crawlingIds.has(site.id)}
+                        >
+                          {crawlingIds.has(site.id) ? (
+                            <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                          ) : (
+                            <Play className="w-3.5 h-3.5 mr-1.5" />
+                          )}
+                          {crawlingIds.has(site.id) ? 'Crawling...' : 'Start Crawl'}
                         </Button>
                         <Link to={createPageUrl(`SiteOverview?siteId=${site.id}`)}>
                           <Button size="sm" className="h-8 bg-slate-900 hover:bg-slate-800">
