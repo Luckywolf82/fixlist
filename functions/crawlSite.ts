@@ -372,9 +372,8 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
             let loadTimeMs = 0;
             const fetchStart = Date.now();
 
-            console.log(`Fetching page: ${url}, useJs: ${useJs}`);
-
             try {
+                console.log(`Fetching page: ${url}, useJs: ${useJs}`);
                 if (useJs) {
                     const result = await fetchHtmlRendered(url, USER_AGENT, {
                         timeoutMs: 20000,
