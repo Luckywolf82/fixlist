@@ -3,30 +3,42 @@ import { jsPDF } from 'npm:jspdf@2.5.1';
 
 Deno.serve(async (req) => {
   try {
+    console.log('Starting report generation...');
     const base44 = createClientFromRequest(req);
+    
+    console.log('Checking authentication...');
     const user = await base44.auth.me();
+    console.log('User authenticated:', user?.email);
 
     if (!user) {
+      console.error('No user found');
       return Response.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const { site_id, period_days = 30 } = await req.json();
+    console.log('Generating report for site_id:', site_id, 'period_days:', period_days);
 
+    console.log('Fetching site...');
     const site = (await base44.asServiceRole.entities.Site.filter({ id: site_id }))[0];
     if (!site) {
+      console.error('Site not found:', site_id);
       return Response.json({ error: 'Site not found' }, { status: 404 });
     }
+    console.log('Site found:', site.domain);
 
     const periodEnd = new Date();
     const periodStart = new Date();
     periodStart.setDate(periodStart.getDate() - period_days);
 
     // Get crawls in period
+    console.log('Fetching crawls...');
     const allCrawls = await base44.asServiceRole.entities.Crawl.filter({ site_id });
+    console.log('Total crawls found:', allCrawls.length);
     const crawls = allCrawls.filter(c => {
       const crawlDate = new Date(c.started_at);
       return crawlDate >= periodStart && crawlDate <= periodEnd;
     });
+    console.log('Crawls in period:', crawls.length);
 
     // Get latest crawl data
     const latestCrawl = crawls[0];
@@ -34,8 +46,12 @@ Deno.serve(async (req) => {
     let pages = [];
     
     if (latestCrawl) {
+      console.log('Fetching issues and pages for latest crawl...');
       issues = await base44.asServiceRole.entities.Issue.filter({ crawl_id: latestCrawl.id });
       pages = await base44.asServiceRole.entities.Page.filter({ crawl_id: latestCrawl.id });
+      console.log('Issues found:', issues.length, 'Pages found:', pages.length);
+    } else {
+      console.log('No crawls found in period');
     }
 
     const openIssues = issues.filter(i => i.status === 'open');
@@ -176,16 +192,17 @@ Deno.serve(async (req) => {
       doc.text(`Fixlist Report - Page ${i} of ${pageCount}`, 20, 287);
     }
 
+    console.log('Generating PDF...');
     const pdfBytes = doc.output('arraybuffer');
     const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
     
-    const formData = new FormData();
-    formData.append('file', pdfBlob, `report-${site.domain}-${Date.now()}.pdf`);
-    
+    console.log('Uploading PDF...');
     const uploadResponse = await base44.asServiceRole.integrations.Core.UploadFile({ file: pdfBlob });
     const pdfUrl = uploadResponse.file_url;
+    console.log('PDF uploaded:', pdfUrl);
 
     // Save report record
+    console.log('Saving report record...');
     const report = await base44.asServiceRole.entities.Report.create({
       site_id,
       title: `${site.domain} - ${periodStart.toLocaleDateString()} to ${periodEnd.toLocaleDateString()}`,
@@ -201,6 +218,7 @@ Deno.serve(async (req) => {
         medium_issues: mediumIssues.length,
       }
     });
+    console.log('Report created successfully:', report.id);
 
     return Response.json({ 
       success: true,
