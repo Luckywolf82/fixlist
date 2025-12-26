@@ -1,6 +1,8 @@
 import { createClientFromRequest } from 'npm:@base44/sdk@0.8.6';
 import { parseHTML } from 'npm:linkedom@0.18.5';
 
+const USER_AGENT = 'FixlistBot/1.0';
+
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
@@ -10,7 +12,6 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'site_id is required' }, { status: 400 });
         }
 
-        // Get the site
         const sites = await base44.asServiceRole.entities.Site.filter({ id: site_id });
         const site = sites[0];
 
@@ -18,7 +19,6 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Site not found' }, { status: 404 });
         }
 
-        // Create a new crawl
         const crawl = await base44.asServiceRole.entities.Crawl.create({
             site_id: site_id,
             status: 'running',
@@ -26,7 +26,6 @@ Deno.serve(async (req) => {
             pages_crawled: 0
         });
 
-        // Start crawling in the background (don't await)
         crawlWebsite(base44.asServiceRole, site, crawl.id).catch(console.error);
 
         return Response.json({
@@ -41,201 +40,432 @@ Deno.serve(async (req) => {
     }
 });
 
-async function crawlWebsite(base44ServiceRole, site, crawlId) {
-    const domain = site.domain;
-    const baseUrl = `https://${domain}`;
-    const visitedUrls = new Set();
-    const urlsToVisit = [baseUrl];
-    const maxPages = 50; // Limit for demo purposes
-    let pagesCrawled = 0;
+// ============ URL Normalization ============
+function normalizeUrl(raw) {
+    try {
+        const u = new URL(raw);
+        u.hash = '';
+        u.hostname = u.hostname.toLowerCase();
+        
+        if (u.pathname !== '/' && u.pathname.endsWith('/')) {
+            u.pathname = u.pathname.slice(0, -1);
+        }
+        
+        return u.toString();
+    } catch {
+        return null;
+    }
+}
+
+function isSameOrigin(url, domain) {
+    try {
+        const u = new URL(url);
+        const d = new URL(domain);
+        return u.hostname === d.hostname;
+    } catch {
+        return false;
+    }
+}
+
+function toAbsoluteUrl(href, baseUrl) {
+    const trimmed = href.trim();
+    if (!trimmed) return null;
+    if (trimmed.startsWith('mailto:') || trimmed.startsWith('tel:') || trimmed.startsWith('javascript:')) return null;
 
     try {
-        while (urlsToVisit.length > 0 && pagesCrawled < maxPages) {
-            const url = urlsToVisit.shift();
-            
-            if (visitedUrls.has(url)) continue;
-            visitedUrls.add(url);
+        const abs = new URL(trimmed, baseUrl).toString();
+        return normalizeUrl(abs);
+    } catch {
+        return null;
+    }
+}
+
+// ============ Robots.txt Support ============
+async function loadRobots(domain) {
+    const robotsUrl = normalizeUrl(new URL('/robots.txt', domain).toString());
+    if (!robotsUrl) return { allowed: () => true };
+
+    try {
+        const response = await fetch(robotsUrl, {
+            headers: { 'User-Agent': USER_AGENT },
+            redirect: 'follow'
+        });
+
+        if (response.status >= 400) return { allowed: () => true };
+
+        const txt = await response.text();
+        const rules = parseRobotsTxt(txt);
+
+        return {
+            allowed: (url) => isAllowedByRobots(url, domain, rules)
+        };
+    } catch {
+        return { allowed: () => true };
+    }
+}
+
+function parseRobotsTxt(txt) {
+    const lines = txt.split('\n').map(l => l.trim());
+    let inStar = false;
+    const disallow = [];
+
+    for (const line of lines) {
+        if (!line || line.startsWith('#')) continue;
+        const [kRaw, vRaw] = line.split(':');
+        const k = (kRaw || '').trim().toLowerCase();
+        const v = (vRaw || '').trim();
+
+        if (k === 'user-agent') {
+            inStar = v === '*';
+            continue;
+        }
+        if (inStar && k === 'disallow' && v) {
+            disallow.push(v);
+        }
+    }
+    return { disallow };
+}
+
+function isAllowedByRobots(url, domain, rules) {
+    try {
+        const u = new URL(url);
+        const d = new URL(domain);
+        if (u.hostname !== d.hostname) return true;
+
+        const path = u.pathname || '/';
+        for (const dis of rules.disallow) {
+            if (dis === '/') return false;
+            if (dis && path.startsWith(dis)) return false;
+        }
+        return true;
+    } catch {
+        return true;
+    }
+}
+
+// ============ HTML Parsing ============
+function parseHtml(url, html) {
+    const { document } = parseHTML(html);
+
+    const title = document.querySelector('title')?.textContent?.trim() || '';
+    const metaDesc = document.querySelector('meta[name="description"]')?.getAttribute('content')?.trim() || '';
+    const canonical = document.querySelector('link[rel="canonical"]')?.getAttribute('href')?.trim() || '';
+    const h1Elements = document.querySelectorAll('h1');
+    const h1 = h1Elements[0]?.textContent?.trim() || '';
+    const h1Count = h1Elements.length;
+
+    const bodyText = document.body?.textContent || '';
+    const wordCount = bodyText.split(/\s+/).filter(word => word.length > 0).length;
+
+    const hrefs = [];
+    document.querySelectorAll('a[href]').forEach(el => {
+        const href = el.getAttribute('href');
+        if (!href) return;
+        const abs = toAbsoluteUrl(href, url);
+        if (abs) hrefs.push(abs);
+    });
+
+    return { title, metaDesc, canonical, h1, h1Count, wordCount, hrefs };
+}
+
+// ============ SEO Rules ============
+function checkPageIssues(page) {
+    const issues = [];
+
+    if (!page.title) {
+        issues.push({
+            type: 'missing_title',
+            severity: 'critical',
+            message: 'Siden mangler <title>-tag',
+            how_to_fix: 'Legg til en unik og beskrivende <title> for siden (anbefalt 20-60 tegn).'
+        });
+    } else {
+        const len = page.title.length;
+        if (len < 20 || len > 60) {
+            issues.push({
+                type: 'title_length',
+                severity: 'medium',
+                message: `Title-lengde er ${len} tegn (anbefalt 20-60)`,
+                how_to_fix: 'Juster title til anbefalt lengde for bedre visning i søkeresultater.'
+            });
+        }
+    }
+
+    if (!page.h1) {
+        issues.push({
+            type: 'missing_h1',
+            severity: 'critical',
+            message: 'Siden mangler <h1>',
+            how_to_fix: 'Legg til én tydelig hovedoverskrift (<h1>) som beskriver sidens tema.'
+        });
+    } else if (page.h1_count > 1) {
+        issues.push({
+            type: 'multiple_h1',
+            severity: 'medium',
+            message: `Siden har ${page.h1_count} stk <h1>`,
+            how_to_fix: 'Bruk kun én <h1> per side. Flytt øvrige overskrifter til <h2> eller <h3>.'
+        });
+    }
+
+    if (!page.meta_description) {
+        issues.push({
+            type: 'missing_meta_description',
+            severity: 'high',
+            message: 'Siden mangler meta description',
+            how_to_fix: 'Legg til en beskrivelse (70-160 tegn) som oppsummerer sidens innhold.'
+        });
+    } else {
+        const len = page.meta_description.length;
+        if (len < 70 || len > 160) {
+            issues.push({
+                type: 'meta_description_length',
+                severity: 'medium',
+                message: `Meta description er ${len} tegn (anbefalt 70-160)`,
+                how_to_fix: 'Juster lengden for optimal visning i søkeresultater.'
+            });
+        }
+    }
+
+    if (page.canonical && page.canonical !== page.url) {
+        issues.push({
+            type: 'canonical_mismatch',
+            severity: 'high',
+            message: 'Canonical peker til en annen URL',
+            related_url: page.canonical,
+            how_to_fix: 'Sjekk at canonical-URL er korrekt og peker til riktig side.'
+        });
+    }
+
+    if (page.word_count_estimate < 300) {
+        issues.push({
+            type: 'thin_content',
+            severity: 'medium',
+            message: `Lavt ordantall (${page.word_count_estimate} ord)`,
+            how_to_fix: 'Legg til mer verdifullt innhold. Mål for minst 300-500 ord.'
+        });
+    }
+
+    if (page.status_code !== 200) {
+        issues.push({
+            type: 'non_200_status',
+            severity: 'high',
+            message: `HTTP status ${page.status_code}`,
+            how_to_fix: 'Sørg for at siden returnerer 200 OK. Fiks serverfeil eller redirect-problemer.'
+        });
+    }
+
+    return issues;
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// ============ Main Crawler ============
+async function crawlWebsite(base44ServiceRole, site, crawlId) {
+    const domain = `https://${site.domain}`;
+    const maxPages = 50;
+    let pagesCrawled = 0;
+
+    const queue = [];
+    const seen = new Set();
+    const pages = [];
+    const links = [];
+
+    const seed = normalizeUrl(domain);
+    if (!seed) throw new Error('Invalid domain');
+
+    queue.push(seed);
+    seen.add(seed);
+
+    const robots = await loadRobots(domain);
+
+    try {
+        while (queue.length > 0 && pagesCrawled < maxPages) {
+            const url = queue.shift();
+
+            if (!robots.allowed(url)) {
+                console.log(`Skipped by robots.txt: ${url}`);
+                continue;
+            }
+
+            await sleep(200); // Polite crawling
+
+            let statusCode = 0;
+            let html = null;
 
             try {
-                // Fetch the page
                 const response = await fetch(url, {
-                    headers: {
-                        'User-Agent': 'Fixlist-Crawler/1.0'
-                    },
+                    headers: { 'User-Agent': USER_AGENT },
                     redirect: 'follow'
                 });
 
-                const html = await response.text();
-                const { document } = parseHTML(html);
-
-                // Extract SEO elements
-                const title = document.querySelector('title')?.textContent?.trim() || '';
-                const metaDesc = document.querySelector('meta[name="description"]')?.getAttribute('content')?.trim() || '';
-                const canonical = document.querySelector('link[rel="canonical"]')?.getAttribute('href')?.trim() || '';
-                const h1Elements = document.querySelectorAll('h1');
-                const h1 = h1Elements[0]?.textContent?.trim() || '';
-                const h1Count = h1Elements.length;
+                statusCode = response.status;
+                const contentType = response.headers.get('content-type') || '';
                 
-                // Estimate word count
-                const bodyText = document.body?.textContent || '';
-                const wordCount = bodyText.split(/\s+/).filter(word => word.length > 0).length;
+                if (contentType.includes('text/html')) {
+                    html = await response.text();
+                }
+            } catch (error) {
+                console.error(`Fetch error for ${url}:`, error.message);
+            }
 
-                // Create page record
-                await base44ServiceRole.entities.Page.create({
-                    crawl_id: crawlId,
-                    url: url,
-                    status_code: response.status,
-                    title: title,
-                    meta_description: metaDesc,
-                    canonical: canonical,
-                    h1: h1,
-                    h1_count: h1Count,
-                    word_count_estimate: wordCount
-                });
+            let page = {
+                crawl_id: crawlId,
+                url,
+                status_code: statusCode,
+                title: '',
+                meta_description: '',
+                canonical: '',
+                h1: '',
+                h1_count: 0,
+                word_count_estimate: 0
+            };
 
-                pagesCrawled++;
+            if (html) {
+                const parsed = parseHtml(url, html);
+                page.title = parsed.title;
+                page.meta_description = parsed.metaDesc;
+                page.canonical = parsed.canonical;
+                page.h1 = parsed.h1;
+                page.h1_count = parsed.h1Count;
+                page.word_count_estimate = parsed.wordCount;
 
-                // Detect issues
-                const issues = [];
-
-                if (!title) {
-                    issues.push({
-                        type: 'missing_title',
-                        severity: 'critical',
-                        message: 'Missing page title',
-                        how_to_fix: 'Add a <title> tag in the <head> section with a descriptive, unique title (50-60 characters recommended).'
+                // Collect links
+                for (const toUrl of parsed.hrefs) {
+                    const type = isSameOrigin(toUrl, domain) ? 'internal' : 'external';
+                    links.push({
+                        crawl_id: crawlId,
+                        from_url: url,
+                        to_url: toUrl,
+                        type,
+                        status_code: 0
                     });
+
+                    if (type === 'internal' && !seen.has(toUrl)) {
+                        seen.add(toUrl);
+                        queue.push(toUrl);
+                    }
                 }
 
-                if (title && title.length > 60) {
-                    issues.push({
-                        type: 'long_title',
-                        severity: 'medium',
-                        message: `Title too long (${title.length} characters)`,
-                        how_to_fix: 'Shorten the title to 50-60 characters to avoid truncation in search results.'
-                    });
-                }
-
-                if (!metaDesc) {
-                    issues.push({
-                        type: 'missing_meta_description',
-                        severity: 'high',
-                        message: 'Missing meta description',
-                        how_to_fix: 'Add a <meta name="description" content="..."> tag with a compelling description (150-160 characters recommended).'
-                    });
-                }
-
-                if (metaDesc && metaDesc.length > 160) {
-                    issues.push({
-                        type: 'long_meta_description',
-                        severity: 'medium',
-                        message: `Meta description too long (${metaDesc.length} characters)`,
-                        how_to_fix: 'Shorten the meta description to 150-160 characters to avoid truncation in search results.'
-                    });
-                }
-
-                if (h1Count === 0) {
-                    issues.push({
-                        type: 'missing_h1',
-                        severity: 'high',
-                        message: 'Missing H1 heading',
-                        how_to_fix: 'Add one <h1> tag to the page with the main heading or topic of the page.'
-                    });
-                } else if (h1Count > 1) {
-                    issues.push({
-                        type: 'multiple_h1',
-                        severity: 'medium',
-                        message: `Multiple H1 tags found (${h1Count})`,
-                        how_to_fix: 'Use only one <h1> tag per page. Convert additional H1s to <h2> or other heading levels.'
-                    });
-                }
-
-                if (wordCount < 300) {
-                    issues.push({
-                        type: 'thin_content',
-                        severity: 'medium',
-                        message: `Low word count (${wordCount} words)`,
-                        how_to_fix: 'Add more valuable content. Aim for at least 300-500 words to provide comprehensive information.'
-                    });
-                }
-
-                if (response.status !== 200) {
-                    issues.push({
-                        type: 'non_200_status',
-                        severity: 'high',
-                        message: `Non-200 status code: ${response.status}`,
-                        how_to_fix: 'Ensure the page returns a 200 OK status code. Fix server errors or redirect issues.'
-                    });
-                }
-
-                // Save issues
-                for (const issue of issues) {
+                // Page-level issues
+                const pageIssues = checkPageIssues(page);
+                for (const issue of pageIssues) {
                     await base44ServiceRole.entities.Issue.create({
                         crawl_id: crawlId,
                         type: issue.type,
                         severity: issue.severity,
-                        url: url,
+                        url: page.url,
+                        related_url: issue.related_url || null,
                         message: issue.message,
                         how_to_fix: issue.how_to_fix,
                         status: 'open'
                     });
                 }
+            }
 
-                // Find internal links to crawl
-                const links = document.querySelectorAll('a[href]');
-                for (const link of links) {
-                    const href = link.getAttribute('href');
-                    if (!href) continue;
+            await base44ServiceRole.entities.Page.create(page);
+            pages.push(page);
+            pagesCrawled++;
 
-                    let absoluteUrl;
-                    try {
-                        absoluteUrl = new URL(href, url).href;
-                    } catch {
-                        continue;
-                    }
+            // Batch insert links
+            if (links.length >= 100) {
+                await base44ServiceRole.entities.Link.bulkCreate(links.splice(0, 100));
+            }
 
-                    // Only crawl same domain
-                    if (absoluteUrl.startsWith(baseUrl) && !visitedUrls.has(absoluteUrl) && !urlsToVisit.includes(absoluteUrl)) {
-                        urlsToVisit.push(absoluteUrl);
-                    }
+            await base44ServiceRole.entities.Crawl.update(crawlId, {
+                pages_crawled: pagesCrawled
+            });
+        }
+
+        // Final link flush
+        if (links.length > 0) {
+            await base44ServiceRole.entities.Link.bulkCreate(links);
+        }
+
+        // ============ Global Rules ============
+        // Duplicate titles
+        const titleMap = new Map();
+        for (const p of pages) {
+            if (!p.title) continue;
+            const key = p.title.trim();
+            if (!titleMap.has(key)) titleMap.set(key, []);
+            titleMap.get(key).push(p.url);
+        }
+        for (const [title, urls] of titleMap.entries()) {
+            if (urls.length > 1) {
+                for (const u of urls) {
+                    await base44ServiceRole.entities.Issue.create({
+                        crawl_id: crawlId,
+                        type: 'duplicate_title',
+                        severity: 'high',
+                        url: u,
+                        message: `Flere sider deler samme title: "${title.slice(0, 60)}"`,
+                        how_to_fix: 'Gi hver side en unik title som beskriver sidens unike innhold.',
+                        status: 'open'
+                    });
                 }
-
-                // Update crawl progress
-                await base44ServiceRole.entities.Crawl.update(crawlId, {
-                    pages_crawled: pagesCrawled
-                });
-
-            } catch (error) {
-                console.error(`Error crawling ${url}:`, error);
-                
-                // Still create a page record with error
-                await base44ServiceRole.entities.Page.create({
-                    crawl_id: crawlId,
-                    url: url,
-                    status_code: 0,
-                    title: '',
-                    meta_description: '',
-                    canonical: '',
-                    h1: '',
-                    h1_count: 0,
-                    word_count_estimate: 0
-                });
-
-                await base44ServiceRole.entities.Issue.create({
-                    crawl_id: crawlId,
-                    type: 'crawl_error',
-                    severity: 'critical',
-                    url: url,
-                    message: `Failed to crawl page: ${error.message}`,
-                    how_to_fix: 'Check if the page is accessible and loading properly. Verify there are no server errors or blocks.',
-                    status: 'open'
-                });
-
-                pagesCrawled++;
             }
         }
 
-        // Mark crawl as done
+        // Duplicate H1
+        const h1Map = new Map();
+        for (const p of pages) {
+            if (!p.h1) continue;
+            const key = p.h1.trim();
+            if (!h1Map.has(key)) h1Map.set(key, []);
+            h1Map.get(key).push(p.url);
+        }
+        for (const [h1, urls] of h1Map.entries()) {
+            if (urls.length > 1) {
+                for (const u of urls) {
+                    await base44ServiceRole.entities.Issue.create({
+                        crawl_id: crawlId,
+                        type: 'duplicate_h1',
+                        severity: 'high',
+                        url: u,
+                        message: `Flere sider deler samme H1: "${h1.slice(0, 60)}"`,
+                        how_to_fix: 'Gi hver side en unik H1 som reflekterer sidens tema.',
+                        status: 'open'
+                    });
+                }
+            }
+        }
+
+        // Check for broken internal links
+        const allLinks = await base44ServiceRole.entities.Link.filter({ crawl_id: crawlId });
+        const internalLinks = allLinks.filter(l => l.type === 'internal');
+        const crawledUrls = new Set(pages.map(p => p.url));
+
+        for (const link of internalLinks) {
+            if (!crawledUrls.has(link.to_url)) {
+                // Link points to uncrawled internal URL - check it
+                try {
+                    await sleep(200);
+                    const response = await fetch(link.to_url, {
+                        method: 'HEAD',
+                        headers: { 'User-Agent': USER_AGENT },
+                        redirect: 'manual'
+                    });
+
+                    if (response.status === 404) {
+                        await base44ServiceRole.entities.Issue.create({
+                            crawl_id: crawlId,
+                            type: 'broken_internal_link',
+                            severity: 'critical',
+                            url: link.from_url,
+                            related_url: link.to_url,
+                            message: 'Intern lenke peker til 404 (finnes ikke)',
+                            how_to_fix: 'Oppdater lenken til korrekt URL eller fjern lenken.',
+                            status: 'open'
+                        });
+                    }
+                } catch (error) {
+                    console.error(`Error checking link ${link.to_url}:`, error.message);
+                }
+            }
+        }
+
         await base44ServiceRole.entities.Crawl.update(crawlId, {
             status: 'done',
             finished_at: new Date().toISOString(),
@@ -244,8 +474,6 @@ async function crawlWebsite(base44ServiceRole, site, crawlId) {
 
     } catch (error) {
         console.error('Crawl failed:', error);
-        
-        // Mark crawl as failed
         await base44ServiceRole.entities.Crawl.update(crawlId, {
             status: 'failed',
             finished_at: new Date().toISOString(),
