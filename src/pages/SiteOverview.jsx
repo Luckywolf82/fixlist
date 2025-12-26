@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import StatCard from "@/components/dashboard/StatCard";
+import AIPrioritizedIssues from "@/components/AIPrioritizedIssues";
 import { AlertCircle, AlertTriangle, Info, ArrowLeft, Clock, FileText, Bug, ExternalLink, Play, BarChart3 } from "lucide-react";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
@@ -217,6 +218,11 @@ export default function SiteOverview() {
           variant="medium"
         />
       </div>
+
+      {/* AI Prioritization */}
+      {latestCrawl && openIssues.length > 0 && (
+        <AIPrioritizedIssues siteId={siteId} />
+      )}
 
       {/* Quick Links */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
