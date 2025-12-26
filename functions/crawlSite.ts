@@ -407,6 +407,61 @@ function checkPageIssues(page) {
         });
     }
 
+    // Check Core Web Vitals
+    if (page.lcp !== null && page.lcp !== undefined) {
+        if (page.lcp > 4000) {
+            issues.push({
+                type: 'lcp_poor',
+                severity: 'critical',
+                message: `Largest Contentful Paint er ${(page.lcp / 1000).toFixed(1)}s (bør være under 2.5s)`,
+                how_to_fix: 'Optimaliser hero-bilde, server-side render, bruk preload på LCP-ressurs, reduser server responstid.'
+            });
+        } else if (page.lcp > 2500) {
+            issues.push({
+                type: 'lcp_needs_improvement',
+                severity: 'high',
+                message: `Largest Contentful Paint er ${(page.lcp / 1000).toFixed(1)}s (bør være under 2.5s)`,
+                how_to_fix: 'Optimaliser bilder, reduser render-blocking ressurser, bruk CDN.'
+            });
+        }
+    }
+
+    if (page.cls !== null && page.cls !== undefined) {
+        if (page.cls > 0.25) {
+            issues.push({
+                type: 'cls_poor',
+                severity: 'critical',
+                message: `Cumulative Layout Shift er ${page.cls.toFixed(3)} (bør være under 0.1)`,
+                how_to_fix: 'Sett eksplisitte dimensjoner på bilder og embeds, unngå å sette inn innhold over eksisterende innhold, bruk CSS transforms i stedet for layout-påvirkende properties.'
+            });
+        } else if (page.cls > 0.1) {
+            issues.push({
+                type: 'cls_needs_improvement',
+                severity: 'high',
+                message: `Cumulative Layout Shift er ${page.cls.toFixed(3)} (bør være under 0.1)`,
+                how_to_fix: 'Legg til width/height på bilder, reserver plass for dynamisk innhold.'
+            });
+        }
+    }
+
+    if (page.inp !== null && page.inp !== undefined && page.inp > 0) {
+        if (page.inp > 500) {
+            issues.push({
+                type: 'inp_poor',
+                severity: 'high',
+                message: `Interaction to Next Paint er ${page.inp.toFixed(0)}ms (bør være under 200ms)`,
+                how_to_fix: 'Reduser JavaScript execution time, optimaliser event handlers, bruk web workers for tung prosessering.'
+            });
+        } else if (page.inp > 200) {
+            issues.push({
+                type: 'inp_needs_improvement',
+                severity: 'medium',
+                message: `Interaction to Next Paint er ${page.inp.toFixed(0)}ms (bør være under 200ms)`,
+                how_to_fix: 'Optimaliser JavaScript, reduser main thread blocking.'
+            });
+        }
+    }
+
     return issues;
 }
 
@@ -424,11 +479,52 @@ async function getBrowser() {
     return _browser;
 }
 
+async function collectWebVitals(page) {
+    try {
+        await page.addInitScript(() => {
+            window.__vitals = { lcp: 0, cls: 0, inp: 0 };
+
+            // LCP
+            new PerformanceObserver((entryList) => {
+                const entries = entryList.getEntries();
+                const last = entries[entries.length - 1];
+                window.__vitals.lcp = last.renderTime || last.loadTime;
+            }).observe({ type: "largest-contentful-paint", buffered: true });
+
+            // CLS
+            let cls = 0;
+            new PerformanceObserver((entryList) => {
+                for (const entry of entryList.getEntries()) {
+                    if (!entry.hadRecentInput) cls += entry.value;
+                }
+                window.__vitals.cls = cls;
+            }).observe({ type: "layout-shift", buffered: true });
+
+            // INP (Interaction to Next Paint)
+            let maxInp = 0;
+            new PerformanceObserver((list) => {
+                for (const entry of list.getEntries()) {
+                    maxInp = Math.max(maxInp, entry.duration);
+                }
+                window.__vitals.inp = maxInp;
+            }).observe({ type: "event", buffered: true, durationThreshold: 40 });
+        });
+
+        await page.waitForTimeout(2000);
+        const vitals = await page.evaluate(() => window.__vitals);
+        return vitals;
+    } catch (e) {
+        console.error('Error collecting web vitals:', e.message);
+        return { lcp: 0, cls: 0, inp: 0 };
+    }
+}
+
 async function fetchHtmlRendered(url, userAgent, opts = {}) {
     const timeoutMs = opts.timeoutMs || 20000;
     const waitUntil = opts.waitUntil || 'domcontentloaded';
     const extraWaitMs = opts.extraWaitMs || 800;
     const blockResources = opts.blockResources !== false;
+    const collectVitals = opts.collectVitals !== false;
 
     const browser = await getBrowser();
     const context = await browser.newContext({
@@ -450,6 +546,38 @@ async function fetchHtmlRendered(url, userAgent, opts = {}) {
             });
         }
 
+        // Add web vitals script before navigation
+        if (collectVitals) {
+            await page.addInitScript(() => {
+                window.__vitals = { lcp: 0, cls: 0, inp: 0 };
+
+                // LCP
+                new PerformanceObserver((entryList) => {
+                    const entries = entryList.getEntries();
+                    const last = entries[entries.length - 1];
+                    window.__vitals.lcp = last.renderTime || last.loadTime;
+                }).observe({ type: "largest-contentful-paint", buffered: true });
+
+                // CLS
+                let cls = 0;
+                new PerformanceObserver((entryList) => {
+                    for (const entry of entryList.getEntries()) {
+                        if (!entry.hadRecentInput) cls += entry.value;
+                    }
+                    window.__vitals.cls = cls;
+                }).observe({ type: "layout-shift", buffered: true });
+
+                // INP
+                let maxInp = 0;
+                new PerformanceObserver((list) => {
+                    for (const entry of list.getEntries()) {
+                        maxInp = Math.max(maxInp, entry.duration);
+                    }
+                    window.__vitals.inp = maxInp;
+                }).observe({ type: "event", buffered: true, durationThreshold: 40 });
+            });
+        }
+
         let mainStatus = 0;
         page.on('response', (resp) => {
             if (resp.url() === page?.url()) {
@@ -466,15 +594,25 @@ async function fetchHtmlRendered(url, userAgent, opts = {}) {
 
         const finalUrl = page.url();
         const html = await page.content();
+
+        let webVitals = null;
+        if (collectVitals) {
+            await page.waitForTimeout(2000);
+            try {
+                webVitals = await page.evaluate(() => window.__vitals);
+            } catch (e) {
+                console.error('Error evaluating web vitals:', e.message);
+            }
+        }
         
         await context.close();
-        return { statusCode, finalUrl, html, timedOut: false };
+        return { statusCode, finalUrl, html, timedOut: false, webVitals };
     } catch (e) {
         await context.close();
         const finalUrl = page?.url?.() || url;
         const msg = String(e?.message || e);
         const timedOut = msg.toLowerCase().includes('timeout');
-        return { statusCode: 0, finalUrl, html: null, timedOut };
+        return { statusCode: 0, finalUrl, html: null, timedOut, webVitals: null };
     }
 }
 
@@ -520,6 +658,7 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
             let html = null;
             let finalUrl = url;
             let loadTimeMs = 0;
+            let webVitals = null;
             const fetchStart = Date.now();
 
             try {
@@ -529,12 +668,14 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
                         timeoutMs: 20000,
                         waitUntil: 'domcontentloaded',
                         extraWaitMs: 800,
-                        blockResources: true
+                        blockResources: true,
+                        collectVitals: true
                     });
                     statusCode = result.statusCode;
                     html = result.html;
                     finalUrl = result.finalUrl;
-                    console.log(`JS Render result - Status: ${statusCode}, HTML length: ${html?.length || 0}`);
+                    webVitals = result.webVitals;
+                    console.log(`JS Render result - Status: ${statusCode}, HTML length: ${html?.length || 0}, Web Vitals:`, webVitals);
                     
                     if (result.timedOut) {
                         console.log(`Timeout rendering ${url}`);
@@ -582,7 +723,10 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
                 h1: '',
                 h1_count: 0,
                 word_count_estimate: 0,
-                load_time_ms: loadTimeMs
+                load_time_ms: loadTimeMs,
+                lcp: webVitals?.lcp || null,
+                cls: webVitals?.cls || null,
+                inp: webVitals?.inp || null
             };
 
             if (html) {
