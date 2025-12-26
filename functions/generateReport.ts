@@ -57,18 +57,18 @@ Deno.serve(async (req) => {
 
     // Fetch Ahrefs data if API key is configured
     let ahrefsData = null;
-    const users = await base44.asServiceRole.entities.User.filter({ id: created_by });
-    const user = users[0];
-    
-    if (user?.ahrefs_api_key) {
-      console.log('Fetching Ahrefs data...');
-      try {
+    try {
+      const allUsers = await base44.asServiceRole.entities.User.list();
+      const user = allUsers[0]; // Get first user for now
+      
+      if (user?.ahrefs_api_key) {
+        console.log('Fetching Ahrefs data...');
         const ahrefsResponse = await base44.asServiceRole.functions.invoke('fetchAhrefsData', { domain: site.domain });
         ahrefsData = ahrefsResponse.data;
         console.log('Ahrefs data fetched:', ahrefsData);
-      } catch (error) {
-        console.error('Failed to fetch Ahrefs data:', error);
       }
+    } catch (error) {
+      console.error('Failed to fetch Ahrefs data:', error);
     }
 
     const openIssues = issues.filter(i => i.status === 'open');
@@ -96,7 +96,57 @@ Deno.serve(async (req) => {
     doc.text(`Generated: ${new Date().toLocaleString()}`, 20, yPos + 5);
     yPos += 20;
 
+    // Ahrefs SEO Metrics (if available)
+    if (ahrefsData?.success) {
+      doc.setFontSize(14);
+      doc.setTextColor(0);
+      doc.text('SEO Metrics (Ahrefs)', 20, yPos);
+      yPos += 10;
+
+      doc.setFontSize(10);
+      doc.text(`Domain Rating: ${ahrefsData.domainRating}/100`, 20, yPos);
+      yPos += 7;
+      doc.text(`Backlinks: ${ahrefsData.backlinks.toLocaleString()}`, 20, yPos);
+      yPos += 7;
+      doc.text(`Referring Domains: ${ahrefsData.referringDomains.toLocaleString()}`, 20, yPos);
+      yPos += 7;
+      doc.text(`Organic Keywords: ${ahrefsData.organicKeywords.toLocaleString()}`, 20, yPos);
+      yPos += 7;
+      doc.text(`Estimated Organic Traffic: ${ahrefsData.organicTraffic.toLocaleString()} visits/month`, 20, yPos);
+      yPos += 10;
+
+      if (ahrefsData.topPages?.length > 0) {
+        doc.setFontSize(12);
+        doc.setFont(undefined, 'bold');
+        doc.text('Top Performing Pages:', 20, yPos);
+        yPos += 7;
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(9);
+
+        ahrefsData.topPages.slice(0, 5).forEach((page, idx) => {
+          if (yPos > 270) {
+            doc.addPage();
+            yPos = 20;
+          }
+          const url = page.url.substring(0, 70);
+          doc.text(`${idx + 1}. ${url}`, 25, yPos);
+          yPos += 5;
+          doc.setTextColor(100);
+          doc.text(`   Traffic: ${page.traffic.toLocaleString()} | Keywords: ${page.keywords}`, 25, yPos);
+          yPos += 7;
+          doc.setTextColor(0);
+        });
+      }
+
+      yPos += 5;
+    }
+
     // Executive Summary
+    if (yPos > 240) {
+      doc.addPage();
+      yPos = 20;
+    }
+
     doc.setFontSize(16);
     doc.setTextColor(0);
     doc.text('Executive Summary', 20, yPos);
