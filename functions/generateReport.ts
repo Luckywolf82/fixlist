@@ -55,6 +55,22 @@ Deno.serve(async (req) => {
       console.log('Previous issues:', previousIssues.length, 'Previous pages:', previousPages.length);
     }
 
+    // Fetch Ahrefs data if API key is configured
+    let ahrefsData = null;
+    const users = await base44.asServiceRole.entities.User.filter({ id: created_by });
+    const user = users[0];
+    
+    if (user?.ahrefs_api_key) {
+      console.log('Fetching Ahrefs data...');
+      try {
+        const ahrefsResponse = await base44.asServiceRole.functions.invoke('fetchAhrefsData', { domain: site.domain });
+        ahrefsData = ahrefsResponse.data;
+        console.log('Ahrefs data fetched:', ahrefsData);
+      } catch (error) {
+        console.error('Failed to fetch Ahrefs data:', error);
+      }
+    }
+
     const openIssues = issues.filter(i => i.status === 'open');
     const criticalIssues = openIssues.filter(i => i.severity === 'critical');
     const highIssues = openIssues.filter(i => i.severity === 'high');
