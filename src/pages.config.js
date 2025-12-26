@@ -1,4 +1,23 @@
-export const pagesConfig = {
-	Pages: {}
+import Sites from './pages/Sites';
+import SiteOverview from './pages/SiteOverview';
+import Crawls from './pages/Crawls';
+import Issues from './pages/Issues';
+import Pages from './pages/Pages';
+import PageDetail from './pages/PageDetail';
+import __Layout from './Layout.jsx';
+
+
+export const PAGES = {
+    "Sites": Sites,
+    "SiteOverview": SiteOverview,
+    "Crawls": Crawls,
+    "Issues": Issues,
+    "Pages": Pages,
+    "PageDetail": PageDetail,
 }
 
+export const pagesConfig = {
+    mainPage: "Sites",
+    Pages: PAGES,
+    Layout: __Layout,
+};
