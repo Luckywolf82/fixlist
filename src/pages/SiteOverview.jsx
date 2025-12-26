@@ -273,28 +273,26 @@ export default function SiteOverview() {
             </div>
           </Card>
         </Link>
-        </div>
 
-        {/* Health Report Link */}
         {latestCrawl && (
-        <Link to={createPageUrl(`HealthReport?siteId=${siteId}`)}>
-          <Card className="p-5 hover:border-slate-300 transition-colors cursor-pointer group">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
-                  <BarChart3 className="w-5 h-5 text-purple-600" />
+          <Link to={createPageUrl(`HealthReport?siteId=${siteId}`)}>
+            <Card className="p-5 hover:border-slate-300 transition-colors cursor-pointer group">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                    <BarChart3 className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-slate-900">Health Report</p>
+                    <p className="text-sm text-slate-500">View performance trends</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-medium text-slate-900">Health Report</p>
-                  <p className="text-sm text-slate-500">View performance trends</p>
-                </div>
+                <ArrowLeft className="w-5 h-5 text-slate-300 rotate-180 group-hover:text-slate-500 transition-colors" />
               </div>
-              <ArrowLeft className="w-5 h-5 text-slate-300 rotate-180 group-hover:text-slate-500 transition-colors" />
-            </div>
-          </Card>
-        </Link>
+            </Card>
+          </Link>
         )}
-        </div>
+      </div>
 
       {/* Recent Critical Issues */}
       {criticalCount > 0 && (
