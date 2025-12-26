@@ -33,8 +33,11 @@ Deno.serve(async (req) => {
 
     // Get latest crawl data
     const latestCrawl = crawls[0];
+    const previousCrawl = crawls[1];
     let issues = [];
     let pages = [];
+    let previousIssues = [];
+    let previousPages = [];
     
     if (latestCrawl) {
       console.log('Fetching issues and pages for latest crawl...');
@@ -45,10 +48,22 @@ Deno.serve(async (req) => {
       console.log('No crawls found in period');
     }
 
+    if (previousCrawl) {
+      console.log('Fetching previous crawl data for comparison...');
+      previousIssues = await base44.asServiceRole.entities.Issue.filter({ crawl_id: previousCrawl.id });
+      previousPages = await base44.asServiceRole.entities.Page.filter({ crawl_id: previousCrawl.id });
+      console.log('Previous issues:', previousIssues.length, 'Previous pages:', previousPages.length);
+    }
+
     const openIssues = issues.filter(i => i.status === 'open');
     const criticalIssues = openIssues.filter(i => i.severity === 'critical');
     const highIssues = openIssues.filter(i => i.severity === 'high');
     const mediumIssues = openIssues.filter(i => i.severity === 'medium');
+
+    const previousOpenIssues = previousIssues.filter(i => i.status === 'open');
+    const previousCriticalIssues = previousOpenIssues.filter(i => i.severity === 'critical');
+    const previousHighIssues = previousOpenIssues.filter(i => i.severity === 'high');
+    const previousMediumIssues = previousOpenIssues.filter(i => i.severity === 'medium');
 
     // Generate PDF
     const doc = new jsPDF();
@@ -88,6 +103,57 @@ Deno.serve(async (req) => {
 
     yPos += 10;
 
+    // Trend Comparison
+    if (previousCrawl) {
+      if (yPos > 240) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setTextColor(0);
+      doc.text('Trend Comparison', 20, yPos);
+      yPos += 10;
+
+      doc.setFontSize(10);
+      const criticalChange = criticalIssues.length - previousCriticalIssues.length;
+      const highChange = highIssues.length - previousHighIssues.length;
+      const mediumChange = mediumIssues.length - previousMediumIssues.length;
+      const pageChange = pages.length - previousPages.length;
+
+      const trends = [
+        `Pages Crawled: ${previousPages.length} → ${pages.length} (${pageChange >= 0 ? '+' : ''}${pageChange})`,
+        `Critical Issues: ${previousCriticalIssues.length} → ${criticalIssues.length} (${criticalChange >= 0 ? '+' : ''}${criticalChange})`,
+        `High Priority: ${previousHighIssues.length} → ${highIssues.length} (${highChange >= 0 ? '+' : ''}${highChange})`,
+        `Medium Priority: ${previousMediumIssues.length} → ${mediumIssues.length} (${mediumChange >= 0 ? '+' : ''}${mediumChange})`,
+      ];
+
+      trends.forEach(trend => {
+        const isImprovement = trend.includes('(-');
+        doc.setTextColor(isImprovement ? 0 : (trend.includes('(+') ? 180 : 100));
+        doc.text(trend, 20, yPos);
+        yPos += 7;
+      });
+
+      doc.setTextColor(0);
+      yPos += 10;
+
+      // Analysis
+      doc.setFontSize(11);
+      if (criticalChange < 0) {
+        doc.setTextColor(0, 150, 0);
+        doc.text(`✓ Great progress! Critical issues reduced by ${Math.abs(criticalChange)}.`, 20, yPos);
+      } else if (criticalChange > 0) {
+        doc.setTextColor(220, 38, 38);
+        doc.text(`⚠ Warning: Critical issues increased by ${criticalChange}.`, 20, yPos);
+      } else {
+        doc.setTextColor(100);
+        doc.text('→ No change in critical issues.', 20, yPos);
+      }
+      yPos += 10;
+      doc.setTextColor(0);
+    }
+
     // Critical Issues
     if (criticalIssues.length > 0) {
       doc.setFontSize(14);
@@ -98,7 +164,7 @@ Deno.serve(async (req) => {
       doc.setFontSize(10);
       doc.setTextColor(0);
 
-      criticalIssues.slice(0, 10).forEach((issue, idx) => {
+      criticalIssues.forEach((issue, idx) => {
         if (yPos > 270) {
           doc.addPage();
           yPos = 20;
@@ -124,6 +190,98 @@ Deno.serve(async (req) => {
 
         doc.setTextColor(0);
       });
+
+      yPos += 5;
+    }
+
+    // High Priority Issues
+    if (highIssues.length > 0) {
+      if (yPos > 240) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setTextColor(245, 158, 11);
+      doc.text('High Priority Issues', 20, yPos);
+      yPos += 10;
+
+      doc.setFontSize(10);
+      doc.setTextColor(0);
+
+      highIssues.forEach((issue, idx) => {
+        if (yPos > 270) {
+          doc.addPage();
+          yPos = 20;
+        }
+
+        doc.setFont(undefined, 'bold');
+        doc.text(`${idx + 1}. ${issue.type.replace(/_/g, ' ')}`, 20, yPos);
+        yPos += 5;
+
+        doc.setFont(undefined, 'normal');
+        const messageLines = doc.splitTextToSize(issue.message, 170);
+        doc.text(messageLines, 25, yPos);
+        yPos += messageLines.length * 5 + 2;
+
+        doc.setTextColor(100);
+        doc.text(`URL: ${issue.url.substring(0, 80)}`, 25, yPos);
+        yPos += 5;
+
+        doc.setTextColor(0, 100, 0);
+        const fixLines = doc.splitTextToSize(`Fix: ${issue.how_to_fix}`, 170);
+        doc.text(fixLines, 25, yPos);
+        yPos += fixLines.length * 5 + 8;
+
+        doc.setTextColor(0);
+      });
+
+      yPos += 5;
+    }
+
+    // Medium Priority Issues
+    if (mediumIssues.length > 0) {
+      if (yPos > 240) {
+        doc.addPage();
+        yPos = 20;
+      }
+
+      doc.setFontSize(14);
+      doc.setTextColor(59, 130, 246);
+      doc.text('Medium Priority Issues', 20, yPos);
+      yPos += 10;
+
+      doc.setFontSize(10);
+      doc.setTextColor(0);
+
+      mediumIssues.forEach((issue, idx) => {
+        if (yPos > 270) {
+          doc.addPage();
+          yPos = 20;
+        }
+
+        doc.setFont(undefined, 'bold');
+        doc.text(`${idx + 1}. ${issue.type.replace(/_/g, ' ')}`, 20, yPos);
+        yPos += 5;
+
+        doc.setFont(undefined, 'normal');
+        const messageLines = doc.splitTextToSize(issue.message, 170);
+        doc.text(messageLines, 25, yPos);
+        yPos += messageLines.length * 5 + 2;
+
+        doc.setTextColor(100);
+        doc.text(`URL: ${issue.url.substring(0, 80)}`, 25, yPos);
+        yPos += 5;
+
+        doc.setTextColor(0, 100, 0);
+        const fixLines = doc.splitTextToSize(`Fix: ${issue.how_to_fix}`, 170);
+        doc.text(fixLines, 25, yPos);
+        yPos += fixLines.length * 5 + 8;
+
+        doc.setTextColor(0);
+      });
+
+      yPos += 5;
     }
 
     // Recommendations
@@ -142,26 +300,75 @@ Deno.serve(async (req) => {
     doc.setFontSize(10);
     const recommendations = [];
 
+    // Critical issues recommendations
     if (criticalIssues.length > 0) {
-      recommendations.push(`Address ${criticalIssues.length} critical issues immediately to prevent SEO penalties.`);
+      recommendations.push(`URGENT: Address ${criticalIssues.length} critical issues immediately to prevent SEO penalties.`);
+      
+      const criticalTypes = {};
+      criticalIssues.forEach(i => {
+        criticalTypes[i.type] = (criticalTypes[i.type] || 0) + 1;
+      });
+      
+      Object.entries(criticalTypes).sort((a, b) => b[1] - a[1]).slice(0, 3).forEach(([type, count]) => {
+        if (type === 'missing_title') {
+          recommendations.push(`Fix ${count} pages missing <title> tags. Each page needs a unique, descriptive title (20-60 characters).`);
+        } else if (type === 'missing_h1') {
+          recommendations.push(`Add <h1> headings to ${count} pages. Every page should have exactly one clear H1.`);
+        } else if (type === 'broken_internal_link') {
+          recommendations.push(`Fix ${count} broken internal links that lead to 404 errors. Update or remove these links.`);
+        } else if (type === 'lcp_poor') {
+          recommendations.push(`${count} pages have poor Largest Contentful Paint (>4s). Optimize images and server response time.`);
+        } else if (type === 'cls_poor') {
+          recommendations.push(`${count} pages have poor Cumulative Layout Shift (>0.25). Set image dimensions and avoid dynamic content shifts.`);
+        }
+      });
     }
-    if (highIssues.length > 5) {
-      recommendations.push(`Focus on resolving high priority issues to improve site quality.`);
+
+    // High priority recommendations
+    if (highIssues.length > 0) {
+      const highTypes = {};
+      highIssues.forEach(i => {
+        highTypes[i.type] = (highTypes[i.type] || 0) + 1;
+      });
+      
+      Object.entries(highTypes).sort((a, b) => b[1] - a[1]).slice(0, 2).forEach(([type, count]) => {
+        if (type === 'missing_meta_description') {
+          recommendations.push(`Add meta descriptions to ${count} pages (70-160 characters each) to improve click-through rates.`);
+        } else if (type === 'missing_image_alt') {
+          recommendations.push(`Add alt text to images on ${count} pages for better accessibility and SEO.`);
+        } else if (type === 'orphan_page') {
+          recommendations.push(`${count} orphan pages have no internal links. Add relevant internal links from other pages.`);
+        } else if (type === 'missing_lang_attribute') {
+          recommendations.push(`Add lang attribute to HTML element on ${count} pages for WCAG compliance and accessibility.`);
+        }
+      });
     }
-    if (pages.length > 0) {
-      const missingMeta = pages.filter(p => !p.meta_description).length;
-      if (missingMeta > 0) {
-        recommendations.push(`${missingMeta} pages are missing meta descriptions. Add unique descriptions for better CTR.`);
+
+    // Trend-based recommendations
+    if (previousCrawl) {
+      const criticalChange = criticalIssues.length - previousCriticalIssues.length;
+      if (criticalChange > 0) {
+        recommendations.push(`Investigate why critical issues increased by ${criticalChange} since last crawl. Review recent changes.`);
       }
     }
-    if (crawls.length === 0) {
-      recommendations.push('Schedule regular crawls to monitor site health and catch issues early.');
-    } else if (crawls.length === 1) {
-      recommendations.push('Run more crawls to establish trend data and track improvements over time.');
+
+    // General best practices
+    if (pages.length > 0) {
+      const missingMeta = pages.filter(p => !p.meta_description).length;
+      const thinContent = pages.filter(p => p.word_count_estimate < 300).length;
+      
+      if (thinContent > pages.length * 0.3) {
+        recommendations.push(`${thinContent} pages have thin content (<300 words). Add more valuable content to improve rankings.`);
+      }
+    }
+
+    if (crawls.length === 1) {
+      recommendations.push('Run crawls regularly (weekly or bi-weekly) to establish trend data and track improvements over time.');
     }
 
     if (recommendations.length === 0) {
-      recommendations.push('Great job! Continue monitoring your site regularly to maintain SEO health.');
+      recommendations.push('Excellent! Your site has no major issues. Continue monitoring regularly to maintain SEO health.');
+      recommendations.push('Consider running crawls weekly to catch new issues early.');
     }
 
     recommendations.forEach((rec, idx) => {
