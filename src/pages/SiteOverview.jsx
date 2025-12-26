@@ -7,6 +7,8 @@ import { createPageUrl } from "@/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import StatCard from "@/components/dashboard/StatCard";
 import { AlertCircle, AlertTriangle, Info, ArrowLeft, Clock, FileText, Bug, ExternalLink, Play } from "lucide-react";
 import { format } from "date-fns";
@@ -14,6 +16,7 @@ import toast from "react-hot-toast";
 
 export default function SiteOverview() {
   const [isCrawling, setIsCrawling] = useState(false);
+  const [renderJs, setRenderJs] = useState(false);
   const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(window.location.search);
   const siteId = urlParams.get("siteId");
@@ -57,8 +60,8 @@ export default function SiteOverview() {
   });
 
   const crawlMutation = useMutation({
-    mutationFn: async (siteId) => {
-      const response = await base44.functions.invoke('crawlSite', { site_id: siteId });
+    mutationFn: async ({ siteId, renderJs }) => {
+      const response = await base44.functions.invoke('crawlSite', { site_id: siteId, render_js: renderJs });
       return response.data;
     },
     onSuccess: (data) => {
@@ -93,7 +96,7 @@ export default function SiteOverview() {
 
   const handleStartCrawl = () => {
     setIsCrawling(true);
-    crawlMutation.mutate(siteId);
+    crawlMutation.mutate({ siteId, renderJs });
   };
 
   const latestCrawl = crawls[0];
@@ -166,18 +169,31 @@ export default function SiteOverview() {
             </p>
           )}
         </div>
-        <Button 
-          onClick={handleStartCrawl}
-          disabled={isCrawling}
-          className="bg-slate-900 hover:bg-slate-800"
-        >
-          {isCrawling ? (
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-          ) : (
-            <Play className="w-4 h-4 mr-2" />
-          )}
-          {isCrawling ? 'Starting Crawl...' : 'Start New Crawl'}
-        </Button>
+        <div className="flex flex-col items-end gap-3">
+          <div className="flex items-center gap-2">
+            <Checkbox 
+              id="renderJs" 
+              checked={renderJs} 
+              onCheckedChange={setRenderJs}
+              disabled={isCrawling}
+            />
+            <Label htmlFor="renderJs" className="text-sm text-slate-600 cursor-pointer">
+              Render JavaScript (langsommere, men bedre for SPA-er)
+            </Label>
+          </div>
+          <Button 
+            onClick={handleStartCrawl}
+            disabled={isCrawling}
+            className="bg-slate-900 hover:bg-slate-800"
+          >
+            {isCrawling ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Play className="w-4 h-4 mr-2" />
+            )}
+            {isCrawling ? 'Starting Crawl...' : 'Start New Crawl'}
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}

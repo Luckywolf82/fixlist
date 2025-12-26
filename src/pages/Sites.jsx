@@ -7,6 +7,8 @@ import { createPageUrl } from "@/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -16,6 +18,7 @@ import toast from "react-hot-toast";
 
 export default function Sites() {
   const [crawlingIds, setCrawlingIds] = useState(new Set());
+  const [renderJsMap, setRenderJsMap] = useState({});
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newDomain, setNewDomain] = useState("");
   const queryClient = useQueryClient();
@@ -56,8 +59,8 @@ export default function Sites() {
   });
 
   const crawlMutation = useMutation({
-    mutationFn: async (siteId) => {
-      const response = await base44.functions.invoke('crawlSite', { site_id: siteId });
+    mutationFn: async ({ siteId, renderJs }) => {
+      const response = await base44.functions.invoke('crawlSite', { site_id: siteId, render_js: renderJs });
       return { ...response.data, siteId };
     },
     onSuccess: (data) => {
@@ -104,7 +107,8 @@ export default function Sites() {
 
   const handleStartCrawl = (siteId) => {
     setCrawlingIds(prev => new Set(prev).add(siteId));
-    crawlMutation.mutate(siteId);
+    const renderJs = renderJsMap[siteId] || false;
+    crawlMutation.mutate({ siteId, renderJs });
   };
 
   const handleAddSite = () => {
@@ -276,7 +280,18 @@ export default function Sites() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-3">
+                        <div className="flex items-center gap-2">
+                          <Checkbox 
+                            id={`renderJs-${site.id}`}
+                            checked={renderJsMap[site.id] || false}
+                            onCheckedChange={(checked) => setRenderJsMap(prev => ({ ...prev, [site.id]: checked }))}
+                            disabled={crawlingIds.has(site.id)}
+                          />
+                          <Label htmlFor={`renderJs-${site.id}`} className="text-xs text-slate-500 cursor-pointer whitespace-nowrap">
+                            Render JS
+                          </Label>
+                        </div>
                         <Button 
                           variant="outline" 
                           size="sm" 
