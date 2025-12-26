@@ -30,6 +30,26 @@ export default function Sites() {
     queryFn: () => base44.entities.Issue.list(),
   });
 
+  const addSiteMutation = useMutation({
+    mutationFn: async (domain) => {
+      return base44.entities.Site.create({ domain });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sites"] });
+      setIsAddDialogOpen(false);
+      setNewDomain("");
+    },
+  });
+
+  const deleteSiteMutation = useMutation({
+    mutationFn: async (siteId) => {
+      return base44.entities.Site.delete(siteId);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["sites"] });
+    },
+  });
+
   const crawlMutation = useMutation({
     mutationFn: async (siteId) => {
       const response = await base44.functions.invoke('crawlSite', { site_id: siteId });
@@ -58,6 +78,19 @@ export default function Sites() {
   const handleStartCrawl = (siteId) => {
     setCrawlingIds(prev => new Set(prev).add(siteId));
     crawlMutation.mutate(siteId);
+  };
+
+  const handleAddSite = () => {
+    if (newDomain.trim()) {
+      const cleanDomain = newDomain.trim().replace(/^https?:\/\//i, '').replace(/\/.*$/, '');
+      addSiteMutation.mutate(cleanDomain);
+    }
+  };
+
+  const handleDeleteSite = (siteId) => {
+    if (confirm('Are you sure you want to delete this site? All crawls, pages, and issues will be lost.')) {
+      deleteSiteMutation.mutate(siteId);
+    }
   };
 
   const getSiteStats = (siteId) => {
@@ -100,6 +133,49 @@ export default function Sites() {
           <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Sites</h1>
           <p className="text-slate-500 mt-1">Manage and monitor your websites</p>
         </div>
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-slate-900 hover:bg-slate-800">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Site
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Site</DialogTitle>
+              <DialogDescription>
+                Enter the domain of the website you want to monitor
+              </DialogDescription>
+            </DialogHeader>
+            <div className="py-4">
+              <Input
+                placeholder="example.com"
+                value={newDomain}
+                onChange={(e) => setNewDomain(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAddSite()}
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleAddSite}
+                disabled={!newDomain.trim() || addSiteMutation.isPending}
+                className="bg-slate-900 hover:bg-slate-800"
+              >
+                {addSiteMutation.isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  'Add Site'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {sites.length === 0 ? (
@@ -193,6 +269,15 @@ export default function Sites() {
                             View Site
                           </Button>
                         </Link>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => handleDeleteSite(site.id)}
+                          disabled={deleteSiteMutation.isPending}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
