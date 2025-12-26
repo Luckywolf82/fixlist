@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { usePermissions } from "@/components/usePermissions";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Card } from "@/components/ui/card";
@@ -14,6 +15,7 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import { ArrowLeft, MoreHorizontal, CheckCircle, EyeOff, ExternalLink, Filter } from "lucide-react";
 
 export default function Issues() {
+  const { canUpdateIssues } = usePermissions();
   const urlParams = new URLSearchParams(window.location.search);
   const siteId = urlParams.get("siteId");
   const crawlId = urlParams.get("crawlId");
@@ -217,6 +219,7 @@ export default function Issues() {
                     <StatusBadge status={issue.status} />
                   </TableCell>
                   <TableCell>
+                    {canUpdateIssues ? (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
@@ -247,6 +250,9 @@ export default function Issues() {
                         )}
                       </DropdownMenuContent>
                     </DropdownMenu>
+                    ) : (
+                      <span className="text-xs text-slate-500">View only</span>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

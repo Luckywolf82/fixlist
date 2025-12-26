@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { usePermissions } from "@/components/usePermissions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Key, CheckCircle } from "lucide-react";
+import { Key, CheckCircle, Shield } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function Settings() {
+  const { canAccessSettings } = usePermissions();
   const [ahrefsKey, setAhrefsKey] = useState("");
   const queryClient = useQueryClient();
 
@@ -40,6 +42,19 @@ export default function Settings() {
   const handleSaveAhrefs = () => {
     updateKeyMutation.mutate(ahrefsKey);
   };
+
+  if (!canAccessSettings) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-semibold text-slate-900">Access Denied</h1>
+        <Card className="p-12 text-center">
+          <Shield className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+          <p className="text-slate-600">You don't have permission to access settings.</p>
+          <p className="text-sm text-slate-500 mt-2">Contact an administrator for access.</p>
+        </Card>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return (
