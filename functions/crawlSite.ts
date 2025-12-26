@@ -4,9 +4,10 @@ import { parseHTML } from 'npm:linkedom@0.18.5';
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
-        const user = await base44.auth.me();
-
-        if (!user) {
+        
+        // Verify authentication
+        const isAuth = await base44.auth.isAuthenticated();
+        if (!isAuth) {
             return Response.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -33,7 +34,7 @@ Deno.serve(async (req) => {
         });
 
         // Start crawling in the background (don't await)
-        crawlWebsite(base44, site, crawl.id).catch(console.error);
+        crawlWebsite(base44.asServiceRole, site, crawl.id).catch(console.error);
 
         return Response.json({
             success: true,
@@ -47,7 +48,7 @@ Deno.serve(async (req) => {
     }
 });
 
-async function crawlWebsite(base44, site, crawlId) {
+async function crawlWebsite(base44ServiceRole, site, crawlId) {
     const domain = site.domain;
     const baseUrl = `https://${domain}`;
     const visitedUrls = new Set();
@@ -87,7 +88,7 @@ async function crawlWebsite(base44, site, crawlId) {
                 const wordCount = bodyText.split(/\s+/).filter(word => word.length > 0).length;
 
                 // Create page record
-                await base44.asServiceRole.entities.Page.create({
+                await base44ServiceRole.entities.Page.create({
                     crawl_id: crawlId,
                     url: url,
                     status_code: response.status,
@@ -176,7 +177,7 @@ async function crawlWebsite(base44, site, crawlId) {
 
                 // Save issues
                 for (const issue of issues) {
-                    await base44.asServiceRole.entities.Issue.create({
+                    await base44ServiceRole.entities.Issue.create({
                         crawl_id: crawlId,
                         type: issue.type,
                         severity: issue.severity,
@@ -207,7 +208,7 @@ async function crawlWebsite(base44, site, crawlId) {
                 }
 
                 // Update crawl progress
-                await base44.asServiceRole.entities.Crawl.update(crawlId, {
+                await base44ServiceRole.entities.Crawl.update(crawlId, {
                     pages_crawled: pagesCrawled
                 });
 
@@ -215,7 +216,7 @@ async function crawlWebsite(base44, site, crawlId) {
                 console.error(`Error crawling ${url}:`, error);
                 
                 // Still create a page record with error
-                await base44.asServiceRole.entities.Page.create({
+                await base44ServiceRole.entities.Page.create({
                     crawl_id: crawlId,
                     url: url,
                     status_code: 0,
@@ -227,7 +228,7 @@ async function crawlWebsite(base44, site, crawlId) {
                     word_count_estimate: 0
                 });
 
-                await base44.asServiceRole.entities.Issue.create({
+                await base44ServiceRole.entities.Issue.create({
                     crawl_id: crawlId,
                     type: 'crawl_error',
                     severity: 'critical',
@@ -242,7 +243,7 @@ async function crawlWebsite(base44, site, crawlId) {
         }
 
         // Mark crawl as done
-        await base44.asServiceRole.entities.Crawl.update(crawlId, {
+        await base44ServiceRole.entities.Crawl.update(crawlId, {
             status: 'done',
             finished_at: new Date().toISOString(),
             pages_crawled: pagesCrawled
@@ -252,7 +253,7 @@ async function crawlWebsite(base44, site, crawlId) {
         console.error('Crawl failed:', error);
         
         // Mark crawl as failed
-        await base44.asServiceRole.entities.Crawl.update(crawlId, {
+        await base44ServiceRole.entities.Crawl.update(crawlId, {
             status: 'failed',
             finished_at: new Date().toISOString(),
             pages_crawled: pagesCrawled
