@@ -189,7 +189,35 @@ function parseHtml(url, html) {
     const htmlEl = document.querySelector('html');
     const hasLang = htmlEl ? htmlEl.hasAttribute('lang') : false;
 
-    return { title, metaDesc, canonical, h1, h1Count, wordCount, hrefs, images, outdatedElements, hasLang };
+    // Parse Open Graph tags
+    const ogTitle = document.querySelector('meta[property="og:title"]')?.getAttribute('content');
+    const ogDescription = document.querySelector('meta[property="og:description"]')?.getAttribute('content');
+    const ogImage = document.querySelector('meta[property="og:image"]')?.getAttribute('content');
+    const ogUrl = document.querySelector('meta[property="og:url"]')?.getAttribute('content');
+
+    // Parse Twitter Card tags
+    const twitterCard = document.querySelector('meta[name="twitter:card"]')?.getAttribute('content');
+    const twitterTitle = document.querySelector('meta[name="twitter:title"]')?.getAttribute('content');
+    const twitterDescription = document.querySelector('meta[name="twitter:description"]')?.getAttribute('content');
+    const twitterImage = document.querySelector('meta[name="twitter:image"]')?.getAttribute('content');
+
+    // Check for structured data (JSON-LD)
+    const structuredDataScripts = document.querySelectorAll('script[type="application/ld+json"]');
+    const hasStructuredData = structuredDataScripts.length > 0;
+
+    // Check for favicon
+    const hasFavicon = !!(
+        document.querySelector('link[rel="icon"]') ||
+        document.querySelector('link[rel="shortcut icon"]') ||
+        document.querySelector('link[rel="apple-touch-icon"]')
+    );
+
+    return { 
+        title, metaDesc, canonical, h1, h1Count, wordCount, hrefs, images, outdatedElements, hasLang,
+        ogTitle, ogDescription, ogImage, ogUrl,
+        twitterCard, twitterTitle, twitterDescription, twitterImage,
+        hasStructuredData, hasFavicon
+    };
 }
 
 // ============ SEO Rules ============
@@ -318,6 +346,64 @@ function checkPageIssues(page) {
             severity: 'medium',
             message: `Svært høyt ordantall (${page.word_count_estimate} ord) kan påvirke lesbarhet`,
             how_to_fix: 'Vurder å dele innholdet opp i flere undersider, bruke innholdsfortegnelse, eller gruppere i seksjoner med navigasjon for bedre brukeropplevelse.'
+        });
+    }
+
+    // Check for Open Graph tags
+    if (!page.ogTitle) {
+        issues.push({
+            type: 'missing_og_title',
+            severity: 'medium',
+            message: 'Mangler Open Graph title (viktig for deling på sosiale medier)',
+            how_to_fix: 'Legg til <meta property="og:title" content="Din tittel"> i <head>. Dette bestemmer hvordan siden vises når den deles på Facebook, LinkedIn, etc.'
+        });
+    }
+
+    if (!page.ogDescription) {
+        issues.push({
+            type: 'missing_og_description',
+            severity: 'medium',
+            message: 'Mangler Open Graph description',
+            how_to_fix: 'Legg til <meta property="og:description" content="Din beskrivelse"> for bedre visning på sosiale medier.'
+        });
+    }
+
+    if (!page.ogImage) {
+        issues.push({
+            type: 'missing_og_image',
+            severity: 'medium',
+            message: 'Mangler Open Graph image',
+            how_to_fix: 'Legg til <meta property="og:image" content="URL til bilde"> (anbefalt størrelse: 1200x630px). Dette er bildet som vises når siden deles.'
+        });
+    }
+
+    // Check for Twitter Card tags
+    if (!page.twitterCard) {
+        issues.push({
+            type: 'missing_twitter_card',
+            severity: 'medium',
+            message: 'Mangler Twitter Card metadata',
+            how_to_fix: 'Legg til <meta name="twitter:card" content="summary_large_image"> for optimalisert visning på Twitter/X.'
+        });
+    }
+
+    // Check for structured data
+    if (!page.hasStructuredData) {
+        issues.push({
+            type: 'missing_structured_data',
+            severity: 'medium',
+            message: 'Mangler strukturert data (schema.org)',
+            how_to_fix: 'Legg til JSON-LD strukturert data for bedre forståelse av innholdet for søkemotorer. F.eks. Organization, Article, Product, etc.'
+        });
+    }
+
+    // Check for favicon
+    if (!page.hasFavicon) {
+        issues.push({
+            type: 'missing_favicon',
+            severity: 'medium',
+            message: 'Mangler favicon',
+            how_to_fix: 'Legg til <link rel="icon" href="/favicon.ico"> eller bruk moderne formater som PNG/SVG for bedre brukeropplevelse.'
         });
     }
 
@@ -511,6 +597,16 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
                 page.images = parsed.images;
                 page.outdatedElements = parsed.outdatedElements;
                 page.hasLang = parsed.hasLang;
+                page.ogTitle = parsed.ogTitle;
+                page.ogDescription = parsed.ogDescription;
+                page.ogImage = parsed.ogImage;
+                page.ogUrl = parsed.ogUrl;
+                page.twitterCard = parsed.twitterCard;
+                page.twitterTitle = parsed.twitterTitle;
+                page.twitterDescription = parsed.twitterDescription;
+                page.twitterImage = parsed.twitterImage;
+                page.hasStructuredData = parsed.hasStructuredData;
+                page.hasFavicon = parsed.hasFavicon;
                 console.log(`Parsed - Title: "${page.title}", H1: "${page.h1}", Words: ${page.word_count_estimate}`);
 
                 // Collect links
@@ -653,6 +749,34 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
                     status: 'open'
                 });
             }
+        }
+
+        // Check for sitemap.xml
+        console.log('Checking for sitemap.xml...');
+        try {
+            const sitemapUrl = `${domain}/sitemap.xml`;
+            const sitemapResponse = await fetch(sitemapUrl, {
+                method: 'HEAD',
+                headers: { 'User-Agent': USER_AGENT },
+                redirect: 'follow'
+            });
+
+            if (sitemapResponse.status === 404) {
+                console.log('sitemap.xml not found');
+                await base44ServiceRole.entities.Issue.create({
+                    crawl_id: crawlId,
+                    type: 'missing_sitemap',
+                    severity: 'high',
+                    url: domain,
+                    message: 'Nettstedet mangler sitemap.xml',
+                    how_to_fix: 'Opprett en sitemap.xml fil som lister alle viktige sider på nettstedet. Dette hjelper søkemotorer å finne og indeksere sidene dine mer effektivt.',
+                    status: 'open'
+                });
+            } else {
+                console.log('sitemap.xml found');
+            }
+        } catch (error) {
+            console.error('Error checking sitemap:', error.message);
         }
 
         // Check for broken internal links
