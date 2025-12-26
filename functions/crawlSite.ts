@@ -373,6 +373,7 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
             const fetchStart = Date.now();
 
             try {
+                console.log(`Fetching page: ${url}, useJs: ${useJs}`);
                 if (useJs) {
                     const result = await fetchHtmlRendered(url, USER_AGENT, {
                         timeoutMs: 20000,
@@ -383,6 +384,7 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
                     statusCode = result.statusCode;
                     html = result.html;
                     finalUrl = result.finalUrl;
+                    console.log(`JS Render result - Status: ${statusCode}, HTML length: ${html?.length || 0}`);
                     
                     if (result.timedOut) {
                         console.log(`Timeout rendering ${url}`);
@@ -395,9 +397,13 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
 
                     statusCode = response.status;
                     const contentType = response.headers.get('content-type') || '';
+                    console.log(`Fetch result - Status: ${statusCode}, Content-Type: ${contentType}`);
                     
                     if (contentType.includes('text/html')) {
                         html = await response.text();
+                        console.log(`HTML received, length: ${html.length}`);
+                    } else {
+                        console.log(`Skipping non-HTML content`);
                     }
                 }
                 
@@ -430,6 +436,7 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
             };
 
             if (html) {
+                console.log(`Parsing HTML for ${url}`);
                 const parsed = parseHtml(url, html);
                 page.title = parsed.title;
                 page.meta_description = parsed.metaDesc;
@@ -437,6 +444,7 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
                 page.h1 = parsed.h1;
                 page.h1_count = parsed.h1Count;
                 page.word_count_estimate = parsed.wordCount;
+                console.log(`Parsed - Title: "${page.title}", H1: "${page.h1}", Words: ${page.word_count_estimate}`);
 
                 // Collect links
                 for (const toUrl of parsed.hrefs) {
@@ -457,20 +465,27 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
 
                 // Page-level issues
                 const pageIssues = checkPageIssues(page);
-                console.log(`Page: ${page.url} - Found ${pageIssues.length} issues:`, pageIssues);
+                console.log(`Page: ${page.url} - Found ${pageIssues.length} issues`);
                 for (const issue of pageIssues) {
-                    console.log(`Creating issue: ${issue.type} - ${issue.message}`);
-                    await base44ServiceRole.entities.Issue.create({
-                        crawl_id: crawlId,
-                        type: issue.type,
-                        severity: issue.severity,
-                        url: page.url,
-                        related_url: issue.related_url || null,
-                        message: issue.message,
-                        how_to_fix: issue.how_to_fix,
-                        status: 'open'
-                    });
+                    console.log(`  - ${issue.severity.toUpperCase()}: ${issue.type} - ${issue.message}`);
+                    try {
+                        await base44ServiceRole.entities.Issue.create({
+                            crawl_id: crawlId,
+                            type: issue.type,
+                            severity: issue.severity,
+                            url: page.url,
+                            related_url: issue.related_url || null,
+                            message: issue.message,
+                            how_to_fix: issue.how_to_fix,
+                            status: 'open'
+                        });
+                        console.log(`  ✓ Issue created successfully`);
+                    } catch (err) {
+                        console.error(`  ✗ Failed to create issue:`, err.message);
+                    }
                 }
+            } else {
+                console.log(`No HTML for ${url} - skipping issue checks`);
             }
 
             await base44ServiceRole.entities.Page.create(page);
