@@ -4,13 +4,6 @@ import { parseHTML } from 'npm:linkedom@0.18.5';
 Deno.serve(async (req) => {
     try {
         const base44 = createClientFromRequest(req);
-        
-        // Verify authentication
-        const isAuth = await base44.auth.isAuthenticated();
-        if (!isAuth) {
-            return Response.json({ error: 'Unauthorized' }, { status: 401 });
-        }
-
         const { site_id } = await req.json();
 
         if (!site_id) {
