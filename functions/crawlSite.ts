@@ -432,9 +432,31 @@ async function crawlWebsite(base44ServiceRole, site, crawlId) {
             }
         }
 
-        // Check for broken internal links
+        // Orphan pages detection (pages with no inbound internal links)
         const allLinks = await base44ServiceRole.entities.Link.filter({ crawl_id: crawlId });
         const internalLinks = allLinks.filter(l => l.type === 'internal');
+        const inboundCount = new Map();
+        
+        for (const link of internalLinks) {
+            inboundCount.set(link.to_url, (inboundCount.get(link.to_url) || 0) + 1);
+        }
+        
+        for (const p of pages) {
+            const count = inboundCount.get(p.url) || 0;
+            if (count === 0 && p.url !== seed) { // Exclude homepage from orphan check
+                await base44ServiceRole.entities.Issue.create({
+                    crawl_id: crawlId,
+                    type: 'orphan_page',
+                    severity: 'high',
+                    url: p.url,
+                    message: 'Siden har ingen interne lenker inn (orphan page)',
+                    how_to_fix: 'Legg inn minst én relevant internlenke til siden fra en passende side.',
+                    status: 'open'
+                });
+            }
+        }
+
+        // Check for broken internal links
         const crawledUrls = new Set(pages.map(p => p.url));
 
         for (const link of internalLinks) {
