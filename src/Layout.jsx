@@ -1,15 +1,19 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
-import { Globe, LayoutDashboard, Bug, FileText, Search, BarChart3, Settings } from "lucide-react";
+import { usePermissions } from "@/components/usePermissions";
+import { Globe, LayoutDashboard, Bug, FileText, Search, BarChart3, Settings, Users } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
+  const { canAccessSettings, canManageUsers } = usePermissions();
+  
   const navigation = [
-    { name: "Sites", page: "Sites", icon: Globe },
-    { name: "Analytics", page: "Analytics", icon: BarChart3 },
-    { name: "Reports", page: "Reports", icon: FileText },
-    { name: "Settings", page: "Settings", icon: Settings },
-  ];
+    { name: "Sites", page: "Sites", icon: Globe, show: true },
+    { name: "Analytics", page: "Analytics", icon: BarChart3, show: true },
+    { name: "Reports", page: "Reports", icon: FileText, show: true },
+    { name: "Users", page: "UserManagement", icon: Users, show: canManageUsers },
+    { name: "Settings", page: "Settings", icon: Settings, show: canAccessSettings },
+  ].filter(item => item.show);
 
   return (
     <div className="min-h-screen bg-slate-50">

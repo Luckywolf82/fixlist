@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { usePermissions } from "@/components/usePermissions";
 import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -18,6 +19,7 @@ import toast from "react-hot-toast";
 import ScheduleCrawlDialog from "@/components/ScheduleCrawlDialog";
 
 export default function Sites() {
+  const { canAddSite, canDeleteSite, canStartCrawl, canManageSchedules } = usePermissions();
   const [crawlingIds, setCrawlingIds] = useState(new Set());
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newDomain, setNewDomain] = useState("");
@@ -199,6 +201,7 @@ export default function Sites() {
           <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Sites</h1>
           <p className="text-slate-500 mt-1">Manage and monitor your websites</p>
         </div>
+        {canAddSite && (
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
             <Button className="bg-slate-900 hover:bg-slate-800">
@@ -240,9 +243,10 @@ export default function Sites() {
                 )}
               </Button>
             </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+            </DialogContent>
+            </Dialog>
+            )}
+            </div>
 
       {sites.length === 0 ? (
         <Card className="p-12 text-center">
@@ -328,6 +332,7 @@ export default function Sites() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
+                        {canManageSchedules && (
                         <Button 
                           variant="outline" 
                           size="sm" 
@@ -337,6 +342,8 @@ export default function Sites() {
                           <Calendar className="w-3.5 h-3.5 mr-1.5" />
                           Schedule
                         </Button>
+                        )}
+                        {canStartCrawl && (
                         <Button 
                           variant="outline" 
                           size="sm" 
@@ -351,11 +358,13 @@ export default function Sites() {
                           )}
                           {crawlingIds.has(site.id) ? 'Crawling...' : 'Crawl Now'}
                         </Button>
+                        )}
                         <Link to={createPageUrl(`SiteOverview?siteId=${site.id}`)}>
                           <Button size="sm" className="h-8 bg-slate-900 hover:bg-slate-800">
                             View
                           </Button>
                         </Link>
+                        {canDeleteSite && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -365,6 +374,7 @@ export default function Sites() {
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </Button>
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>

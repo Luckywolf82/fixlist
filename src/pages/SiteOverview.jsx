@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { usePermissions } from "@/components/usePermissions";
 import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -16,6 +17,7 @@ import { format } from "date-fns";
 import toast from "react-hot-toast";
 
 export default function SiteOverview() {
+  const { canStartCrawl } = usePermissions();
   const [isCrawling, setIsCrawling] = useState(false);
   const [renderJs, setRenderJs] = useState(false);
   const queryClient = useQueryClient();
@@ -170,6 +172,7 @@ export default function SiteOverview() {
             </p>
           )}
         </div>
+        {canStartCrawl && (
         <div className="flex flex-col items-end gap-3">
           <div className="flex items-center gap-2">
             <Checkbox 
@@ -195,6 +198,7 @@ export default function SiteOverview() {
             {isCrawling ? 'Starting Crawl...' : 'Start New Crawl'}
           </Button>
         </div>
+        )}
       </div>
 
       {/* Stats */}
