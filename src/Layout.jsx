@@ -7,6 +7,7 @@ export default function Layout({ children, currentPageName }) {
   const navigation = [
     { name: "Sites", page: "Sites", icon: Globe },
     { name: "Analytics", page: "Analytics", icon: BarChart3 },
+    { name: "Reports", page: "Reports", icon: FileText },
   ];
 
   return (

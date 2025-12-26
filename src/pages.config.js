@@ -5,6 +5,7 @@ import Issues from './pages/Issues';
 import Pages from './pages/Pages';
 import PageDetail from './pages/PageDetail';
 import Analytics from './pages/Analytics';
+import Reports from './pages/Reports';
 import __Layout from './Layout.jsx';
 
 
@@ -16,6 +17,7 @@ export const PAGES = {
     "Pages": Pages,
     "PageDetail": PageDetail,
     "Analytics": Analytics,
+    "Reports": Reports,
 }
 
 export const pagesConfig = {
