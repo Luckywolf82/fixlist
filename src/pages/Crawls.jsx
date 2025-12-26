@@ -139,11 +139,18 @@ export default function Crawls() {
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Link to={createPageUrl(`Issues?siteId=${siteId}&crawlId=${crawl.id}`)}>
-                        <Button variant="outline" size="sm" className="h-8">
-                          View Issues
-                        </Button>
-                      </Link>
+                      <div className="flex items-center justify-end gap-2">
+                        <Link to={createPageUrl(`CrawlReport?crawlId=${crawl.id}&siteId=${siteId}`)}>
+                          <Button variant="outline" size="sm" className="h-8">
+                            View Report
+                          </Button>
+                        </Link>
+                        <Link to={createPageUrl(`Issues?siteId=${siteId}&crawlId=${crawl.id}`)}>
+                          <Button size="sm" className="h-8 bg-slate-900 hover:bg-slate-800">
+                            View Issues
+                          </Button>
+                        </Link>
+                      </div>
                     </TableCell>
                   </TableRow>
                 );
