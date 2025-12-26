@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Loader2 } from "lucide-react";
@@ -6,13 +6,17 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Globe, ExternalLink, Play, AlertCircle, Clock, FileText } from "lucide-react";
+import { Globe, ExternalLink, Play, AlertCircle, Clock, FileText, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 
 export default function Sites() {
   const [crawlingIds, setCrawlingIds] = useState(new Set());
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [newDomain, setNewDomain] = useState("");
   const queryClient = useQueryClient();
 
   const { data: sites = [], isLoading: sitesLoading } = useQuery({
