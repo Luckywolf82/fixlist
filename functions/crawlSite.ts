@@ -425,7 +425,8 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
                 canonical: '',
                 h1: '',
                 h1_count: 0,
-                word_count_estimate: 0
+                word_count_estimate: 0,
+                load_time_ms: loadTimeMs
             };
 
             if (html) {
