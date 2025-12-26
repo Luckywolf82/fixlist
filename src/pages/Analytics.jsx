@@ -4,8 +4,9 @@ import { base44 } from "@/api/base44Client";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { TrendingUp, PieChart as PieChartIcon, BarChart3, Calendar } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area } from "recharts";
+import { TrendingUp, PieChart as PieChartIcon, BarChart3, Calendar, Link2, Search, MousePointerClick, ArrowUp, AlertTriangle } from "lucide-react";
 import { format, parseISO, subDays, isAfter } from "date-fns";
 
 export default function Analytics() {
@@ -30,6 +31,44 @@ export default function Analytics() {
   const { data: pages = [], isLoading: pagesLoading } = useQuery({
     queryKey: ["pages"],
     queryFn: () => base44.entities.Page.list(),
+  });
+
+  // Get current user for Ahrefs API key check
+  const { data: currentUser } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: () => base44.auth.me(),
+  });
+
+  // Fetch Ahrefs data if a single site is selected
+  const { data: ahrefsData } = useQuery({
+    queryKey: ["ahrefs", selectedSiteId],
+    queryFn: async () => {
+      const site = sites.find(s => s.id === selectedSiteId);
+      if (!site) return null;
+      const response = await base44.functions.invoke('fetchAhrefsData', { domain: site.domain });
+      return response.data;
+    },
+    enabled: selectedSiteId !== "all" && !!currentUser?.ahrefs_api_key,
+  });
+
+  // Fetch GSC data if a single site is selected
+  const { data: gscData } = useQuery({
+    queryKey: ["gsc", selectedSiteId, dateRange],
+    queryFn: async () => {
+      const site = sites.find(s => s.id === selectedSiteId);
+      if (!site) return null;
+      
+      const endDate = new Date();
+      const startDate = subDays(endDate, parseInt(dateRange) || 30);
+      
+      const response = await base44.functions.invoke('fetchGSCData', { 
+        domain: site.domain,
+        start_date: format(startDate, 'yyyy-MM-dd'),
+        end_date: format(endDate, 'yyyy-MM-dd')
+      });
+      return response.data;
+    },
+    enabled: selectedSiteId !== "all",
   });
 
   const filteredCrawls = useMemo(() => {
@@ -131,6 +170,28 @@ export default function Analytics() {
     }).filter(s => s.issues > 0 || s.pages > 0);
   }, [sites, crawls, issues, selectedSiteId]);
 
+  // Issues over time trend
+  const issuesOverTime = useMemo(() => {
+    const grouped = {};
+    
+    filteredCrawls.forEach(crawl => {
+      const date = format(parseISO(crawl.started_at), "MMM d");
+      const crawlIssues = issues.filter(i => i.crawl_id === crawl.id && i.status === "open");
+      
+      if (!grouped[date]) {
+        grouped[date] = { date, total: 0, critical: 0, high: 0, medium: 0 };
+      }
+      grouped[date].total += crawlIssues.length;
+      grouped[date].critical += crawlIssues.filter(i => i.severity === "critical").length;
+      grouped[date].high += crawlIssues.filter(i => i.severity === "high").length;
+      grouped[date].medium += crawlIssues.filter(i => i.severity === "medium").length;
+    });
+    
+    return Object.values(grouped).sort((a, b) => 
+      new Date(a.date) - new Date(b.date)
+    );
+  }, [filteredCrawls, issues]);
+
   const isLoading = sitesLoading || crawlsLoading || issuesLoading || pagesLoading;
 
   if (isLoading) {
@@ -178,6 +239,137 @@ export default function Analytics() {
           </Select>
         </div>
       </div>
+
+      {/* SEO Metrics Cards - Single site view */}
+      {selectedSiteId !== "all" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Ahrefs Metrics */}
+          {ahrefsData?.success && (
+            <>
+              <Card className="p-5">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Link2 className="w-4 h-4 text-orange-600" />
+                    <p className="text-sm text-slate-600">Domain Rating</p>
+                  </div>
+                  <Badge variant="outline" className="text-xs">Ahrefs</Badge>
+                </div>
+                <p className="text-2xl font-bold text-slate-900">{ahrefsData.domainRating}</p>
+                <p className="text-xs text-slate-500 mt-1">out of 100</p>
+              </Card>
+              <Card className="p-5">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Link2 className="w-4 h-4 text-orange-600" />
+                    <p className="text-sm text-slate-600">Backlinks</p>
+                  </div>
+                  <Badge variant="outline" className="text-xs">Ahrefs</Badge>
+                </div>
+                <p className="text-2xl font-bold text-slate-900">{ahrefsData.backlinks.toLocaleString()}</p>
+                <p className="text-xs text-slate-500 mt-1">{ahrefsData.referringDomains.toLocaleString()} domains</p>
+              </Card>
+            </>
+          )}
+
+          {/* GSC Metrics */}
+          {gscData?.success && (
+            <>
+              <Card className="p-5">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <MousePointerClick className="w-4 h-4 text-blue-600" />
+                    <p className="text-sm text-slate-600">Total Clicks</p>
+                  </div>
+                  <Badge variant="outline" className="text-xs">GSC</Badge>
+                </div>
+                <p className="text-2xl font-bold text-slate-900">{gscData.totals.clicks.toLocaleString()}</p>
+                <p className="text-xs text-slate-500 mt-1">CTR: {gscData.totals.avgCTR}%</p>
+              </Card>
+              <Card className="p-5">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Search className="w-4 h-4 text-blue-600" />
+                    <p className="text-sm text-slate-600">Impressions</p>
+                  </div>
+                  <Badge variant="outline" className="text-xs">GSC</Badge>
+                </div>
+                <p className="text-2xl font-bold text-slate-900">{gscData.totals.impressions.toLocaleString()}</p>
+                <p className="text-xs text-slate-500 mt-1">Avg pos: {gscData.totals.avgPosition}</p>
+              </Card>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* GSC Daily Trends */}
+      {selectedSiteId !== "all" && gscData?.success && gscData.dailyData?.length > 0 && (
+        <Card className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="w-5 h-5 text-blue-600" />
+            <h2 className="font-semibold text-slate-900">Organic Traffic Trends</h2>
+            <Badge variant="outline" className="text-xs ml-auto">Google Search Console</Badge>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={gscData.dailyData}>
+              <defs>
+                <linearGradient id="colorClicks" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorImpressions" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis dataKey="date" stroke="#64748b" fontSize={12} />
+              <YAxis stroke="#64748b" fontSize={12} />
+              <Tooltip 
+                contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: "8px" }}
+                labelStyle={{ color: "#0f172a", fontWeight: 600 }}
+              />
+              <Legend />
+              <Area type="monotone" dataKey="clicks" stroke="#3b82f6" fillOpacity={1} fill="url(#colorClicks)" name="Clicks" />
+              <Area type="monotone" dataKey="impressions" stroke="#10b981" fillOpacity={1} fill="url(#colorImpressions)" name="Impressions" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </Card>
+      )}
+
+      {/* Issues Over Time Trend */}
+      {issuesOverTime.length > 0 && (
+        <Card className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <AlertTriangle className="w-5 h-5 text-red-600" />
+            <h2 className="font-semibold text-slate-900">Issues Trend Over Time</h2>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <AreaChart data={issuesOverTime}>
+              <defs>
+                <linearGradient id="colorCritical" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#ef4444" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                </linearGradient>
+                <linearGradient id="colorHigh" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis dataKey="date" stroke="#64748b" fontSize={12} />
+              <YAxis stroke="#64748b" fontSize={12} />
+              <Tooltip 
+                contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: "8px" }}
+                labelStyle={{ color: "#0f172a", fontWeight: 600 }}
+              />
+              <Legend />
+              <Area type="monotone" dataKey="critical" stackId="1" stroke="#ef4444" fillOpacity={1} fill="url(#colorCritical)" name="Critical" />
+              <Area type="monotone" dataKey="high" stackId="1" stroke="#f97316" fillOpacity={1} fill="url(#colorHigh)" name="High" />
+              <Area type="monotone" dataKey="medium" stackId="1" stroke="#eab308" fillOpacity={0.6} fill="#eab308" name="Medium" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </Card>
+      )}
 
       {/* Crawl Activity Over Time */}
       <Card className="p-6">
@@ -314,6 +506,69 @@ export default function Analytics() {
           </Card>
         )}
       </div>
+
+      {/* Top Performing Queries (GSC) */}
+      {selectedSiteId !== "all" && gscData?.success && gscData.topQueries?.length > 0 && (
+        <Card className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Search className="w-5 h-5 text-blue-600" />
+            <h2 className="font-semibold text-slate-900">Top Search Queries</h2>
+            <Badge variant="outline" className="text-xs ml-auto">Google Search Console</Badge>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="border-b border-slate-200">
+                <tr>
+                  <th className="text-left text-sm font-semibold text-slate-700 pb-3">Query</th>
+                  <th className="text-right text-sm font-semibold text-slate-700 pb-3">Clicks</th>
+                  <th className="text-right text-sm font-semibold text-slate-700 pb-3">Impressions</th>
+                  <th className="text-right text-sm font-semibold text-slate-700 pb-3">CTR</th>
+                  <th className="text-right text-sm font-semibold text-slate-700 pb-3">Position</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {gscData.topQueries.map((query, idx) => (
+                  <tr key={idx} className="hover:bg-slate-50">
+                    <td className="py-3 text-sm text-slate-900">{query.query}</td>
+                    <td className="py-3 text-sm text-slate-600 text-right">{query.clicks.toLocaleString()}</td>
+                    <td className="py-3 text-sm text-slate-600 text-right">{query.impressions.toLocaleString()}</td>
+                    <td className="py-3 text-sm text-slate-600 text-right">{query.ctr}%</td>
+                    <td className="py-3 text-sm text-slate-600 text-right">{query.position}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </Card>
+      )}
+
+      {/* Top Performing Pages (Ahrefs) */}
+      {selectedSiteId !== "all" && ahrefsData?.success && ahrefsData.topPages?.length > 0 && (
+        <Card className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <ArrowUp className="w-5 h-5 text-orange-600" />
+            <h2 className="font-semibold text-slate-900">Top Performing Pages</h2>
+            <Badge variant="outline" className="text-xs ml-auto">Ahrefs</Badge>
+          </div>
+          <div className="space-y-3">
+            {ahrefsData.topPages.map((page, idx) => (
+              <div key={idx} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
+                <div className="flex-1 min-w-0 mr-4">
+                  <p className="text-sm font-medium text-slate-900 truncate">{page.url}</p>
+                  <div className="flex items-center gap-3 mt-1 text-xs text-slate-600">
+                    <span>Traffic: {page.traffic.toLocaleString()}/mo</span>
+                    <span>•</span>
+                    <span>Keywords: {page.keywords}</span>
+                  </div>
+                </div>
+                <div className="w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">
+                  {idx + 1}
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
     </div>
   );
 }
