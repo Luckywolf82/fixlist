@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Loader2 } from "lucide-react";
@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import StatCard from "@/components/dashboard/StatCard";
 import { AlertCircle, AlertTriangle, Info, ArrowLeft, Clock, FileText, Bug, ExternalLink, Play } from "lucide-react";
 import { format } from "date-fns";
+import toast from "react-hot-toast";
 
 export default function SiteOverview() {
   const [isCrawling, setIsCrawling] = useState(false);
@@ -60,12 +61,32 @@ export default function SiteOverview() {
       const response = await base44.functions.invoke('crawlSite', { site_id: siteId });
       return response.data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["crawls", siteId] });
-      queryClient.invalidateQueries({ queryKey: ["issues", siteId] });
-      setTimeout(() => setIsCrawling(false), 3000);
+    onSuccess: (data) => {
+      toast.success('Crawl started! This may take a few minutes.', { duration: 5000 });
+      // Poll for crawl completion
+      const pollInterval = setInterval(async () => {
+        const crawls = await base44.entities.Crawl.filter({ id: data.crawl_id });
+        if (crawls[0]?.status === 'done' || crawls[0]?.status === 'failed') {
+          clearInterval(pollInterval);
+          queryClient.invalidateQueries({ queryKey: ["crawls", siteId] });
+          queryClient.invalidateQueries({ queryKey: ["issues", siteId] });
+          setIsCrawling(false);
+          if (crawls[0].status === 'done') {
+            toast.success(`Crawl completed! Found ${crawls[0].pages_crawled} pages.`);
+          } else {
+            toast.error('Crawl failed. Please try again.');
+          }
+        }
+      }, 3000);
+      
+      // Stop polling after 5 minutes
+      setTimeout(() => {
+        clearInterval(pollInterval);
+        setIsCrawling(false);
+      }, 300000);
     },
     onError: () => {
+      toast.error('Failed to start crawl. Please try again.');
       setIsCrawling(false);
     }
   });

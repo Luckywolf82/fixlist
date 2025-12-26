@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { Loader2 } from "lucide-react";
@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Globe, ExternalLink, Play, AlertCircle, Clock, FileText, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
+import toast from "react-hot-toast";
 
 export default function Sites() {
   const [crawlingIds, setCrawlingIds] = useState(new Set());
@@ -57,20 +58,42 @@ export default function Sites() {
   const crawlMutation = useMutation({
     mutationFn: async (siteId) => {
       const response = await base44.functions.invoke('crawlSite', { site_id: siteId });
-      return response.data;
+      return { ...response.data, siteId };
     },
-    onSuccess: (data, siteId) => {
-      queryClient.invalidateQueries({ queryKey: ["crawls"] });
-      queryClient.invalidateQueries({ queryKey: ["issues"] });
+    onSuccess: (data) => {
+      toast.success('Crawl started! This may take a few minutes.', { duration: 5000 });
+      // Poll for crawl completion
+      const pollInterval = setInterval(async () => {
+        const crawls = await base44.entities.Crawl.filter({ id: data.crawl_id });
+        if (crawls[0]?.status === 'done' || crawls[0]?.status === 'failed') {
+          clearInterval(pollInterval);
+          queryClient.invalidateQueries({ queryKey: ["crawls"] });
+          queryClient.invalidateQueries({ queryKey: ["issues"] });
+          setCrawlingIds(prev => {
+            const next = new Set(prev);
+            next.delete(data.siteId);
+            return next;
+          });
+          if (crawls[0].status === 'done') {
+            toast.success(`Crawl completed! Found ${crawls[0].pages_crawled} pages.`);
+          } else {
+            toast.error('Crawl failed. Please try again.');
+          }
+        }
+      }, 3000);
+      
+      // Stop polling after 5 minutes
       setTimeout(() => {
+        clearInterval(pollInterval);
         setCrawlingIds(prev => {
           const next = new Set(prev);
-          next.delete(siteId);
+          next.delete(data.siteId);
           return next;
         });
-      }, 3000);
+      }, 300000);
     },
     onError: (error, siteId) => {
+      toast.error('Failed to start crawl. Please try again.');
       setCrawlingIds(prev => {
         const next = new Set(prev);
         next.delete(siteId);
