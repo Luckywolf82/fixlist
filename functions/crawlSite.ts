@@ -730,7 +730,7 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
             };
 
             if (html) {
-                console.log(`Parsing HTML for ${url}`);
+                console.log(`Parsing HTML for ${url}, HTML length: ${html.length}`);
                 const parsed = parseHtml(url, html);
                 page.title = parsed.title;
                 page.meta_description = parsed.metaDesc;
@@ -751,7 +751,7 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
                 page.twitterImage = parsed.twitterImage;
                 page.hasStructuredData = parsed.hasStructuredData;
                 page.hasFavicon = parsed.hasFavicon;
-                console.log(`Parsed - Title: "${page.title}", H1: "${page.h1}", Words: ${page.word_count_estimate}`);
+                console.log(`Parsed - Title: "${page.title}", H1: "${page.h1}", Words: ${page.word_count_estimate}, Images: ${page.images?.length || 0}`);
 
                 // Collect links
                 for (const toUrl of parsed.hrefs) {
@@ -771,6 +771,19 @@ async function crawlWebsite(base44ServiceRole, site, crawlId, renderJs = false) 
                 }
 
                 // Page-level issues
+                console.log(`Checking issues for page: ${page.url}`);
+                console.log(`Page data for issue check:`, {
+                    title: page.title,
+                    h1: page.h1,
+                    h1_count: page.h1_count,
+                    meta_description: page.meta_description,
+                    status_code: page.status_code,
+                    word_count: page.word_count_estimate,
+                    images_count: page.images?.length || 0,
+                    lcp: page.lcp,
+                    cls: page.cls,
+                    inp: page.inp
+                });
                 const pageIssues = checkPageIssues(page);
                 console.log(`Page: ${page.url} - Found ${pageIssues.length} issues`);
                 for (const issue of pageIssues) {
