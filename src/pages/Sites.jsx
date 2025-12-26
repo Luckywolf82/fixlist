@@ -64,26 +64,30 @@ export default function Sites() {
       return { ...response.data, siteId };
     },
     onSuccess: (data) => {
-      toast.success('Crawl started! This may take a few minutes.', { duration: 5000 });
-      // Poll for crawl completion
-      const pollInterval = setInterval(async () => {
-        const crawls = await base44.entities.Crawl.filter({ id: data.crawl_id });
-        if (crawls[0]?.status === 'done' || crawls[0]?.status === 'failed') {
-          clearInterval(pollInterval);
-          queryClient.invalidateQueries({ queryKey: ["crawls"] });
-          queryClient.invalidateQueries({ queryKey: ["issues"] });
-          setCrawlingIds(prev => {
-            const next = new Set(prev);
-            next.delete(data.siteId);
-            return next;
-          });
-          if (crawls[0].status === 'done') {
-            toast.success(`Crawl completed! Found ${crawls[0].pages_crawled} pages.`);
-          } else {
-            toast.error('Crawl failed. Please try again.');
-          }
-        }
-      }, 3000);
+        console.log('Crawl started with data:', data);
+        toast.success('Crawl started! This may take a few minutes.', { duration: 5000 });
+        // Poll for crawl completion
+        const pollInterval = setInterval(async () => {
+            console.log('Polling for crawl status:', data.crawl_id);
+            const crawls = await base44.entities.Crawl.filter({ id: data.crawl_id });
+            console.log('Crawl status:', crawls[0]);
+            if (crawls[0]?.status === 'done' || crawls[0]?.status === 'failed') {
+                clearInterval(pollInterval);
+                console.log('Crawl finished! Invalidating queries...');
+                queryClient.invalidateQueries({ queryKey: ["crawls"] });
+                queryClient.invalidateQueries({ queryKey: ["issues"] });
+                setCrawlingIds(prev => {
+                    const next = new Set(prev);
+                    next.delete(data.siteId);
+                    return next;
+                });
+                if (crawls[0].status === 'done') {
+                    toast.success(`Crawl completed! Found ${crawls[0].pages_crawled} pages.`);
+                } else {
+                    toast.error('Crawl failed. Please try again.');
+                }
+            }
+        }, 3000);
       
       // Stop polling after 5 minutes
       setTimeout(() => {
