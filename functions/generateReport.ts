@@ -185,10 +185,12 @@ Deno.serve(async (req) => {
 
     console.log('Generating PDF...');
     const pdfBytes = doc.output('arraybuffer');
-    const pdfBlob = new Blob([pdfBytes], { type: 'application/pdf' });
     
     console.log('Uploading PDF...');
-    const uploadResponse = await base44.asServiceRole.integrations.Core.UploadFile({ file: pdfBlob });
+    const fileName = `report-${site.domain}-${Date.now()}.pdf`;
+    const pdfFile = new File([pdfBytes], fileName, { type: 'application/pdf' });
+    
+    const uploadResponse = await base44.asServiceRole.integrations.Core.UploadFile({ file: pdfFile });
     const pdfUrl = uploadResponse.file_url;
     console.log('PDF uploaded:', pdfUrl);
 
