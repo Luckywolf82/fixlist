@@ -2,6 +2,9 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { usePermissions } from "@/components/usePermissions";
+import { usePlanLimits } from "@/components/usePlanLimits";
+import UserNotRegisteredError from "@/components/UserNotRegisteredError";
+import PlanLimitWarning from "@/components/PlanLimitWarning";
 import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -15,11 +18,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Globe, ExternalLink, Play, AlertCircle, Clock, FileText, Plus, Trash2, Calendar } from "lucide-react";
 import { format } from "date-fns";
-import toast from "react-hot-toast";
+import { toast } from "sonner";
 import ScheduleCrawlDialog from "@/components/ScheduleCrawlDialog";
 
 export default function Sites() {
-  const { canAddSite, canDeleteSite, canStartCrawl, canManageSchedules } = usePermissions();
+  const { user, canAddSite, canDeleteSite, canStartCrawl, canManageSchedules } = usePermissions();
+  const { organization, limits, canAddSite: canAddSiteByPlan, canCrawl } = usePlanLimits();
   const [crawlingIds, setCrawlingIds] = useState(new Set());
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newDomain, setNewDomain] = useState("");
@@ -144,11 +148,19 @@ export default function Sites() {
   });
 
   const handleStartCrawl = (siteId) => {
+    if (!canCrawl()) {
+      toast.error('Crawl limit reached. Please upgrade your plan.');
+      return;
+    }
     setCrawlingIds(prev => new Set(prev).add(siteId));
     crawlMutation.mutate({ siteId });
   };
 
   const handleAddSite = () => {
+    if (!canAddSiteByPlan(sites.length)) {
+      toast.error(`You've reached the maximum of ${limits.max_sites} sites on your plan. Please upgrade.`);
+      return;
+    }
     if (newDomain.trim()) {
       const cleanDomain = newDomain.trim().replace(/^https?:\/\//i, '').replace(/\/.*$/, '');
       addSiteMutation.mutate(cleanDomain);
@@ -176,6 +188,11 @@ export default function Sites() {
     };
   };
 
+  // Show onboarding if user doesn't have an organization
+  if (!user?.organization_id) {
+    return <UserNotRegisteredError user={user} />;
+  }
+
   if (sitesLoading) {
     return (
       <div className="space-y-6">
@@ -196,6 +213,14 @@ export default function Sites() {
 
   return (
     <div className="space-y-6">
+      {/* Plan Limit Warnings */}
+      {!canCrawl() && (
+        <PlanLimitWarning message={`You've used all ${limits.max_crawls_per_month} crawls this month. Upgrade to continue crawling.`} />
+      )}
+      {!canAddSiteByPlan(sites.length) && (
+        <PlanLimitWarning message={`You've reached the maximum of ${limits.max_sites} sites on your ${limits.name} plan.`} />
+      )}
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Sites</h1>

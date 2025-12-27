@@ -22,6 +22,21 @@ Deno.serve(async (req) => {
             return Response.json({ error: 'Site not found' }, { status: 404 });
         }
 
+        // Check plan limits
+        const orgs = await base44.asServiceRole.entities.Organization.filter({ id: site.organization_id });
+        const org = orgs[0];
+
+        if (org) {
+            if (org.max_crawls_per_month !== -1 && org.crawls_this_month >= org.max_crawls_per_month) {
+                return Response.json({ error: 'Crawl limit reached for this month. Please upgrade your plan.' }, { status: 403 });
+            }
+
+            // Increment crawl counter
+            await base44.asServiceRole.entities.Organization.update(org.id, {
+                crawls_this_month: org.crawls_this_month + 1
+            });
+        }
+
         const crawl = await base44.asServiceRole.entities.Crawl.create({
             site_id: site_id,
             status: 'running',

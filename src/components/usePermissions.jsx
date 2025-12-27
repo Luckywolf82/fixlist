@@ -7,7 +7,9 @@ export function usePermissions() {
     queryFn: () => base44.auth.me(),
   });
 
-  const role = user?.custom_role || user?.role === 'admin' ? 'administrator' : 'editor';
+  const role = user?.custom_role === 'superadmin' ? 'superadmin' 
+    : user?.custom_role || user?.role === 'admin' ? 'administrator' 
+    : 'editor';
 
   const permissions = {
     // Viewer: Can only view data
@@ -21,6 +23,7 @@ export function usePermissions() {
       canGenerateReports: true,
       canAccessSettings: false,
       canManageUsers: false,
+      canAccessSuperAdmin: false,
     },
     // Editor: Can manage content but not settings
     editor: {
@@ -33,6 +36,7 @@ export function usePermissions() {
       canGenerateReports: true,
       canAccessSettings: false,
       canManageUsers: false,
+      canAccessSuperAdmin: false,
     },
     // Administrator: Full access
     administrator: {
@@ -45,6 +49,20 @@ export function usePermissions() {
       canGenerateReports: true,
       canAccessSettings: true,
       canManageUsers: true,
+      canAccessSuperAdmin: false,
+    },
+    // SuperAdmin: Platform-wide access
+    superadmin: {
+      canViewSites: true,
+      canAddSite: true,
+      canDeleteSite: true,
+      canStartCrawl: true,
+      canManageSchedules: true,
+      canUpdateIssues: true,
+      canGenerateReports: true,
+      canAccessSettings: true,
+      canManageUsers: true,
+      canAccessSuperAdmin: true,
     },
   };
 
@@ -55,5 +73,6 @@ export function usePermissions() {
     isAdmin: role === 'administrator',
     isEditor: role === 'editor',
     isViewer: role === 'viewer',
+    isSuperAdmin: role === 'superadmin',
   };
 }

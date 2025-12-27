@@ -5,7 +5,7 @@ import { usePermissions } from "@/components/usePermissions";
 import { Globe, LayoutDashboard, Bug, FileText, Search, BarChart3, Settings, Users, CreditCard } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
-  const { canAccessSettings, canManageUsers } = usePermissions();
+  const { canAccessSettings, canManageUsers, canAccessSuperAdmin } = usePermissions();
   
   const navigation = [
     { name: "Sites", page: "Sites", icon: Globe, show: true },
@@ -14,6 +14,7 @@ export default function Layout({ children, currentPageName }) {
     { name: "Users", page: "UserManagement", icon: Users, show: canManageUsers },
     { name: "Billing", page: "Billing", icon: CreditCard, show: true },
     { name: "Settings", page: "Settings", icon: Settings, show: canAccessSettings },
+    { name: "SuperAdmin", page: "SuperAdmin", icon: Shield, show: canAccessSuperAdmin },
   ].filter(item => item.show);
 
   return (
