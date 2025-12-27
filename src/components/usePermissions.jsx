@@ -70,7 +70,7 @@ export function usePermissions() {
     user,
     role,
     ...permissions[role],
-    isAdmin: role === 'administrator',
+    isAdmin: role === 'administrator' || role === 'superadmin',
     isEditor: role === 'editor',
     isViewer: role === 'viewer',
     isSuperAdmin: role === 'superadmin',
