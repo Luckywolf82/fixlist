@@ -79,45 +79,58 @@ export default function SuperAdmin() {
 
   const createProductMutation = useMutation({
     mutationFn: async (productData) => {
-      return base44.entities.Product.create(productData);
+      const response = await base44.functions.invoke('manageStripeProduct', {
+        action: 'create',
+        productData
+      });
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      toast.success("Product created");
+      toast.success("Product created in Stripe");
       setIsProductDialogOpen(false);
       resetProductForm();
     },
-    onError: () => {
-      toast.error("Failed to create product");
+    onError: (error) => {
+      toast.error("Failed to create product: " + error.message);
     },
   });
 
   const updateProductMutation = useMutation({
     mutationFn: async ({ productId, data }) => {
-      return base44.entities.Product.update(productId, data);
+      const response = await base44.functions.invoke('manageStripeProduct', {
+        action: 'update',
+        productId,
+        productData: data
+      });
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      toast.success("Product updated");
+      toast.success("Product updated in Stripe");
       setIsProductDialogOpen(false);
       setEditingProduct(null);
       resetProductForm();
     },
-    onError: () => {
-      toast.error("Failed to update product");
+    onError: (error) => {
+      toast.error("Failed to update product: " + error.message);
     },
   });
 
   const deleteProductMutation = useMutation({
     mutationFn: async (productId) => {
-      return base44.entities.Product.delete(productId);
+      const response = await base44.functions.invoke('manageStripeProduct', {
+        action: 'delete',
+        productId
+      });
+      return response.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      toast.success("Product deleted");
+      toast.success("Product archived in Stripe");
     },
-    onError: () => {
-      toast.error("Failed to delete product");
+    onError: (error) => {
+      toast.error("Failed to delete product: " + error.message);
     },
   });
 
