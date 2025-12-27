@@ -5,6 +5,7 @@ import { usePermissions } from "@/components/usePermissions";
 import { usePlanLimits } from "@/components/usePlanLimits";
 import UserNotRegisteredError from "@/components/UserNotRegisteredError";
 import PlanLimitWarning from "@/components/PlanLimitWarning";
+import OnboardingWizard from "@/components/OnboardingWizard";
 import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -193,6 +194,8 @@ export default function Sites() {
     return <UserNotRegisteredError user={user} />;
   }
 
+  const showOnboarding = user && !user.onboarding_completed && sites.length === 0;
+
   if (sitesLoading) {
     return (
       <div className="space-y-6">
@@ -213,6 +216,14 @@ export default function Sites() {
 
   return (
     <div className="space-y-6">
+      {/* Onboarding Wizard */}
+      {showOnboarding && (
+        <OnboardingWizard 
+          user={user} 
+          onComplete={() => queryClient.invalidateQueries({ queryKey: ["currentUser"] })}
+        />
+      )}
+
       {/* Plan Limit Warnings */}
       {!canCrawl() && (
         <PlanLimitWarning message={`You've used all ${limits.max_crawls_per_month} crawls this month. Upgrade to continue crawling.`} />
