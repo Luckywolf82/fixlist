@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { usePermissions } from "@/components/usePermissions";
-import { Globe, LayoutDashboard, Bug, FileText, Search, BarChart3, Settings, Users, CreditCard } from "lucide-react";
+import { Globe, LayoutDashboard, Bug, FileText, Search, BarChart3, Settings, Users, CreditCard, Shield } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
   const { canAccessSettings, canManageUsers, canAccessSuperAdmin } = usePermissions();
