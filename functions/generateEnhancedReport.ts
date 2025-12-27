@@ -314,36 +314,139 @@ Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", .
       yPos += 10;
     }
 
-    // Issue Details (condensed)
-    if (template?.include_sections?.issue_details !== false && criticalIssues.length > 0) {
-      if (yPos > 240) {
-        doc.addPage();
-        yPos = 20;
-      }
-
-      doc.setFontSize(14);
-      doc.setTextColor(220, 38, 38);
-      doc.text('Critical Issues', 20, yPos);
-      yPos += 10;
-
-      doc.setFontSize(9);
-      doc.setTextColor(0);
-
-      criticalIssues.slice(0, 10).forEach((issue, idx) => {
-        if (yPos > 270) {
+    // Issue Details
+    if (template?.include_sections?.issue_details !== false) {
+      // Critical Issues
+      if (criticalIssues.length > 0) {
+        if (yPos > 240) {
           doc.addPage();
           yPos = 20;
         }
 
-        doc.setFont(undefined, 'bold');
-        doc.text(`${idx + 1}. ${issue.type.replace(/_/g, ' ')}`, 20, yPos);
-        yPos += 5;
+        doc.setFontSize(14);
+        doc.setTextColor(220, 38, 38);
+        doc.text('Critical Issues', 20, yPos);
+        yPos += 10;
 
-        doc.setFont(undefined, 'normal');
-        const msgLines = doc.splitTextToSize(issue.message, 170);
-        doc.text(msgLines, 25, yPos);
-        yPos += msgLines.length * 4 + 7;
-      });
+        doc.setFontSize(9);
+        doc.setTextColor(0);
+
+        criticalIssues.forEach((issue, idx) => {
+          if (yPos > 270) {
+            doc.addPage();
+            yPos = 20;
+          }
+
+          doc.setFont(undefined, 'bold');
+          doc.text(`${idx + 1}. ${issue.type.replace(/_/g, ' ')}`, 20, yPos);
+          yPos += 5;
+
+          doc.setFont(undefined, 'normal');
+          const msgLines = doc.splitTextToSize(issue.message, 170);
+          doc.text(msgLines, 25, yPos);
+          yPos += msgLines.length * 4 + 2;
+
+          doc.setTextColor(100);
+          doc.text(`URL: ${issue.url.substring(0, 70)}`, 25, yPos);
+          yPos += 5;
+
+          doc.setTextColor(0, 100, 0);
+          const fixLines = doc.splitTextToSize(`Fix: ${issue.how_to_fix}`, 170);
+          doc.text(fixLines, 25, yPos);
+          yPos += fixLines.length * 4 + 7;
+
+          doc.setTextColor(0);
+        });
+        yPos += 5;
+      }
+
+      // High Priority Issues
+      if (highIssues.length > 0) {
+        if (yPos > 240) {
+          doc.addPage();
+          yPos = 20;
+        }
+
+        doc.setFontSize(14);
+        doc.setTextColor(245, 158, 11);
+        doc.text('High Priority Issues', 20, yPos);
+        yPos += 10;
+
+        doc.setFontSize(9);
+        doc.setTextColor(0);
+
+        highIssues.forEach((issue, idx) => {
+          if (yPos > 270) {
+            doc.addPage();
+            yPos = 20;
+          }
+
+          doc.setFont(undefined, 'bold');
+          doc.text(`${idx + 1}. ${issue.type.replace(/_/g, ' ')}`, 20, yPos);
+          yPos += 5;
+
+          doc.setFont(undefined, 'normal');
+          const msgLines = doc.splitTextToSize(issue.message, 170);
+          doc.text(msgLines, 25, yPos);
+          yPos += msgLines.length * 4 + 2;
+
+          doc.setTextColor(100);
+          doc.text(`URL: ${issue.url.substring(0, 70)}`, 25, yPos);
+          yPos += 5;
+
+          doc.setTextColor(0, 100, 0);
+          const fixLines = doc.splitTextToSize(`Fix: ${issue.how_to_fix}`, 170);
+          doc.text(fixLines, 25, yPos);
+          yPos += fixLines.length * 4 + 7;
+
+          doc.setTextColor(0);
+        });
+        yPos += 5;
+      }
+
+      // Medium Priority Issues
+      if (mediumIssues.length > 0) {
+        if (yPos > 240) {
+          doc.addPage();
+          yPos = 20;
+        }
+
+        doc.setFontSize(14);
+        doc.setTextColor(59, 130, 246);
+        doc.text('Medium Priority Issues', 20, yPos);
+        yPos += 10;
+
+        doc.setFontSize(9);
+        doc.setTextColor(0);
+
+        mediumIssues.forEach((issue, idx) => {
+          if (yPos > 270) {
+            doc.addPage();
+            yPos = 20;
+          }
+
+          doc.setFont(undefined, 'bold');
+          doc.text(`${idx + 1}. ${issue.type.replace(/_/g, ' ')}`, 20, yPos);
+          yPos += 5;
+
+          doc.setFont(undefined, 'normal');
+          const msgLines = doc.splitTextToSize(issue.message, 170);
+          doc.text(msgLines, 25, yPos);
+          yPos += msgLines.length * 4 + 2;
+
+          doc.setTextColor(100);
+          doc.text(`URL: ${issue.url.substring(0, 70)}`, 25, yPos);
+          yPos += 5;
+
+          doc.setTextColor(0, 100, 0);
+          const fixLines = doc.splitTextToSize(`Fix: ${issue.how_to_fix}`, 170);
+          doc.text(fixLines, 25, yPos);
+          yPos += fixLines.length * 4 + 7;
+
+          doc.setTextColor(0);
+        });
+        yPos += 5;
+      }
     }
 
     // Footer
