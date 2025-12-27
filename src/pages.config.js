@@ -12,6 +12,7 @@ import Settings from './pages/Settings';
 import UserManagement from './pages/UserManagement';
 import Billing from './pages/Billing';
 import SuperAdmin from './pages/SuperAdmin';
+import Landing from './pages/Landing';
 import __Layout from './Layout.jsx';
 
 
@@ -30,6 +31,7 @@ export const PAGES = {
     "UserManagement": UserManagement,
     "Billing": Billing,
     "SuperAdmin": SuperAdmin,
+    "Landing": Landing,
 }
 
 export const pagesConfig = {
