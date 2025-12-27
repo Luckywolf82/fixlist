@@ -40,7 +40,7 @@ export default function Settings() {
   });
 
   const handleSaveAhrefs = () => {
-    updateKeyMutation.mutate(ahrefsKey);
+    updateKeyMutation.mutate(ahrefsKey.trim());
   };
 
   if (!canAccessSettings) {
