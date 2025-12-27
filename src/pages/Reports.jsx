@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { FileText, Download, Calendar, Loader2, Plus, AlertCircle } from "lucide-react";
+import { FileText, Download, Calendar, Loader2, Plus, AlertCircle, Sparkles, TrendingUp, TrendingDown } from "lucide-react";
 import { format, parseISO } from "date-fns";
+import toast from "react-hot-toast";
 
 export default function Reports() {
   const [selectedSiteId, setSelectedSiteId] = useState("all");
@@ -35,18 +36,22 @@ export default function Reports() {
 
   const generateReportMutation = useMutation({
     mutationFn: async ({ siteId, days }) => {
-      const response = await base44.functions.invoke('generateReport', { 
+      const response = await base44.functions.invoke('generateEnhancedReport', { 
         site_id: siteId,
         period_days: parseInt(days)
       });
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["reports"] });
       setGeneratingForSite(null);
+      if (data.ai_summary) {
+        toast.success("Report generated with AI insights!");
+      }
     },
     onError: () => {
       setGeneratingForSite(null);
+      toast.error("Failed to generate report");
     }
   });
 
@@ -200,6 +205,22 @@ export default function Reports() {
                           <div className="flex items-center gap-1 text-red-600">
                             <AlertCircle className="w-3.5 h-3.5" />
                             <span className="font-medium">{report.summary.critical_issues} critical</span>
+                          </div>
+                        )}
+                        {report.ai_summary && (
+                          <div className="flex items-center gap-1 text-purple-600">
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span className="text-xs">AI Insights</span>
+                          </div>
+                        )}
+                        {report.comparison_data && (
+                          <div className="flex items-center gap-1">
+                            {report.comparison_data.improvements?.length > report.comparison_data.regressions?.length ? (
+                              <TrendingUp className="w-3.5 h-3.5 text-green-600" />
+                            ) : report.comparison_data.regressions?.length > 0 ? (
+                              <TrendingDown className="w-3.5 h-3.5 text-red-600" />
+                            ) : null}
+                            <span className="text-xs text-slate-500">vs previous</span>
                           </div>
                         )}
                       </div>

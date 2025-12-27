@@ -11,6 +11,7 @@ export default function Layout({ children, currentPageName }) {
     { name: "Sites", page: "Sites", icon: Globe, show: true },
     { name: "Analytics", page: "Analytics", icon: BarChart3, show: true },
     { name: "Reports", page: "Reports", icon: FileText, show: true },
+    { name: "Templates", page: "ReportTemplates", icon: Settings, show: canAccessSettings },
     { name: "Users", page: "UserManagement", icon: Users, show: canManageUsers },
     { name: "Billing", page: "Billing", icon: CreditCard, show: true },
     { name: "Settings", page: "Settings", icon: Settings, show: canAccessSettings },

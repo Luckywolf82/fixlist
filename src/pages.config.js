@@ -13,6 +13,7 @@ import UserManagement from './pages/UserManagement';
 import Billing from './pages/Billing';
 import SuperAdmin from './pages/SuperAdmin';
 import Landing from './pages/Landing';
+import ReportTemplates from './pages/ReportTemplates';
 import __Layout from './Layout.jsx';
 
 
@@ -32,6 +33,7 @@ export const PAGES = {
     "Billing": Billing,
     "SuperAdmin": SuperAdmin,
     "Landing": Landing,
+    "ReportTemplates": ReportTemplates,
 }
 
 export const pagesConfig = {
