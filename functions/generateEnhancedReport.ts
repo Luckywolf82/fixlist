@@ -53,6 +53,28 @@ Deno.serve(async (req) => {
       previousPages = await base44.asServiceRole.entities.Page.filter({ crawl_id: previousCrawl.id });
     }
 
+    // Fetch competitor data
+    const competitors = await base44.asServiceRole.entities.Competitor.filter({ site_id, enabled: true });
+    const competitorMetrics = competitors
+      .filter(c => c.metrics)
+      .map(c => ({
+        domain: c.domain,
+        domain_rating: c.metrics.domain_rating,
+        backlinks: c.metrics.backlinks,
+        organic_keywords: c.metrics.organic_keywords,
+      }));
+
+    // Fetch own site Ahrefs data
+    let siteAhrefsData = null;
+    try {
+      const ahrefsResponse = await base44.asServiceRole.functions.invoke('fetchAhrefsData', { domain: site.domain });
+      if (ahrefsResponse.data.success) {
+        siteAhrefsData = ahrefsResponse.data;
+      }
+    } catch (error) {
+      console.error('Failed to fetch Ahrefs data:', error);
+    }
+
     const openIssues = issues.filter(i => i.status === 'open');
     const criticalIssues = openIssues.filter(i => i.severity === 'critical');
     const highIssues = openIssues.filter(i => i.severity === 'high');
@@ -64,6 +86,22 @@ Deno.serve(async (req) => {
     const previousMediumIssues = previousOpenIssues.filter(i => i.severity === 'medium');
 
     // Generate AI Summary and Recommendations
+    const competitorContext = competitorMetrics.length > 0 ? `
+
+Competitor Benchmarking (${competitorMetrics.length} competitors):
+${siteAhrefsData ? `Your site:
+- Domain Rating: ${siteAhrefsData.domainRating}
+- Backlinks: ${siteAhrefsData.backlinks}
+- Organic Keywords: ${siteAhrefsData.organicKeywords}` : ''}
+
+Competitors average:
+- Domain Rating: ${(competitorMetrics.reduce((sum, c) => sum + (c.domain_rating || 0), 0) / competitorMetrics.length).toFixed(1)}
+- Backlinks: ${Math.round(competitorMetrics.reduce((sum, c) => sum + (c.backlinks || 0), 0) / competitorMetrics.length)}
+- Organic Keywords: ${Math.round(competitorMetrics.reduce((sum, c) => sum + (c.organic_keywords || 0), 0) / competitorMetrics.length)}
+
+Competitive gaps to address:
+${competitorMetrics.map(c => `- ${c.domain}: DR ${c.domain_rating}, ${c.backlinks} backlinks, ${c.organic_keywords} keywords`).join('\n')}` : '';
+
     const aiPrompt = `Analyze this SEO audit data and provide:
 1. A concise executive summary (3-4 sentences) highlighting the most important findings
 2. Top 5 actionable recommendations prioritized by impact
@@ -85,6 +123,7 @@ ${Object.entries(openIssues.reduce((acc, i) => {
   acc[i.type] = (acc[i.type] || 0) + 1;
   return acc;
 }, {})).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([type, count]) => `- ${type}: ${count}`).join('\n')}
+${competitorContext}
 
 Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", ...]}`;
 
@@ -203,6 +242,51 @@ Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", .
     }
 
     yPos += 10;
+
+    // Competitor Benchmarking
+    if (competitorMetrics.length > 0 && siteAhrefsData) {
+      doc.setFontSize(16);
+      doc.setTextColor(brandColor.r, brandColor.g, brandColor.b);
+      doc.text('Competitive Benchmarking', 20, yPos);
+      yPos += 10;
+
+      doc.setFontSize(10);
+      doc.setTextColor(0);
+
+      // Your site metrics
+      doc.setFont(undefined, 'bold');
+      doc.text('Your Site:', 20, yPos);
+      yPos += 6;
+      doc.setFont(undefined, 'normal');
+      doc.text(`Domain Rating: ${siteAhrefsData.domainRating}  |  Backlinks: ${siteAhrefsData.backlinks.toLocaleString()}  |  Keywords: ${siteAhrefsData.organicKeywords.toLocaleString()}`, 20, yPos);
+      yPos += 10;
+
+      // Competitors
+      doc.setFont(undefined, 'bold');
+      doc.text('Competitors:', 20, yPos);
+      yPos += 6;
+      doc.setFont(undefined, 'normal');
+
+      competitorMetrics.slice(0, 5).forEach((comp, idx) => {
+        if (yPos > 270) {
+          doc.addPage();
+          yPos = 20;
+        }
+        const drDiff = comp.domain_rating - siteAhrefsData.domainRating;
+        const drColor = drDiff > 0 ? [220, 38, 38] : [0, 150, 0];
+        
+        doc.text(`${idx + 1}. ${comp.domain}`, 20, yPos);
+        yPos += 5;
+        doc.text(`   DR: ${comp.domain_rating}`, 25, yPos);
+        doc.setTextColor(drColor[0], drColor[1], drColor[2]);
+        doc.text(`(${drDiff > 0 ? '+' : ''}${drDiff})`, 50, yPos);
+        doc.setTextColor(0);
+        doc.text(`  |  Backlinks: ${comp.backlinks.toLocaleString()}  |  Keywords: ${comp.organic_keywords.toLocaleString()}`, 70, yPos);
+        yPos += 6;
+      });
+
+      yPos += 10;
+    }
 
     // AI Executive Summary
     if (template?.include_sections?.executive_summary !== false) {

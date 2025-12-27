@@ -14,6 +14,7 @@ import Billing from './pages/Billing';
 import SuperAdmin from './pages/SuperAdmin';
 import Landing from './pages/Landing';
 import ReportTemplates from './pages/ReportTemplates';
+import CompetitorAnalysis from './pages/CompetitorAnalysis';
 import __Layout from './Layout.jsx';
 
 
@@ -34,6 +35,7 @@ export const PAGES = {
     "SuperAdmin": SuperAdmin,
     "Landing": Landing,
     "ReportTemplates": ReportTemplates,
+    "CompetitorAnalysis": CompetitorAnalysis,
 }
 
 export const pagesConfig = {

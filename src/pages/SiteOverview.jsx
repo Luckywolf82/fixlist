@@ -12,7 +12,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import StatCard from "@/components/dashboard/StatCard";
 import AIPrioritizedIssues from "@/components/AIPrioritizedIssues";
-import { AlertCircle, AlertTriangle, Info, ArrowLeft, Clock, FileText, Bug, ExternalLink, Play, BarChart3 } from "lucide-react";
+import { AlertCircle, AlertTriangle, Info, ArrowLeft, Clock, FileText, Bug, ExternalLink, Play, BarChart3, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 
@@ -301,8 +301,25 @@ export default function SiteOverview() {
               </div>
             </Card>
           </Link>
-        )}
-      </div>
+          )}
+
+          <Link to={createPageUrl(`CompetitorAnalysis?siteId=${siteId}`)}>
+          <Card className="p-5 hover:border-slate-300 transition-colors cursor-pointer group">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center">
+                  <TrendingUp className="w-5 h-5 text-orange-600" />
+                </div>
+                <div>
+                  <p className="font-medium text-slate-900">Competitors</p>
+                  <p className="text-sm text-slate-500">Benchmark against rivals</p>
+                </div>
+              </div>
+              <ArrowLeft className="w-5 h-5 text-slate-300 rotate-180 group-hover:text-slate-500 transition-colors" />
+            </div>
+          </Card>
+          </Link>
+          </div>
 
       {/* Recent Critical Issues */}
       {criticalCount > 0 && (
