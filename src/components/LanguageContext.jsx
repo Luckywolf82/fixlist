@@ -20,7 +20,7 @@ export const translations = {
     heroTitle2: "SEO-optimized",
     heroSubtitle: "Automatic scanning, AI prioritization, and comprehensive reports. Everything you need to maintain and improve your website's SEO health.",
     heroCtaPrimary: "Start Free Trial",
-    heroCta Secondary: "View Demo",
+    heroCtaSecondary: "View Demo",
     
     // Landing - Features
     featuresTitle: "Everything you need for SEO monitoring",
