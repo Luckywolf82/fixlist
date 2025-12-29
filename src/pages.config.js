@@ -5,6 +5,7 @@ import CrawlReport from './pages/CrawlReport';
 import Crawls from './pages/Crawls';
 import HealthReport from './pages/HealthReport';
 import Issues from './pages/Issues';
+import Landing from './pages/Landing';
 import PageDetail from './pages/PageDetail';
 import Pages from './pages/Pages';
 import ReportTemplates from './pages/ReportTemplates';
@@ -14,7 +15,6 @@ import SiteOverview from './pages/SiteOverview';
 import Sites from './pages/Sites';
 import SuperAdmin from './pages/SuperAdmin';
 import UserManagement from './pages/UserManagement';
-import Landing from './pages/Landing';
 import __Layout from './Layout.jsx';
 
 
@@ -26,6 +26,7 @@ export const PAGES = {
     "Crawls": Crawls,
     "HealthReport": HealthReport,
     "Issues": Issues,
+    "Landing": Landing,
     "PageDetail": PageDetail,
     "Pages": Pages,
     "ReportTemplates": ReportTemplates,
@@ -35,7 +36,6 @@ export const PAGES = {
     "Sites": Sites,
     "SuperAdmin": SuperAdmin,
     "UserManagement": UserManagement,
-    "Landing": Landing,
 }
 
 export const pagesConfig = {

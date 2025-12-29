@@ -8,15 +8,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Key, CheckCircle, Shield, Sparkles, Link as LinkIcon, Loader2 } from "lucide-react";
+import { Key, CheckCircle, Shield } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function Settings() {
   const { t } = useLanguage();
   const { canAccessSettings } = usePermissions();
   const [ahrefsKey, setAhrefsKey] = useState("");
-  const [ahrefsUrl, setAhrefsUrl] = useState("");
-  const [extractingInfo, setExtractingInfo] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: user, isLoading } = useQuery({
@@ -45,39 +43,6 @@ export default function Settings() {
 
   const handleSaveAhrefs = () => {
     updateKeyMutation.mutate(ahrefsKey.trim());
-  };
-
-  const handleExtractInfo = async () => {
-    if (!ahrefsUrl.trim()) {
-      toast.error("Please enter a URL");
-      return;
-    }
-
-    setExtractingInfo(true);
-    try {
-      const response = await base44.functions.invoke('extractIntegrationInfo', {
-        url: ahrefsUrl.trim(),
-        integration_type: 'ahrefs'
-      });
-
-      const data = response.data.data;
-      
-      toast.success(
-        <div>
-          <p className="font-semibold">Information extracted!</p>
-          <p className="text-xs mt-1">{data.instructions}</p>
-        </div>,
-        { duration: 6000 }
-      );
-
-      if (data.api_key_url) {
-        window.open(data.api_key_url, '_blank');
-      }
-    } catch (error) {
-      toast.error("Failed to extract information");
-    } finally {
-      setExtractingInfo(false);
-    }
   };
 
   if (!canAccessSettings) {
@@ -120,38 +85,7 @@ export default function Settings() {
             <p className="text-sm text-slate-500 mt-1 mb-4">
               {t('settingsAhrefsDesc') || 'Enter your Ahrefs API key to fetch backlinks, domain rating, and referring domains data'}
             </p>
-            <div className="space-y-4">
-              {/* AI Auto-fill */}
-              <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="w-4 h-4 text-purple-600" />
-                  <span className="text-sm font-semibold text-purple-900">AI Auto-fill</span>
-                </div>
-                <p className="text-xs text-purple-700 mb-3">
-                  Paste a link to the API documentation or settings page, and AI will guide you
-                </p>
-                <div className="flex gap-2">
-                  <Input
-                    placeholder="https://ahrefs.com/api/documentation"
-                    value={ahrefsUrl}
-                    onChange={(e) => setAhrefsUrl(e.target.value)}
-                    className="flex-1 bg-white"
-                  />
-                  <Button
-                    onClick={handleExtractInfo}
-                    disabled={extractingInfo || !ahrefsUrl.trim()}
-                    variant="outline"
-                    className="bg-white"
-                  >
-                    {extractingInfo ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <LinkIcon className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
-              </div>
-
+            <div className="space-y-3">
               <div>
                 <Label htmlFor="ahrefs-key">{t('settingsAhrefsApiKey')}</Label>
                 <Input
