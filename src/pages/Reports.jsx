@@ -19,12 +19,18 @@ export default function Reports() {
   const [generatingForSite, setGeneratingForSite] = useState(null);
   const [periodDays, setPeriodDays] = useState("30");
   const [reportLanguage, setReportLanguage] = useState("en");
+  const [selectedTemplateId, setSelectedTemplateId] = useState("");
 
   const queryClient = useQueryClient();
 
   const { data: sites = [], isLoading: sitesLoading } = useQuery({
     queryKey: ["sites"],
     queryFn: () => base44.entities.Site.list("-created_date"),
+  });
+
+  const { data: templates = [] } = useQuery({
+    queryKey: ["reportTemplates"],
+    queryFn: () => base44.entities.ReportTemplate.list(),
   });
 
   const { data: reports = [], isLoading: reportsLoading } = useQuery({
@@ -38,15 +44,21 @@ export default function Reports() {
   });
 
   const generateReportMutation = useMutation({
-    mutationFn: async ({ siteId, days, language }) => {
-      // Get default template
-      const templates = await base44.entities.ReportTemplate.filter({ is_default: true });
-      const defaultTemplate = templates[0];
+    mutationFn: async ({ siteId, days, language, templateId }) => {
+      // Use selected template or get default template
+      let template = null;
+      if (templateId) {
+        const selectedTemplates = await base44.entities.ReportTemplate.filter({ id: templateId });
+        template = selectedTemplates[0];
+      } else {
+        const defaultTemplates = await base44.entities.ReportTemplate.filter({ is_default: true });
+        template = defaultTemplates[0];
+      }
       
       const response = await base44.functions.invoke('generateEnhancedReport', { 
         site_id: siteId,
         period_days: parseInt(days),
-        template_id: defaultTemplate?.id,
+        template_id: template?.id,
         language: language
       });
       return response.data;
@@ -66,7 +78,12 @@ export default function Reports() {
 
   const handleGenerateReport = (siteId) => {
     setGeneratingForSite(siteId);
-    generateReportMutation.mutate({ siteId, days: periodDays, language: reportLanguage });
+    generateReportMutation.mutate({ 
+      siteId, 
+      days: periodDays, 
+      language: reportLanguage,
+      templateId: selectedTemplateId 
+    });
   };
 
   const getSiteName = (siteId) => {
@@ -142,6 +159,21 @@ export default function Reports() {
                 <SelectItem value="de">Deutsch</SelectItem>
                 <SelectItem value="fr">Français</SelectItem>
                 <SelectItem value="es">Español</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={selectedTemplateId} onValueChange={setSelectedTemplateId}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue placeholder="Template (optional)" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={null}>Default template</SelectItem>
+                {templates.map((template) => (
+                  <SelectItem key={template.id} value={template.id}>
+                    {template.name}
+                    {template.is_default && " ⭐"}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
 
