@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useLanguage } from "@/components/LanguageContext";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Card } from "@/components/ui/card";
@@ -13,6 +14,7 @@ import { format, parseISO } from "date-fns";
 import toast from "react-hot-toast";
 
 export default function Reports() {
+  const { t } = useLanguage();
   const [selectedSiteId, setSelectedSiteId] = useState("all");
   const [generatingForSite, setGeneratingForSite] = useState(null);
   const [periodDays, setPeriodDays] = useState("30");
@@ -87,7 +89,7 @@ export default function Reports() {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Reports</h1>
+          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t('reportsTitle')}</h1>
           <p className="text-slate-500 mt-1">Generate and download SEO reports</p>
         </div>
       </div>

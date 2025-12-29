@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { base44 } from "@/api/base44Client";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { usePermissions } from "@/components/usePermissions";
+import { useLanguage } from "@/components/LanguageContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ import { Key, CheckCircle, Shield } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function Settings() {
+  const { t } = useLanguage();
   const { canAccessSettings } = usePermissions();
   const [ahrefsKey, setAhrefsKey] = useState("");
   const queryClient = useQueryClient();
@@ -68,7 +70,7 @@ export default function Settings() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Settings</h1>
+        <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t('settingsTitle')}</h1>
         <p className="text-slate-500 mt-1">Connect your SEO tools for enhanced reporting</p>
       </div>
 

@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { usePlanLimits } from "@/components/usePlanLimits";
 import { usePermissions } from "@/components/usePermissions";
+import { useLanguage } from "@/components/LanguageContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,7 @@ import { format } from "date-fns";
 import toast from "react-hot-toast";
 
 export default function Billing() {
+  const { t } = useLanguage();
   const { isAdmin } = usePermissions();
   const { organization, plan, limits, allPlans, isTrialing, isActive, isPastDue } = usePlanLimits();
   const [loading, setLoading] = useState(null);
@@ -91,7 +93,7 @@ export default function Billing() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Billing & Subscription</h1>
+        <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t('billingTitle')}</h1>
         <p className="text-slate-500 mt-1">Manage your subscription and billing</p>
       </div>
 
