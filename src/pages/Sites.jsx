@@ -283,10 +283,10 @@ export default function Sites() {
                 )}
               </Button>
             </DialogFooter>
-            </DialogContent>
-            </Dialog>
-            )}
-            </div>
+          </DialogContent>
+        </Dialog>
+        )}
+      </div>
 
       {sites.length === 0 ? (
         <Card className="p-12 text-center">
@@ -348,20 +348,20 @@ export default function Sites() {
                         </div>
                       ) : (
                         <span className="text-slate-400 text-sm">{t('sitesScheduleDisabled')}</span>
-                        )}
-                        </TableCell>
-                        <TableCell className="hidden sm:table-cell">
-                        {stats.lastCrawl ? (
+                      )}
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                      {stats.lastCrawl ? (
                         <div className="flex items-center gap-1.5 text-slate-600">
                           <Clock className="w-4 h-4 text-slate-400" />
                           {format(new Date(stats.lastCrawl.started_at), "MMM d, yyyy")}
                         </div>
                       ) : (
                         <span className="text-slate-400">{t('sitesNever')}</span>
-                        )}
-                        </TableCell>
-                        <TableCell className="hidden lg:table-cell">
-                        <div className="flex items-center gap-2">
+                      )}
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                      <div className="flex items-center gap-2">
                         {stats.criticalCount > 0 && (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-700 text-xs font-medium">
                             <AlertCircle className="w-3 h-3" />
@@ -370,62 +370,62 @@ export default function Sites() {
                         )}
                         <span className="text-slate-600">{stats.openIssues} {t('sitesTotal')}</span>
                       </div>
-                    </TableCell>
+                      </TableCell>
                     <TableCell className="text-right">
                       <div className="flex flex-col sm:flex-row items-end sm:items-center justify-end gap-2">
                         {canManageSchedules && (
-                        <Button 
-                         variant="outline" 
-                         size="sm" 
-                         className="h-8 w-full sm:w-auto whitespace-nowrap"
-                         onClick={() => setScheduleDialogSite(site)}
-                        >
-                         <Calendar className="w-3.5 h-3.5 sm:mr-1.5" />
-                         <span className="hidden sm:inline">{t('sitesManageSchedule')}</span>
-                        </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-8 w-full sm:w-auto whitespace-nowrap"
+                            onClick={() => setScheduleDialogSite(site)}
+                          >
+                            <Calendar className="w-3.5 h-3.5 sm:mr-1.5" />
+                            <span className="hidden sm:inline">{t('sitesManageSchedule')}</span>
+                          </Button>
                         )}
                         {canStartCrawl && (
-                        <Button 
-                         variant="outline" 
-                         size="sm" 
-                         className="h-8 w-full sm:w-auto whitespace-nowrap"
-                         onClick={() => handleStartCrawl(site.id)}
-                         disabled={crawlingIds.has(site.id)}
-                        >
-                         {crawlingIds.has(site.id) ? (
-                           <Loader2 className="w-3.5 h-3.5 sm:mr-1.5 animate-spin" />
-                         ) : (
-                           <Play className="w-3.5 h-3.5 sm:mr-1.5" />
-                         )}
-                         <span className="hidden sm:inline">{crawlingIds.has(site.id) ? t('sitesStartCrawl') + '...' : t('sitesStartCrawl')}</span>
-                        </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            className="h-8 w-full sm:w-auto whitespace-nowrap"
+                            onClick={() => handleStartCrawl(site.id)}
+                            disabled={crawlingIds.has(site.id)}
+                          >
+                            {crawlingIds.has(site.id) ? (
+                              <Loader2 className="w-3.5 h-3.5 sm:mr-1.5 animate-spin" />
+                            ) : (
+                              <Play className="w-3.5 h-3.5 sm:mr-1.5" />
+                            )}
+                            <span className="hidden sm:inline">{crawlingIds.has(site.id) ? t('sitesStartCrawl') + '...' : t('sitesStartCrawl')}</span>
+                          </Button>
                         )}
                         <Link to={createPageUrl(`SiteOverview?siteId=${site.id}`)} className="w-full sm:w-auto">
-                         <Button size="sm" className="h-8 bg-slate-900 hover:bg-slate-800 w-full whitespace-nowrap">
-                           {t('sitesViewDetails')}
-                         </Button>
+                          <Button size="sm" className="h-8 bg-slate-900 hover:bg-slate-800 w-full whitespace-nowrap">
+                            {t('sitesViewDetails')}
+                          </Button>
                         </Link>
                         {canDeleteSite && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50 w-full sm:w-auto"
-                          onClick={() => handleDeleteSite(site.id)}
-                          disabled={deleteSiteMutation.isPending}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50 w-full sm:w-auto"
+                            onClick={() => handleDeleteSite(site.id)}
+                            disabled={deleteSiteMutation.isPending}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
                         )}
                       </div>
                     </TableCell>
                   </TableRow>
                 );
               })}
-            </TableBody>
-            </Table>
-            </div>
-            </Card>
-            )}
+              </TableBody>
+              </Table>
+              </div>
+              </Card>
+              )}
 
       <ScheduleCrawlDialog
         site={scheduleDialogSite}
