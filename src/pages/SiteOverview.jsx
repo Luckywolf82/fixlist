@@ -148,8 +148,8 @@ export default function SiteOverview() {
   return (
     <div className="space-y-8">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+        <div className="flex-1 min-w-0">
           <Link 
             to={createPageUrl("Sites")} 
             className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 mb-3"
@@ -175,7 +175,7 @@ export default function SiteOverview() {
           )}
         </div>
         {canStartCrawl && (
-        <div className="flex flex-col items-end gap-3">
+        <div className="flex flex-col sm:flex-row lg:flex-col items-stretch sm:items-center lg:items-end gap-3 w-full lg:w-auto">
           <div className="flex items-center gap-2">
             <Checkbox 
               id="renderJs" 
@@ -190,7 +190,7 @@ export default function SiteOverview() {
             <Button 
             onClick={handleStartCrawl}
             disabled={isCrawling}
-            className="bg-slate-900 hover:bg-slate-800"
+            className="bg-slate-900 hover:bg-slate-800 w-full sm:w-auto lg:w-full whitespace-nowrap"
             >
             {isCrawling ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
