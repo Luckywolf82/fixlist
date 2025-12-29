@@ -4,7 +4,195 @@ import { jsPDF } from 'npm:jspdf@2.5.1';
 Deno.serve(async (req) => {
   try {
     const base44 = createClientFromRequest(req);
-    const { site_id, period_days = 30, template_id } = await req.json();
+    const { site_id, period_days = 30, template_id, language = 'en' } = await req.json();
+    
+    // Translation strings
+    const translations = {
+      en: {
+        reportTitle: 'SEO Audit Report',
+        period: 'Period',
+        generated: 'Generated',
+        preparedBy: 'Prepared by',
+        executiveSummary: 'Executive Summary',
+        competitiveBenchmarking: 'Competitive Benchmarking',
+        yourSite: 'Your Site',
+        competitors: 'Competitors',
+        keyMetrics: 'Key Metrics',
+        totalPages: 'Total Pages',
+        openIssues: 'Open Issues',
+        criticalIssues: 'Critical Issues',
+        highPriority: 'High Priority',
+        mediumPriority: 'Medium Priority',
+        progressSinceLastAudit: 'Progress Since Last Audit',
+        improvements: '✓ Improvements',
+        areasNeedingAttention: '⚠ Areas Needing Attention',
+        aiRecommendations: 'AI-Powered Recommendations',
+        issueDetails: 'Issue Details',
+        fix: 'Fix',
+        url: 'URL',
+        domainRating: 'Domain Rating',
+        backlinks: 'Backlinks',
+        keywords: 'Keywords'
+      },
+      no: {
+        reportTitle: 'SEO-revisjon Rapport',
+        period: 'Periode',
+        generated: 'Generert',
+        preparedBy: 'Utarbeidet av',
+        executiveSummary: 'Sammendrag',
+        competitiveBenchmarking: 'Konkurranseanalyse',
+        yourSite: 'Ditt nettsted',
+        competitors: 'Konkurrenter',
+        keyMetrics: 'Nøkkelmetrikker',
+        totalPages: 'Totale sider',
+        openIssues: 'Åpne problemer',
+        criticalIssues: 'Kritiske problemer',
+        highPriority: 'Høy prioritet',
+        mediumPriority: 'Middels prioritet',
+        progressSinceLastAudit: 'Fremgang siden forrige revisjon',
+        improvements: '✓ Forbedringer',
+        areasNeedingAttention: '⚠ Områder som trenger oppmerksomhet',
+        aiRecommendations: 'AI-drevne anbefalinger',
+        issueDetails: 'Problemdetaljer',
+        fix: 'Fiks',
+        url: 'URL',
+        domainRating: 'Domenerangering',
+        backlinks: 'Backlinks',
+        keywords: 'Søkeord'
+      },
+      sv: {
+        reportTitle: 'SEO-revision Rapport',
+        period: 'Period',
+        generated: 'Genererad',
+        preparedBy: 'Framställd av',
+        executiveSummary: 'Sammanfattning',
+        competitiveBenchmarking: 'Konkurrensanalys',
+        yourSite: 'Din webbplats',
+        competitors: 'Konkurrenter',
+        keyMetrics: 'Nyckelmetrik',
+        totalPages: 'Totalt antal sidor',
+        openIssues: 'Öppna problem',
+        criticalIssues: 'Kritiska problem',
+        highPriority: 'Hög prioritet',
+        mediumPriority: 'Medel prioritet',
+        progressSinceLastAudit: 'Framsteg sedan senaste revision',
+        improvements: '✓ Förbättringar',
+        areasNeedingAttention: '⚠ Områden som behöver uppmärksamhet',
+        aiRecommendations: 'AI-drivna rekommendationer',
+        issueDetails: 'Problemdetaljer',
+        fix: 'Åtgärda',
+        url: 'URL',
+        domainRating: 'Domänbetyg',
+        backlinks: 'Backlinks',
+        keywords: 'Sökord'
+      },
+      da: {
+        reportTitle: 'SEO-revision Rapport',
+        period: 'Periode',
+        generated: 'Genereret',
+        preparedBy: 'Udarbejdet af',
+        executiveSummary: 'Sammendrag',
+        competitiveBenchmarking: 'Konkurrenceanalyse',
+        yourSite: 'Din hjemmeside',
+        competitors: 'Konkurrenter',
+        keyMetrics: 'Nøglemetrik',
+        totalPages: 'Totale sider',
+        openIssues: 'Åbne problemer',
+        criticalIssues: 'Kritiske problemer',
+        highPriority: 'Høj prioritet',
+        mediumPriority: 'Mellem prioritet',
+        progressSinceLastAudit: 'Fremskridt siden sidste revision',
+        improvements: '✓ Forbedringer',
+        areasNeedingAttention: '⚠ Områder der kræver opmærksomhed',
+        aiRecommendations: 'AI-drevne anbefalinger',
+        issueDetails: 'Problemdetaljer',
+        fix: 'Ret',
+        url: 'URL',
+        domainRating: 'Domænevurdering',
+        backlinks: 'Backlinks',
+        keywords: 'Søgeord'
+      },
+      de: {
+        reportTitle: 'SEO-Audit Bericht',
+        period: 'Zeitraum',
+        generated: 'Erstellt',
+        preparedBy: 'Erstellt von',
+        executiveSummary: 'Zusammenfassung',
+        competitiveBenchmarking: 'Wettbewerbsanalyse',
+        yourSite: 'Ihre Website',
+        competitors: 'Wettbewerber',
+        keyMetrics: 'Wichtige Metriken',
+        totalPages: 'Gesamte Seiten',
+        openIssues: 'Offene Probleme',
+        criticalIssues: 'Kritische Probleme',
+        highPriority: 'Hohe Priorität',
+        mediumPriority: 'Mittlere Priorität',
+        progressSinceLastAudit: 'Fortschritt seit letztem Audit',
+        improvements: '✓ Verbesserungen',
+        areasNeedingAttention: '⚠ Bereiche, die Aufmerksamkeit benötigen',
+        aiRecommendations: 'KI-gestützte Empfehlungen',
+        issueDetails: 'Problemdetails',
+        fix: 'Beheben',
+        url: 'URL',
+        domainRating: 'Domain Rating',
+        backlinks: 'Backlinks',
+        keywords: 'Schlüsselwörter'
+      },
+      fr: {
+        reportTitle: 'Rapport d\'audit SEO',
+        period: 'Période',
+        generated: 'Généré',
+        preparedBy: 'Préparé par',
+        executiveSummary: 'Résumé',
+        competitiveBenchmarking: 'Analyse concurrentielle',
+        yourSite: 'Votre site',
+        competitors: 'Concurrents',
+        keyMetrics: 'Métriques clés',
+        totalPages: 'Pages totales',
+        openIssues: 'Problèmes ouverts',
+        criticalIssues: 'Problèmes critiques',
+        highPriority: 'Haute priorité',
+        mediumPriority: 'Priorité moyenne',
+        progressSinceLastAudit: 'Progrès depuis le dernier audit',
+        improvements: '✓ Améliorations',
+        areasNeedingAttention: '⚠ Domaines nécessitant attention',
+        aiRecommendations: 'Recommandations pilotées par l\'IA',
+        issueDetails: 'Détails des problèmes',
+        fix: 'Corriger',
+        url: 'URL',
+        domainRating: 'Domain Rating',
+        backlinks: 'Backlinks',
+        keywords: 'Mots-clés'
+      },
+      es: {
+        reportTitle: 'Informe de Auditoría SEO',
+        period: 'Período',
+        generated: 'Generado',
+        preparedBy: 'Preparado por',
+        executiveSummary: 'Resumen ejecutivo',
+        competitiveBenchmarking: 'Análisis competitivo',
+        yourSite: 'Tu sitio',
+        competitors: 'Competidores',
+        keyMetrics: 'Métricas clave',
+        totalPages: 'Páginas totales',
+        openIssues: 'Problemas abiertos',
+        criticalIssues: 'Problemas críticos',
+        highPriority: 'Alta prioridad',
+        mediumPriority: 'Prioridad media',
+        progressSinceLastAudit: 'Progreso desde la última auditoría',
+        improvements: '✓ Mejoras',
+        areasNeedingAttention: '⚠ Áreas que necesitan atención',
+        aiRecommendations: 'Recomendaciones impulsadas por IA',
+        issueDetails: 'Detalles de problemas',
+        fix: 'Corregir',
+        url: 'URL',
+        domainRating: 'Domain Rating',
+        backlinks: 'Backlinks',
+        keywords: 'Palabras clave'
+      }
+    };
+    
+    const t = translations[language] || translations.en;
 
     const site = (await base44.asServiceRole.entities.Site.filter({ id: site_id }))[0];
     if (!site) {
@@ -239,7 +427,7 @@ Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", .
     // Header
     doc.setFontSize(24);
     doc.setTextColor(brandColor.r, brandColor.g, brandColor.b);
-    doc.text(`SEO Audit Report`, 20, yPos);
+    doc.text(t.reportTitle, 20, yPos);
     yPos += 8;
 
     doc.setFontSize(16);
@@ -248,13 +436,13 @@ Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", .
 
     doc.setFontSize(10);
     doc.setTextColor(100);
-    doc.text(`Period: ${periodStart.toLocaleDateString()} - ${periodEnd.toLocaleDateString()}`, 20, yPos);
+    doc.text(`${t.period}: ${periodStart.toLocaleDateString()} - ${periodEnd.toLocaleDateString()}`, 20, yPos);
     yPos += 5;
-    doc.text(`Generated: ${new Date().toLocaleString()}`, 20, yPos);
+    doc.text(`${t.generated}: ${new Date().toLocaleString()}`, 20, yPos);
     yPos += 5;
 
     if (template?.company_name) {
-      doc.text(`Prepared by: ${template.company_name}`, 20, yPos);
+      doc.text(`${t.preparedBy}: ${template.company_name}`, 20, yPos);
       yPos += 5;
     }
 
@@ -264,7 +452,7 @@ Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", .
     if (competitorMetrics.length > 0 && siteAhrefsData) {
       doc.setFontSize(16);
       doc.setTextColor(brandColor.r, brandColor.g, brandColor.b);
-      doc.text('Competitive Benchmarking', 20, yPos);
+      doc.text(t.competitiveBenchmarking, 20, yPos);
       yPos += 10;
 
       doc.setFontSize(10);
@@ -272,15 +460,15 @@ Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", .
 
       // Your site metrics
       doc.setFont(undefined, 'bold');
-      doc.text('Your Site:', 20, yPos);
+      doc.text(`${t.yourSite}:`, 20, yPos);
       yPos += 6;
       doc.setFont(undefined, 'normal');
-      doc.text(`Domain Rating: ${siteAhrefsData.domainRating}  |  Backlinks: ${siteAhrefsData.backlinks.toLocaleString()}  |  Keywords: ${siteAhrefsData.organicKeywords.toLocaleString()}`, 20, yPos);
+      doc.text(`${t.domainRating}: ${siteAhrefsData.domainRating}  |  ${t.backlinks}: ${siteAhrefsData.backlinks.toLocaleString()}  |  ${t.keywords}: ${siteAhrefsData.organicKeywords.toLocaleString()}`, 20, yPos);
       yPos += 10;
 
       // Competitors
       doc.setFont(undefined, 'bold');
-      doc.text('Competitors:', 20, yPos);
+      doc.text(`${t.competitors}:`, 20, yPos);
       yPos += 6;
       doc.setFont(undefined, 'normal');
 
@@ -309,7 +497,7 @@ Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", .
     if (template?.include_sections?.executive_summary !== false) {
       doc.setFontSize(16);
       doc.setTextColor(brandColor.r, brandColor.g, brandColor.b);
-      doc.text('Executive Summary', 20, yPos);
+      doc.text(t.executiveSummary, 20, yPos);
       yPos += 10;
 
       doc.setFontSize(11);
@@ -322,17 +510,17 @@ Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", .
     // Key Metrics
     doc.setFontSize(14);
     doc.setTextColor(brandColor.r, brandColor.g, brandColor.b);
-    doc.text('Key Metrics', 20, yPos);
+    doc.text(t.keyMetrics, 20, yPos);
     yPos += 10;
 
     doc.setFontSize(11);
     doc.setTextColor(0);
     const metrics = [
-      `Total Pages: ${pages.length}`,
-      `Open Issues: ${openIssues.length}`,
-      `Critical Issues: ${criticalIssues.length}`,
-      `High Priority: ${highIssues.length}`,
-      `Medium Priority: ${mediumIssues.length}`,
+      `${t.totalPages}: ${pages.length}`,
+      `${t.openIssues}: ${openIssues.length}`,
+      `${t.criticalIssues}: ${criticalIssues.length}`,
+      `${t.highPriority}: ${highIssues.length}`,
+      `${t.mediumPriority}: ${mediumIssues.length}`,
     ];
 
     metrics.forEach(metric => {
@@ -350,7 +538,7 @@ Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", .
 
       doc.setFontSize(14);
       doc.setTextColor(brandColor.r, brandColor.g, brandColor.b);
-      doc.text('Progress Since Last Audit', 20, yPos);
+      doc.text(t.progressSinceLastAudit, 20, yPos);
       yPos += 10;
 
       doc.setFontSize(10);
@@ -358,7 +546,7 @@ Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", .
       if (comparisonData.improvements.length > 0) {
         doc.setTextColor(0, 150, 0);
         doc.setFont(undefined, 'bold');
-        doc.text('✓ Improvements:', 20, yPos);
+        doc.text(`${t.improvements}:`, 20, yPos);
         yPos += 7;
         doc.setFont(undefined, 'normal');
 
@@ -372,7 +560,7 @@ Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", .
       if (comparisonData.regressions.length > 0) {
         doc.setTextColor(220, 38, 38);
         doc.setFont(undefined, 'bold');
-        doc.text('⚠ Areas Needing Attention:', 20, yPos);
+        doc.text(`${t.areasNeedingAttention}:`, 20, yPos);
         yPos += 7;
         doc.setFont(undefined, 'normal');
 
@@ -396,7 +584,7 @@ Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", .
 
       doc.setFontSize(14);
       doc.setTextColor(brandColor.r, brandColor.g, brandColor.b);
-      doc.text('AI-Powered Recommendations', 20, yPos);
+      doc.text(t.aiRecommendations, 20, yPos);
       yPos += 10;
 
       doc.setFontSize(10);
@@ -426,7 +614,7 @@ Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", .
 
         doc.setFontSize(14);
         doc.setTextColor(220, 38, 38);
-        doc.text('Critical Issues', 20, yPos);
+        doc.text(t.criticalIssues, 20, yPos);
         yPos += 10;
 
         doc.setFontSize(9);
@@ -470,7 +658,7 @@ Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", .
 
         doc.setFontSize(14);
         doc.setTextColor(245, 158, 11);
-        doc.text('High Priority Issues', 20, yPos);
+        doc.text(t.highPriority, 20, yPos);
         yPos += 10;
 
         doc.setFontSize(9);
@@ -514,7 +702,7 @@ Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", .
 
         doc.setFontSize(14);
         doc.setTextColor(59, 130, 246);
-        doc.text('Medium Priority Issues', 20, yPos);
+        doc.text(t.mediumPriority, 20, yPos);
         yPos += 10;
 
         doc.setFontSize(9);
