@@ -42,7 +42,7 @@ function LayoutContent({ children, currentPageName }) {
               <div className="flex items-center gap-3">
                 <LanguageSwitcher />
                 <button
-                  onClick={() => base44.auth.redirectToLogin()}
+                  onClick={() => base44.auth.redirectToLogin(createPageUrl("Sites"))}
                   className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors"
                 >
                   {t("login")}

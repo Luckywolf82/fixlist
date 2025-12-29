@@ -19,7 +19,7 @@ export function useAuth(requireOrganization = true) {
 
     // Not authenticated
     if (!user) {
-      base44.auth.redirectToLogin(window.location.pathname + window.location.search);
+      base44.auth.redirectToLogin('/Sites');
       return;
     }
 
