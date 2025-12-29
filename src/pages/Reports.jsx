@@ -95,58 +95,56 @@ export default function Reports() {
       </div>
 
       {/* Generate New Report Card */}
-      <Card className="p-6 bg-gradient-to-br from-slate-50 to-white border-slate-200">
-        <div className="flex items-start justify-between gap-6">
-          <div className="flex-1">
-            <div className="flex items-center gap-2 mb-3">
-              <Plus className="w-5 h-5 text-slate-600" />
-              <h2 className="font-semibold text-slate-900">{t('reportsGenerate')}</h2>
-            </div>
-            <p className="text-sm text-slate-600 mb-4">
-              {t('reportsGenerateDesc') || 'Create a comprehensive SEO report including issue analysis, trends, and recommendations.'}
-            </p>
-            <div className="flex items-center gap-3">
-              <Select value={selectedSiteId} onValueChange={setSelectedSiteId}>
-                <SelectTrigger className="w-64">
-                  <SelectValue placeholder={t('reportsSelectSite')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t('reportsAllSites')}</SelectItem>
-                  {sites.map(site => (
-                    <SelectItem key={site.id} value={site.id}>{site.domain}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+      <Card className="p-4 sm:p-6 bg-gradient-to-br from-slate-50 to-white border-slate-200">
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Plus className="w-5 h-5 text-slate-600" />
+            <h2 className="font-semibold text-slate-900">{t('reportsGenerate')}</h2>
+          </div>
+          <p className="text-sm text-slate-600">
+            {t('reportsGenerateDesc') || 'Create a comprehensive SEO report including issue analysis, trends, and recommendations.'}
+          </p>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <Select value={selectedSiteId} onValueChange={setSelectedSiteId}>
+              <SelectTrigger className="w-full sm:w-64">
+                <SelectValue placeholder={t('reportsSelectSite')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">{t('reportsAllSites')}</SelectItem>
+                {sites.map(site => (
+                  <SelectItem key={site.id} value={site.id}>{site.domain}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
-              <Select value={periodDays} onValueChange={setPeriodDays}>
-                <SelectTrigger className="w-40">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="7">{t('reportsLast7Days') || 'Last 7 days'}</SelectItem>
-                  <SelectItem value="30">{t('reportsLast30Days') || 'Last 30 days'}</SelectItem>
-                  <SelectItem value="90">{t('reportsLast90Days') || 'Last 90 days'}</SelectItem>
-                </SelectContent>
-              </Select>
+            <Select value={periodDays} onValueChange={setPeriodDays}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="7">{t('reportsLast7Days') || 'Last 7 days'}</SelectItem>
+                <SelectItem value="30">{t('reportsLast30Days') || 'Last 30 days'}</SelectItem>
+                <SelectItem value="90">{t('reportsLast90Days') || 'Last 90 days'}</SelectItem>
+              </SelectContent>
+            </Select>
 
-              <Button
-                onClick={() => handleGenerateReport(selectedSiteId !== "all" ? selectedSiteId : sites[0]?.id)}
-                disabled={generatingForSite !== null || sites.length === 0}
-                className="bg-slate-900 hover:bg-slate-800"
-              >
-                {generatingForSite ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {t('reportsGenerating')}
-                  </>
-                ) : (
-                  <>
-                    <FileText className="w-4 h-4 mr-2" />
-                    {t('reportsGenerate')}
-                  </>
-                )}
-              </Button>
-            </div>
+            <Button
+              onClick={() => handleGenerateReport(selectedSiteId !== "all" ? selectedSiteId : sites[0]?.id)}
+              disabled={generatingForSite !== null || sites.length === 0}
+              className="bg-slate-900 hover:bg-slate-800 w-full sm:w-auto whitespace-nowrap"
+            >
+              {generatingForSite ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {t('reportsGenerating')}
+                </>
+              ) : (
+                <>
+                  <FileText className="w-4 h-4 mr-2" />
+                  {t('reportsGenerate')}
+                </>
+              )}
+            </Button>
           </div>
         </div>
       </Card>
@@ -165,14 +163,15 @@ export default function Reports() {
           </Card>
         ) : (
           <Card className="overflow-hidden border-slate-200">
-            <Table>
+            <div className="overflow-x-auto">
+              <Table>
               <TableHeader>
                 <TableRow className="bg-slate-50/50">
-                  <TableHead className="font-semibold text-slate-700">{t('reportsReport') || 'Report'}</TableHead>
-                  <TableHead className="font-semibold text-slate-700">{t('reportsSite')}</TableHead>
-                  <TableHead className="font-semibold text-slate-700">{t('reportsPeriod')}</TableHead>
-                  <TableHead className="font-semibold text-slate-700">{t('reportsSummary')}</TableHead>
-                  <TableHead className="font-semibold text-slate-700 w-[120px]"></TableHead>
+                  <TableHead className="font-semibold text-slate-700 min-w-[200px]">{t('reportsReport') || 'Report'}</TableHead>
+                  <TableHead className="font-semibold text-slate-700 min-w-[150px]">{t('reportsSite')}</TableHead>
+                  <TableHead className="font-semibold text-slate-700 min-w-[180px]">{t('reportsPeriod')}</TableHead>
+                  <TableHead className="font-semibold text-slate-700 min-w-[200px]">{t('reportsSummary')}</TableHead>
+                  <TableHead className="font-semibold text-slate-700 min-w-[120px]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -249,6 +248,7 @@ export default function Reports() {
                 ))}
               </TableBody>
             </Table>
+            </div>
           </Card>
         )}
       </div>

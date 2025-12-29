@@ -213,14 +213,14 @@ export default function Analytics() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
+      <div className="space-y-4">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t('analyticsTitle')}</h1>
           <p className="text-slate-500 mt-1">{t('analyticsSubtitle')}</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <Select value={selectedSiteId} onValueChange={setSelectedSiteId}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-full sm:w-48">
               <SelectValue placeholder="All sites" />
             </SelectTrigger>
             <SelectContent>
@@ -231,7 +231,7 @@ export default function Analytics() {
             </SelectContent>
           </Select>
           <Select value={dateRange} onValueChange={setDateRange}>
-            <SelectTrigger className="w-32">
+            <SelectTrigger className="w-full sm:w-48">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

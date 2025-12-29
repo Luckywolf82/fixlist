@@ -108,28 +108,28 @@ function LandingContent() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32">
+      <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-32">
           <div className="text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-sm mb-6">
               <Zap className="w-4 h-4 text-yellow-400" />
               <span>{t("heroPreline")}</span>
             </div>
-            <h1 className="text-4xl lg:text-6xl font-bold tracking-tight mb-6">
+            <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold tracking-tight mb-6 px-2">
               {t("heroTitle1")}<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
                 {t("heroTitle2")}
               </span>
             </h1>
-            <p className="text-xl text-slate-300 max-w-3xl mx-auto mb-10">
+            <p className="text-lg sm:text-xl text-slate-300 max-w-3xl mx-auto mb-10 px-4">
               {t("heroSubtitle")}
             </p>
-            <div className="flex items-center justify-center gap-4">
-              <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 text-lg px-8">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-4">
+              <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto whitespace-nowrap">
                 {t("heroCtaPrimary")}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
-              <Button size="lg" variant="outline" className="text-white border-white hover:bg-white/10 text-lg px-8">
+              <Button size="lg" variant="outline" className="text-white border-white hover:bg-white/10 text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto whitespace-nowrap">
                 {t("heroCtaSecondary")}
               </Button>
             </div>
@@ -270,15 +270,15 @@ function LandingContent() {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white py-20">
+      <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white py-16 sm:py-20 overflow-hidden">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-6">
+          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-6">
             {t("ctaTitle")}
           </h2>
-          <p className="text-xl text-slate-300 mb-10">
+          <p className="text-lg sm:text-xl text-slate-300 mb-10">
             {t("ctaSubtitle")}
           </p>
-          <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 text-lg px-8">
+          <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 text-base sm:text-lg px-6 sm:px-8 w-full sm:w-auto whitespace-nowrap">
             {t("ctaButton")}
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
