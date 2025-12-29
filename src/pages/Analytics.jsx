@@ -224,7 +224,7 @@ export default function Analytics() {
               <SelectValue placeholder="All sites" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All sites</SelectItem>
+              <SelectItem value="all">{t('analyticsAllSites')}</SelectItem>
               {sites.map(site => (
                 <SelectItem key={site.id} value={site.id}>{site.domain}</SelectItem>
               ))}
@@ -235,10 +235,10 @@ export default function Analytics() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="7">Last 7 days</SelectItem>
-              <SelectItem value="30">Last 30 days</SelectItem>
-              <SelectItem value="90">Last 90 days</SelectItem>
-              <SelectItem value="all">All time</SelectItem>
+              <SelectItem value="7">{t('analyticsLast7Days')}</SelectItem>
+              <SelectItem value="30">{t('analyticsLast30Days')}</SelectItem>
+              <SelectItem value="90">{t('analyticsLast90Days')}</SelectItem>
+              <SelectItem value="all">{t('analyticsAllTime')}</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -254,23 +254,23 @@ export default function Analytics() {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <Link2 className="w-4 h-4 text-orange-600" />
-                    <p className="text-sm text-slate-600">Domain Rating</p>
+                    <p className="text-sm text-slate-600">{t('analyticsDomainRating')}</p>
                   </div>
-                  <Badge variant="outline" className="text-xs">Ahrefs</Badge>
+                  <Badge variant="outline" className="text-xs">{t('analyticsAhrefs')}</Badge>
                 </div>
                 <p className="text-2xl font-bold text-slate-900">{ahrefsData.domainRating}</p>
-                <p className="text-xs text-slate-500 mt-1">out of 100</p>
+                <p className="text-xs text-slate-500 mt-1">{t('analyticsOutOf100')}</p>
               </Card>
               <Card className="p-5">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <Link2 className="w-4 h-4 text-orange-600" />
-                    <p className="text-sm text-slate-600">Backlinks</p>
+                    <p className="text-sm text-slate-600">{t('analyticsBacklinks')}</p>
                   </div>
-                  <Badge variant="outline" className="text-xs">Ahrefs</Badge>
+                  <Badge variant="outline" className="text-xs">{t('analyticsAhrefs')}</Badge>
                 </div>
                 <p className="text-2xl font-bold text-slate-900">{ahrefsData.backlinks.toLocaleString()}</p>
-                <p className="text-xs text-slate-500 mt-1">{ahrefsData.referringDomains.toLocaleString()} domains</p>
+                <p className="text-xs text-slate-500 mt-1">{ahrefsData.referringDomains.toLocaleString()} {t('analyticsDomains')}</p>
               </Card>
             </>
           )}
@@ -282,9 +282,9 @@ export default function Analytics() {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <MousePointerClick className="w-4 h-4 text-blue-600" />
-                    <p className="text-sm text-slate-600">Total Clicks</p>
+                    <p className="text-sm text-slate-600">{t('analyticsTotalClicks')}</p>
                   </div>
-                  <Badge variant="outline" className="text-xs">GSC</Badge>
+                  <Badge variant="outline" className="text-xs">{t('analyticsGSC')}</Badge>
                 </div>
                 <p className="text-2xl font-bold text-slate-900">{gscData.totals.clicks.toLocaleString()}</p>
                 <p className="text-xs text-slate-500 mt-1">CTR: {gscData.totals.avgCTR}%</p>
@@ -293,9 +293,9 @@ export default function Analytics() {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <Search className="w-4 h-4 text-blue-600" />
-                    <p className="text-sm text-slate-600">Impressions</p>
+                    <p className="text-sm text-slate-600">{t('analyticsImpressions')}</p>
                   </div>
-                  <Badge variant="outline" className="text-xs">GSC</Badge>
+                  <Badge variant="outline" className="text-xs">{t('analyticsGSC')}</Badge>
                 </div>
                 <p className="text-2xl font-bold text-slate-900">{gscData.totals.impressions.toLocaleString()}</p>
                 <p className="text-xs text-slate-500 mt-1">Avg pos: {gscData.totals.avgPosition}</p>
@@ -310,8 +310,8 @@ export default function Analytics() {
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-5 h-5 text-blue-600" />
-            <h2 className="font-semibold text-slate-900">Organic Traffic Trends</h2>
-            <Badge variant="outline" className="text-xs ml-auto">Google Search Console</Badge>
+            <h2 className="font-semibold text-slate-900">{t('analyticsOrganicTrends')}</h2>
+            <Badge variant="outline" className="text-xs ml-auto">{t('analyticsGoogleSearchConsole')}</Badge>
           </div>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={gscData.dailyData}>
@@ -333,8 +333,8 @@ export default function Analytics() {
                 labelStyle={{ color: "#0f172a", fontWeight: 600 }}
               />
               <Legend />
-              <Area type="monotone" dataKey="clicks" stroke="#3b82f6" fillOpacity={1} fill="url(#colorClicks)" name="Clicks" />
-              <Area type="monotone" dataKey="impressions" stroke="#10b981" fillOpacity={1} fill="url(#colorImpressions)" name="Impressions" />
+              <Area type="monotone" dataKey="clicks" stroke="#3b82f6" fillOpacity={1} fill="url(#colorClicks)" name={t('analyticsClicks')} />
+              <Area type="monotone" dataKey="impressions" stroke="#10b981" fillOpacity={1} fill="url(#colorImpressions)" name={t('analyticsImpressions')} />
             </AreaChart>
           </ResponsiveContainer>
         </Card>
@@ -345,7 +345,7 @@ export default function Analytics() {
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-4">
             <AlertTriangle className="w-5 h-5 text-red-600" />
-            <h2 className="font-semibold text-slate-900">Issues Trend Over Time</h2>
+            <h2 className="font-semibold text-slate-900">{t('analyticsIssuesTrend')}</h2>
           </div>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={issuesOverTime}>
@@ -367,9 +367,9 @@ export default function Analytics() {
                 labelStyle={{ color: "#0f172a", fontWeight: 600 }}
               />
               <Legend />
-              <Area type="monotone" dataKey="critical" stackId="1" stroke="#ef4444" fillOpacity={1} fill="url(#colorCritical)" name="Critical" />
-              <Area type="monotone" dataKey="high" stackId="1" stroke="#f97316" fillOpacity={1} fill="url(#colorHigh)" name="High" />
-              <Area type="monotone" dataKey="medium" stackId="1" stroke="#eab308" fillOpacity={0.6} fill="#eab308" name="Medium" />
+              <Area type="monotone" dataKey="critical" stackId="1" stroke="#ef4444" fillOpacity={1} fill="url(#colorCritical)" name={t('issuesCritical')} />
+              <Area type="monotone" dataKey="high" stackId="1" stroke="#f97316" fillOpacity={1} fill="url(#colorHigh)" name={t('issuesHigh')} />
+              <Area type="monotone" dataKey="medium" stackId="1" stroke="#eab308" fillOpacity={0.6} fill="#eab308" name={t('issuesMedium')} />
             </AreaChart>
           </ResponsiveContainer>
         </Card>
@@ -379,11 +379,11 @@ export default function Analytics() {
       <Card className="p-6">
         <div className="flex items-center gap-2 mb-4">
           <TrendingUp className="w-5 h-5 text-slate-600" />
-          <h2 className="font-semibold text-slate-900">Crawl Activity Over Time</h2>
+          <h2 className="font-semibold text-slate-900">{t('analyticsCrawlActivity')}</h2>
         </div>
         {crawlsOverTime.length === 0 ? (
           <div className="h-64 flex items-center justify-center text-slate-400">
-            No crawl data available
+            {t('analyticsNoCrawlData')}
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
@@ -396,8 +396,8 @@ export default function Analytics() {
                 labelStyle={{ color: "#0f172a", fontWeight: 600 }}
               />
               <Legend />
-              <Line type="monotone" dataKey="crawls" stroke="#3b82f6" strokeWidth={2} name="Crawls" />
-              <Line type="monotone" dataKey="pages" stroke="#10b981" strokeWidth={2} name="Pages Crawled" />
+              <Line type="monotone" dataKey="crawls" stroke="#3b82f6" strokeWidth={2} name={t('siteOverviewCrawls')} />
+              <Line type="monotone" dataKey="pages" stroke="#10b981" strokeWidth={2} name={t('siteOverviewPagesCrawled')} />
             </LineChart>
           </ResponsiveContainer>
         )}
@@ -408,11 +408,11 @@ export default function Analytics() {
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-4">
             <PieChartIcon className="w-5 h-5 text-slate-600" />
-            <h2 className="font-semibold text-slate-900">Issue Severity Distribution</h2>
+            <h2 className="font-semibold text-slate-900">{t('analyticsIssueSeverity')}</h2>
           </div>
           {issueDistribution.length === 0 ? (
             <div className="h-64 flex items-center justify-center text-slate-400">
-              No issues found
+              {t('analyticsNoIssuesFound')}
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={300}>
@@ -441,11 +441,11 @@ export default function Analytics() {
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-4">
             <BarChart3 className="w-5 h-5 text-slate-600" />
-            <h2 className="font-semibold text-slate-900">Top Issue Types</h2>
+            <h2 className="font-semibold text-slate-900">{t('analyticsTopIssueTypes')}</h2>
           </div>
           {issueTypes.length === 0 ? (
             <div className="h-64 flex items-center justify-center text-slate-400">
-              No issues found
+              {t('analyticsNoIssuesFound')}
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={300}>
@@ -456,7 +456,7 @@ export default function Analytics() {
                 <Tooltip 
                   contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: "8px" }}
                 />
-                <Bar dataKey="value" fill="#f59e0b" name="Count" />
+                <Bar dataKey="value" fill="#f59e0b" name={t('analyticsCount')} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -466,11 +466,11 @@ export default function Analytics() {
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-4">
             <BarChart3 className="w-5 h-5 text-slate-600" />
-            <h2 className="font-semibold text-slate-900">HTTP Status Codes</h2>
+            <h2 className="font-semibold text-slate-900">{t('analyticsHttpCodes')}</h2>
           </div>
           {statusCodes.length === 0 ? (
             <div className="h-64 flex items-center justify-center text-slate-400">
-              No page data available
+              {t('analyticsNoPageData')}
             </div>
           ) : (
             <ResponsiveContainer width="100%" height={300}>
@@ -481,7 +481,7 @@ export default function Analytics() {
                 <Tooltip 
                   contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: "8px" }}
                 />
-                <Bar dataKey="value" fill="#6366f1" name="Pages" />
+                <Bar dataKey="value" fill="#6366f1" name={t('analyticsPages')} />
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -492,7 +492,7 @@ export default function Analytics() {
           <Card className="p-6">
             <div className="flex items-center gap-2 mb-4">
               <Calendar className="w-5 h-5 text-slate-600" />
-              <h2 className="font-semibold text-slate-900">Site Comparison</h2>
+              <h2 className="font-semibold text-slate-900">{t('analyticsSiteComparison')}</h2>
             </div>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={siteComparison}>
@@ -503,8 +503,8 @@ export default function Analytics() {
                   contentStyle={{ backgroundColor: "#fff", border: "1px solid #e2e8f0", borderRadius: "8px" }}
                 />
                 <Legend />
-                <Bar dataKey="issues" fill="#ef4444" name="Total Issues" />
-                <Bar dataKey="critical" fill="#991b1b" name="Critical Issues" />
+                <Bar dataKey="issues" fill="#ef4444" name={t('analyticsTotalIssues')} />
+                <Bar dataKey="critical" fill="#991b1b" name={t('analyticsCriticalIssues')} />
               </BarChart>
             </ResponsiveContainer>
           </Card>
@@ -516,18 +516,18 @@ export default function Analytics() {
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-4">
             <Search className="w-5 h-5 text-blue-600" />
-            <h2 className="font-semibold text-slate-900">Top Search Queries</h2>
-            <Badge variant="outline" className="text-xs ml-auto">Google Search Console</Badge>
+            <h2 className="font-semibold text-slate-900">{t('analyticsTopQueries')}</h2>
+            <Badge variant="outline" className="text-xs ml-auto">{t('analyticsGoogleSearchConsole')}</Badge>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="border-b border-slate-200">
                 <tr>
-                  <th className="text-left text-sm font-semibold text-slate-700 pb-3">Query</th>
-                  <th className="text-right text-sm font-semibold text-slate-700 pb-3">Clicks</th>
-                  <th className="text-right text-sm font-semibold text-slate-700 pb-3">Impressions</th>
-                  <th className="text-right text-sm font-semibold text-slate-700 pb-3">CTR</th>
-                  <th className="text-right text-sm font-semibold text-slate-700 pb-3">Position</th>
+                  <th className="text-left text-sm font-semibold text-slate-700 pb-3">{t('analyticsQuery')}</th>
+                  <th className="text-right text-sm font-semibold text-slate-700 pb-3">{t('analyticsClicks')}</th>
+                  <th className="text-right text-sm font-semibold text-slate-700 pb-3">{t('analyticsImpressions')}</th>
+                  <th className="text-right text-sm font-semibold text-slate-700 pb-3">{t('analyticsCTR')}</th>
+                  <th className="text-right text-sm font-semibold text-slate-700 pb-3">{t('analyticsPosition')}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -551,8 +551,8 @@ export default function Analytics() {
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-4">
             <ArrowUp className="w-5 h-5 text-orange-600" />
-            <h2 className="font-semibold text-slate-900">Top Performing Pages</h2>
-            <Badge variant="outline" className="text-xs ml-auto">Ahrefs</Badge>
+            <h2 className="font-semibold text-slate-900">{t('analyticsTopPages')}</h2>
+            <Badge variant="outline" className="text-xs ml-auto">{t('analyticsAhrefs')}</Badge>
           </div>
           <div className="space-y-3">
             {ahrefsData.topPages.map((page, idx) => (
@@ -560,9 +560,9 @@ export default function Analytics() {
                 <div className="flex-1 min-w-0 mr-4">
                   <p className="text-sm font-medium text-slate-900 truncate">{page.url}</p>
                   <div className="flex items-center gap-3 mt-1 text-xs text-slate-600">
-                    <span>Traffic: {page.traffic.toLocaleString()}/mo</span>
+                    <span>{t('analyticsTraffic')}: {page.traffic.toLocaleString()}/mo</span>
                     <span>•</span>
-                    <span>Keywords: {page.keywords}</span>
+                    <span>{t('analyticsKeywords')}: {page.keywords}</span>
                   </div>
                 </div>
                 <div className="w-8 h-8 bg-slate-900 text-white rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0">

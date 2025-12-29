@@ -69,7 +69,7 @@ export default function Reports() {
 
   const getSiteName = (siteId) => {
     const site = sites.find(s => s.id === siteId);
-    return site?.domain || "Unknown Site";
+    return site?.domain || t('reportsUnknownSite');
   };
 
   if (sitesLoading || reportsLoading) {
@@ -217,7 +217,7 @@ export default function Reports() {
                         {report.ai_summary && (
                           <div className="flex items-center gap-1 text-purple-600">
                             <Sparkles className="w-3.5 h-3.5" />
-                            <span className="text-xs">AI Insights</span>
+                            <span className="text-xs">{t('reportsAiInsights')}</span>
                           </div>
                         )}
                         {report.comparison_data && (
@@ -227,7 +227,7 @@ export default function Reports() {
                             ) : report.comparison_data.regressions?.length > 0 ? (
                               <TrendingDown className="w-3.5 h-3.5 text-red-600" />
                             ) : null}
-                            <span className="text-xs text-slate-500">vs previous</span>
+                            <span className="text-xs text-slate-500">{t('reportsVsPrevious')}</span>
                           </div>
                         )}
                       </div>

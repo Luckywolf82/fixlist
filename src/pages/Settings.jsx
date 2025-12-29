@@ -97,7 +97,7 @@ export default function Settings() {
                   className="mt-1"
                 />
                 <p className="text-xs text-slate-500 mt-1">
-                  Get your API key from <a href="https://ahrefs.com/api" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">ahrefs.com/api</a>
+                  {t('settingsGetApiKey')} <a href="https://ahrefs.com/api" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">ahrefs.com/api</a>
                 </p>
               </div>
               <Button
@@ -118,19 +118,19 @@ export default function Settings() {
         <ul className="space-y-2 text-sm text-slate-600">
           <li className="flex items-start gap-2">
             <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-            <span>Monitor your backlink profile, domain rating, and referring domains</span>
+            <span>{t('settingsAhrefsBenefit1')}</span>
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-            <span>Track organic keywords and estimated organic traffic</span>
+            <span>{t('settingsAhrefsBenefit2')}</span>
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-            <span>See top-performing pages and their keyword rankings</span>
+            <span>{t('settingsAhrefsBenefit3')}</span>
           </li>
           <li className="flex items-start gap-2">
             <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />
-            <span>Your API key is securely stored and only accessible by you</span>
+            <span>{t('settingsAhrefsBenefit4')}</span>
           </li>
         </ul>
       </Card>

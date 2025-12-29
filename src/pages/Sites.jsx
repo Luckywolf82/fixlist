@@ -97,7 +97,7 @@ export default function Sites() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["sites"] });
       setScheduleDialogSite(null);
-      toast.success("Schedule updated");
+      toast.success(t('sitesScheduleUpdated'));
     },
   });
 
@@ -154,7 +154,7 @@ export default function Sites() {
 
   const handleStartCrawl = (siteId) => {
     if (!canCrawl()) {
-      toast.error('Crawl limit reached. Please upgrade your plan.');
+      toast.error(t('sitesCrawlLimitReached'));
       return;
     }
     setCrawlingIds(prev => new Set(prev).add(siteId));
@@ -173,7 +173,7 @@ export default function Sites() {
   };
 
   const handleDeleteSite = (siteId) => {
-    if (confirm('Are you sure you want to delete this site? All crawls, pages, and issues will be lost.')) {
+    if (confirm(t('sitesDeleteConfirm'))) {
       deleteSiteMutation.mutate(siteId);
     }
   };
@@ -239,7 +239,7 @@ export default function Sites() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t('sitesTitle')}</h1>
-          <p className="text-slate-500 mt-1">Manage and monitor your websites</p>
+          <p className="text-slate-500 mt-1">{t('sitesSubtitle')}</p>
         </div>
         {canAddSite && (
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -276,7 +276,7 @@ export default function Sites() {
                 {addSiteMutation.isPending ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Adding...
+                    {t('sitesAdding')}
                   </>
                 ) : (
                   t('sitesAdd')
@@ -326,7 +326,7 @@ export default function Sites() {
                             rel="noopener noreferrer"
                             className="text-xs text-slate-400 hover:text-slate-600 flex items-center gap-1"
                           >
-                            Visit site <ExternalLink className="w-3 h-3" />
+                            {t('sitesVisitSite')} <ExternalLink className="w-3 h-3" />
                           </a>
                         </div>
                       </div>
@@ -356,7 +356,7 @@ export default function Sites() {
                           {format(new Date(stats.lastCrawl.started_at), "MMM d, yyyy")}
                         </div>
                       ) : (
-                        <span className="text-slate-400">Never</span>
+                        <span className="text-slate-400">{t('sitesNever')}</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -364,10 +364,10 @@ export default function Sites() {
                         {stats.criticalCount > 0 && (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-50 text-red-700 text-xs font-medium">
                             <AlertCircle className="w-3 h-3" />
-                            {stats.criticalCount} critical
+                            {stats.criticalCount} {t('sitesCritical')}
                           </span>
                         )}
-                        <span className="text-slate-600">{stats.openIssues} total</span>
+                        <span className="text-slate-600">{stats.openIssues} {t('sitesTotal')}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
