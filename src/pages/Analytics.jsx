@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/components/useAuth";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -10,6 +11,7 @@ import { TrendingUp, PieChart as PieChartIcon, BarChart3, Calendar, Link2, Searc
 import { format, parseISO, subDays, isAfter } from "date-fns";
 
 export default function Analytics() {
+  useAuth();
   const [selectedSiteId, setSelectedSiteId] = useState("all");
   const [dateRange, setDateRange] = useState("30");
 

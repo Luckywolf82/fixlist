@@ -1,6 +1,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/components/useAuth";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Card } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, ExternalLink, FileText, Bug, AlertCircle, CheckCircle } from "lucide-react";
 
 export default function Pages() {
+  useAuth();
   const urlParams = new URLSearchParams(window.location.search);
   const siteId = urlParams.get("siteId");
 

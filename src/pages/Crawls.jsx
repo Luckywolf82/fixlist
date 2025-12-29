@@ -1,6 +1,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/components/useAuth";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Card } from "@/components/ui/card";
@@ -12,6 +13,7 @@ import { ArrowLeft, Clock, FileText, Bug, ExternalLink } from "lucide-react";
 import { format, formatDistanceToNow } from "date-fns";
 
 export default function Crawls() {
+  useAuth();
   const urlParams = new URLSearchParams(window.location.search);
   const siteId = urlParams.get("siteId");
 
