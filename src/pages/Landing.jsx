@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { useLanguage } from "@/components/LanguageContext";
+import { LanguageProvider, useLanguage } from "@/components/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -307,5 +307,9 @@ function LandingContent() {
 }
 
 export default function Landing() {
-  return <LandingContent />;
+  return (
+    <LanguageProvider>
+      <LandingContent />
+    </LanguageProvider>
+  );
 }
