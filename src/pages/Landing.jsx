@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
-import { useLanguage } from "@/components/LanguageContext";
+import { LanguageProvider, useLanguage } from "@/components/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,7 +23,7 @@ import {
   Briefcase
 } from "lucide-react";
 
-export default function Landing() {
+function LandingContent() {
   const { t } = useLanguage();
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products"],
@@ -33,38 +33,38 @@ export default function Landing() {
   const features = [
     {
       icon: Search,
-      title: "Automatisk Nettstedskanning",
-      description: "Crawler alle sidene på nettstedet ditt og identifiserer SEO-problemer automatisk",
+      title: t("feature1Title"),
+      description: t("feature1Desc"),
       color: "blue"
     },
     {
       icon: AlertTriangle,
-      title: "Prioriterte Problemer",
-      description: "AI-drevet analyse som rangerer problemer etter viktighet og påvirkning",
+      title: t("feature2Title"),
+      description: t("feature2Desc"),
       color: "red"
     },
     {
       icon: BarChart3,
-      title: "Performance Metrics",
-      description: "Overvåk Core Web Vitals, sidetid, og andre viktige ytelsesmetrikker",
+      title: t("feature3Title"),
+      description: t("feature3Desc"),
       color: "purple"
     },
     {
       icon: FileText,
-      title: "Automatiske Rapporter",
-      description: "Planlegg ukentlige eller månedlige PDF-rapporter til kunder",
+      title: t("feature4Title"),
+      description: t("feature4Desc"),
       color: "green"
     },
     {
       icon: Clock,
-      title: "Planlagte Crawls",
-      description: "Automatisk overvåking av nettsted-endringer og nye problemer",
+      title: t("feature5Title"),
+      description: t("feature5Desc"),
       color: "orange"
     },
     {
       icon: Users,
-      title: "Team Management",
-      description: "Administrer tilganger for teamet ditt med roller og tillatelser",
+      title: t("feature6Title"),
+      description: t("feature6Desc"),
       color: "indigo"
     }
   ];
@@ -72,27 +72,27 @@ export default function Landing() {
   const useCases = [
     {
       icon: Building2,
-      title: "For Bedrifter",
-      description: "Perfekt for bedrifter som vil ha full kontroll over sin SEO-helse",
+      title: t("useCase1Title"),
+      description: t("useCase1Desc"),
       benefits: [
-        "Identifiser og fiks SEO-problemer før de påvirker rangeringer",
-        "Overvåk konkurransedyktige metrics som backlinks og domain rating",
-        "Få AI-drevne anbefalinger for forbedringer",
-        "Eksporter data for dypere analyse"
+        t("useCase1Benefit1"),
+        t("useCase1Benefit2"),
+        t("useCase1Benefit3"),
+        t("useCase1Benefit4")
       ],
-      cta: "Start Gratis Prøveperiode"
+      cta: t("useCase1Cta")
     },
     {
       icon: Briefcase,
-      title: "For Byråer & Konsulenter",
-      description: "Perfekt for de som leverer SEO-tjenester til flere kunder",
+      title: t("useCase2Title"),
+      description: t("useCase2Desc"),
       benefits: [
-        "White-label rapporter med din egen branding",
-        "Håndter flere kunders nettsteder fra én konto",
-        "Automatiser repeterende SEO-oppgaver",
-        "Vis verdien av dine tjenester med detaljerte rapporter"
+        t("useCase2Benefit1"),
+        t("useCase2Benefit2"),
+        t("useCase2Benefit3"),
+        t("useCase2Benefit4")
       ],
-      cta: "Utforsk Enterprise"
+      cta: t("useCase2Cta")
     }
   ];
 
@@ -113,25 +113,24 @@ export default function Landing() {
           <div className="text-center">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 rounded-full text-sm mb-6">
               <Zap className="w-4 h-4 text-yellow-400" />
-              <span>AI-drevet SEO-analyse for moderne nettsteder</span>
+              <span>{t("heroPreline")}</span>
             </div>
             <h1 className="text-4xl lg:text-6xl font-bold tracking-tight mb-6">
-              Hold nettstedet ditt<br />
+              {t("heroTitle1")}<br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
-                SEO-optimalisert
+                {t("heroTitle2")}
               </span>
             </h1>
             <p className="text-xl text-slate-300 max-w-3xl mx-auto mb-10">
-              Automatisk skanning, AI-prioritering og omfattende rapporter. 
-              Alt du trenger for å opprettholde og forbedre SEO-helsen til nettsidene dine.
+              {t("heroSubtitle")}
             </p>
             <div className="flex items-center justify-center gap-4">
               <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 text-lg px-8">
-                Start Gratis Prøveperiode
+                {t("heroCtaPrimary")}
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
               <Button size="lg" variant="outline" className="text-white border-white hover:bg-white/10 text-lg px-8">
-                Se Demo
+                {t("heroCtaSecondary")}
               </Button>
             </div>
           </div>
@@ -142,10 +141,10 @@ export default function Landing() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
-            Alt du trenger for SEO-overvåking
+            {t("featuresTitle")}
           </h2>
           <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Fra automatisk skanning til detaljerte rapporter - vi har alle verktøyene du trenger
+            {t("featuresSubtitle")}
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -166,10 +165,10 @@ export default function Landing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
-              Perfekt for alle som arbeider med SEO
+              {t("useCasesTitle")}
             </h2>
             <p className="text-lg text-slate-600">
-              Uansett om du administrerer ditt eget nettsted eller leverer tjenester til kunder
+              {t("useCasesSubtitle")}
             </p>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -205,10 +204,10 @@ export default function Landing() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
         <div className="text-center mb-16">
           <h2 className="text-3xl lg:text-4xl font-bold text-slate-900 mb-4">
-            Velg planen som passer deg
+            {t("pricingTitle")}
           </h2>
           <p className="text-lg text-slate-600">
-            Alle planer inkluderer 14 dagers gratis prøveperiode. Ingen kredittkort nødvendig.
+            {t("pricingSubtitle")}
           </p>
         </div>
         
@@ -229,7 +228,7 @@ export default function Landing() {
                 >
                   {isPremium && (
                     <Badge className="absolute top-4 right-4 bg-purple-100 text-purple-700">
-                      Populær
+                      {t("pricingPopular")}
                     </Badge>
                   )}
                   
@@ -237,18 +236,18 @@ export default function Landing() {
                     <h3 className="text-xl font-bold text-slate-900 mb-2">{product.name}</h3>
                     <div className="mt-2">
                       <span className="text-3xl font-bold text-slate-900">${product.price}</span>
-                      <span className="text-slate-500 ml-1">/måned</span>
+                      <span className="text-slate-500 ml-1">{t("pricingPerMonth")}</span>
                     </div>
                   </div>
 
                   <div className="space-y-2 mb-6">
                     <p className="text-sm text-slate-600 flex items-center gap-2">
                       <Check className="w-4 h-4 text-green-600" />
-                      {product.max_sites === -1 ? 'Ubegrensede' : product.max_sites} nettsteder
+                      {product.max_sites === -1 ? t("pricingUnlimited") : product.max_sites} {t("pricingSites")}
                     </p>
                     <p className="text-sm text-slate-600 flex items-center gap-2">
                       <Check className="w-4 h-4 text-green-600" />
-                      {product.max_crawls_per_month === -1 ? 'Ubegrensede' : product.max_crawls_per_month} crawls/måned
+                      {product.max_crawls_per_month === -1 ? t("pricingUnlimited") : product.max_crawls_per_month} {t("pricingCrawls")}
                     </p>
                     {product.features && product.features.length > 0 && product.features.map((feature, idx) => (
                       <p key={idx} className="text-sm text-slate-600 flex items-center gap-2">
@@ -261,7 +260,7 @@ export default function Landing() {
                   <Button
                     className={`w-full ${isPremium ? 'bg-purple-600 hover:bg-purple-700' : 'bg-slate-900 hover:bg-slate-800'}`}
                   >
-                    {product.price === 0 ? "Kom i gang" : "Velg plan"}
+                    {product.price === 0 ? t("pricingCtaFree") : t("pricingCtaPaid")}
                   </Button>
                 </Card>
               );
@@ -274,17 +273,17 @@ export default function Landing() {
       <div className="bg-gradient-to-br from-slate-900 to-slate-800 text-white py-20">
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl lg:text-4xl font-bold mb-6">
-            Klar til å optimalisere nettstedet ditt?
+            {t("ctaTitle")}
           </h2>
           <p className="text-xl text-slate-300 mb-10">
-            Bli med tusenvis av bedrifter og byråer som bruker Fixlist for å holde nettstedene sine SEO-optimaliserte.
+            {t("ctaSubtitle")}
           </p>
           <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 text-lg px-8">
-            Start Gratis Prøveperiode i dag
+            {t("ctaButton")}
             <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
           <p className="text-sm text-slate-400 mt-4">
-            Ingen kredittkort nødvendig • 14 dagers gratis prøveperiode • Avbryt når som helst
+            {t("ctaNotice")}
           </p>
         </div>
       </div>
@@ -299,10 +298,18 @@ export default function Landing() {
               </div>
               <span className="text-lg font-semibold text-white">Fixlist</span>
             </div>
-            <p className="text-sm">© 2025 Fixlist. Alle rettigheter forbeholdt.</p>
+            <p className="text-sm">© 2025 Fixlist. {t("footerCopyright")}</p>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Landing() {
+  return (
+    <LanguageProvider>
+      <LandingContent />
+    </LanguageProvider>
   );
 }

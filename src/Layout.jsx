@@ -3,11 +3,11 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { base44 } from "@/api/base44Client";
 import { usePermissions } from "@/components/usePermissions";
-import { useLanguage } from "@/components/LanguageContext";
+import { LanguageProvider, useLanguage } from "@/components/LanguageContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { Globe, LayoutDashboard, Bug, FileText, Search, BarChart3, Settings, Users, CreditCard, Shield } from "lucide-react";
 
-export default function Layout({ children, currentPageName }) {
+function LayoutContent({ children, currentPageName }) {
   const { canAccessSettings, canManageUsers, canAccessSuperAdmin } = usePermissions();
   const { t } = useLanguage();
   
@@ -78,5 +78,13 @@ export default function Layout({ children, currentPageName }) {
         {children}
       </main>
     </div>
-  );
-}
+    );
+    }
+
+    export default function Layout(props) {
+    return (
+    <LanguageProvider>
+    <LayoutContent {...props} />
+    </LanguageProvider>
+    );
+    }
