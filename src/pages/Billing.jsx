@@ -63,10 +63,10 @@ export default function Billing() {
   if (!isAdmin) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-slate-900">Access Denied</h1>
+        <h1 className="text-2xl font-semibold text-slate-900">{t('settingsAccessDenied')}</h1>
         <Card className="p-12 text-center">
           <Shield className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-          <p className="text-slate-600">Only administrators can manage billing.</p>
+          <p className="text-slate-600">{t('billingAdminOnly') || 'Only administrators can manage billing.'}</p>
         </Card>
       </div>
     );
@@ -94,7 +94,7 @@ export default function Billing() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t('billingTitle')}</h1>
-        <p className="text-slate-500 mt-1">Manage your subscription and billing</p>
+        <p className="text-slate-500 mt-1">{t('billingSubtitle') || 'Manage your subscription and billing'}</p>
       </div>
 
       {/* Current Plan */}
@@ -102,12 +102,12 @@ export default function Billing() {
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
-              <h3 className="text-lg font-semibold text-slate-900">Current Plan: {limits.name}</h3>
+              <h3 className="text-lg font-semibold text-slate-900">{t('billingCurrentPlan')}: {limits.name}</h3>
               {isTrialing && (
-                <Badge className="bg-blue-100 text-blue-700">Trial</Badge>
+                <Badge className="bg-blue-100 text-blue-700">{t('billingTrial') || 'Trial'}</Badge>
               )}
               {isPastDue && (
-                <Badge className="bg-red-100 text-red-700">Past Due</Badge>
+                <Badge className="bg-red-100 text-red-700">{t('billingPastDue') || 'Past Due'}</Badge>
               )}
             </div>
             <div className="space-y-1 text-sm text-slate-600">
@@ -126,7 +126,7 @@ export default function Billing() {
               disabled={manageBillingMutation.isPending}
             >
               <CreditCard className="w-4 h-4 mr-2" />
-              Manage Billing
+              {t('billingManageBilling')}
             </Button>
           )}
         </div>
@@ -134,7 +134,7 @@ export default function Billing() {
 
       {/* Pricing Plans */}
       <div>
-        <h2 className="text-xl font-semibold text-slate-900 mb-4">Choose Your Plan</h2>
+        <h2 className="text-xl font-semibold text-slate-900 mb-4">{t('billingChoosePlan') || 'Choose Your Plan'}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {Object.entries(allPlans).map(([key, planData]) => {
             const Icon = planIcons[key];
@@ -148,7 +148,7 @@ export default function Billing() {
               >
                 {isPremium && (
                   <Badge className="absolute top-4 right-4 bg-purple-100 text-purple-700">
-                    Popular
+                    {t('pricingPopular')}
                   </Badge>
                 )}
                 
@@ -157,7 +157,7 @@ export default function Billing() {
                   <h3 className="text-xl font-bold text-slate-900">{planData.name}</h3>
                   <div className="mt-2">
                     <span className="text-3xl font-bold text-slate-900">${planData.price}</span>
-                    <span className="text-slate-500 ml-1">/month</span>
+                    <span className="text-slate-500 ml-1">{t('pricingPerMonth')}</span>
                   </div>
                 </div>
 
@@ -188,13 +188,13 @@ export default function Billing() {
                   onClick={() => handleUpgrade(key)}
                 >
                   {loading === key ? (
-                    "Loading..."
+                    t('commonLoading')
                   ) : isCurrentPlan ? (
-                    "Current Plan"
+                    t('billingCurrentPlan')
                   ) : key === 'free' ? (
-                    "Default Plan"
+                    t('billingDefaultPlan') || 'Default Plan'
                   ) : (
-                    "Upgrade"
+                    t('billingUpgrade')
                   )}
                 </Button>
               </Card>

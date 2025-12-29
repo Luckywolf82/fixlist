@@ -48,11 +48,11 @@ export default function Settings() {
   if (!canAccessSettings) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-slate-900">Access Denied</h1>
+        <h1 className="text-2xl font-semibold text-slate-900">{t('settingsAccessDenied')}</h1>
         <Card className="p-12 text-center">
           <Shield className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-          <p className="text-slate-600">You don't have permission to access settings.</p>
-          <p className="text-sm text-slate-500 mt-2">Contact an administrator for access.</p>
+          <p className="text-slate-600">{t('settingsNoPermission')}</p>
+          <p className="text-sm text-slate-500 mt-2">{t('settingsContactAdmin') || 'Contact an administrator for access.'}</p>
         </Card>
       </div>
     );
@@ -71,7 +71,7 @@ export default function Settings() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t('settingsTitle')}</h1>
-        <p className="text-slate-500 mt-1">Connect your SEO tools for enhanced reporting</p>
+        <p className="text-slate-500 mt-1">{t('settingsSubtitle') || 'Connect your SEO tools for enhanced reporting'}</p>
       </div>
 
       {/* Ahrefs */}
@@ -81,17 +81,17 @@ export default function Settings() {
             <Key className="w-6 h-6 text-orange-600" />
           </div>
           <div className="flex-1">
-            <h3 className="font-semibold text-slate-900">Ahrefs</h3>
+            <h3 className="font-semibold text-slate-900">{t('settingsAhrefsTitle')}</h3>
             <p className="text-sm text-slate-500 mt-1 mb-4">
-              Enter your Ahrefs API key to fetch backlinks, domain rating, and referring domains data
+              {t('settingsAhrefsDesc') || 'Enter your Ahrefs API key to fetch backlinks, domain rating, and referring domains data'}
             </p>
             <div className="space-y-3">
               <div>
-                <Label htmlFor="ahrefs-key">API Key</Label>
+                <Label htmlFor="ahrefs-key">{t('settingsAhrefsApiKey')}</Label>
                 <Input
                   id="ahrefs-key"
                   type="password"
-                  placeholder="Enter your Ahrefs API key"
+                  placeholder={t('settingsAhrefsPlaceholder')}
                   value={ahrefsKey}
                   onChange={(e) => setAhrefsKey(e.target.value)}
                   className="mt-1"
@@ -105,7 +105,7 @@ export default function Settings() {
                 disabled={updateKeyMutation.isPending}
                 className="bg-slate-900 hover:bg-slate-800"
               >
-                {updateKeyMutation.isPending ? "Saving..." : "Save API Key"}
+                {updateKeyMutation.isPending ? t('settingsSaving') : t('settingsSave')}
               </Button>
             </div>
           </div>
@@ -114,7 +114,7 @@ export default function Settings() {
 
       {/* Help Card */}
       <Card className="p-6 bg-slate-50 border-slate-200">
-        <h3 className="font-semibold text-slate-900 mb-3">Why connect Ahrefs?</h3>
+        <h3 className="font-semibold text-slate-900 mb-3">{t('settingsWhyAhrefs')}</h3>
         <ul className="space-y-2 text-sm text-slate-600">
           <li className="flex items-start gap-2">
             <CheckCircle className="w-4 h-4 text-green-600 mt-0.5 flex-shrink-0" />

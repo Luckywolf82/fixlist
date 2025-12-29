@@ -90,7 +90,7 @@ export default function Reports() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t('reportsTitle')}</h1>
-          <p className="text-slate-500 mt-1">Generate and download SEO reports</p>
+          <parameter name="replace">          <p className="text-slate-500 mt-1">{t('reportsSubtitle') || 'Generate and download SEO reports'}</p>
         </div>
       </div>
 
@@ -100,18 +100,18 @@ export default function Reports() {
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-3">
               <Plus className="w-5 h-5 text-slate-600" />
-              <h2 className="font-semibold text-slate-900">Generate New Report</h2>
+              <h2 className="font-semibold text-slate-900">{t('reportsGenerate')}</h2>
             </div>
             <p className="text-sm text-slate-600 mb-4">
-              Create a comprehensive SEO report including issue analysis, trends, and recommendations.
+              {t('reportsGenerateDesc') || 'Create a comprehensive SEO report including issue analysis, trends, and recommendations.'}
             </p>
             <div className="flex items-center gap-3">
               <Select value={selectedSiteId} onValueChange={setSelectedSiteId}>
                 <SelectTrigger className="w-64">
-                  <SelectValue placeholder="Select site" />
+                  <SelectValue placeholder={t('reportsSelectSite')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">All sites</SelectItem>
+                  <SelectItem value="all">{t('reportsAllSites')}</SelectItem>
                   {sites.map(site => (
                     <SelectItem key={site.id} value={site.id}>{site.domain}</SelectItem>
                   ))}
@@ -123,9 +123,9 @@ export default function Reports() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="7">Last 7 days</SelectItem>
-                  <SelectItem value="30">Last 30 days</SelectItem>
-                  <SelectItem value="90">Last 90 days</SelectItem>
+                  <SelectItem value="7">{t('reportsLast7Days') || 'Last 7 days'}</SelectItem>
+                  <SelectItem value="30">{t('reportsLast30Days') || 'Last 30 days'}</SelectItem>
+                  <SelectItem value="90">{t('reportsLast90Days') || 'Last 90 days'}</SelectItem>
                 </SelectContent>
               </Select>
 
@@ -137,12 +137,12 @@ export default function Reports() {
                 {generatingForSite ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Generating...
+                    {t('reportsGenerating')}
                   </>
                 ) : (
                   <>
                     <FileText className="w-4 h-4 mr-2" />
-                    Generate Report
+                    {t('reportsGenerate')}
                   </>
                 )}
               </Button>
@@ -153,25 +153,25 @@ export default function Reports() {
 
       {/* Reports List */}
       <div>
-        <h2 className="font-semibold text-slate-900 mb-4">Previous Reports</h2>
+        <h2 className="font-semibold text-slate-900 mb-4">{t('reportsPreviousReports') || 'Previous Reports'}</h2>
         
         {reports.length === 0 ? (
           <Card className="p-12 text-center">
             <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <FileText className="w-6 h-6 text-slate-400" />
             </div>
-            <h3 className="text-lg font-medium text-slate-900 mb-2">No reports yet</h3>
-            <p className="text-slate-500">Generate your first report to get started</p>
+            <h3 className="text-lg font-medium text-slate-900 mb-2">{t('reportsNoReports')}</h3>
+            <p className="text-slate-500">{t('reportsNoReportsDesc')}</p>
           </Card>
         ) : (
           <Card className="overflow-hidden border-slate-200">
             <Table>
               <TableHeader>
                 <TableRow className="bg-slate-50/50">
-                  <TableHead className="font-semibold text-slate-700">Report</TableHead>
-                  <TableHead className="font-semibold text-slate-700">Site</TableHead>
-                  <TableHead className="font-semibold text-slate-700">Period</TableHead>
-                  <TableHead className="font-semibold text-slate-700">Summary</TableHead>
+                  <TableHead className="font-semibold text-slate-700">{t('reportsReport') || 'Report'}</TableHead>
+                  <TableHead className="font-semibold text-slate-700">{t('reportsSite')}</TableHead>
+                  <TableHead className="font-semibold text-slate-700">{t('reportsPeriod')}</TableHead>
+                  <TableHead className="font-semibold text-slate-700">{t('reportsSummary')}</TableHead>
                   <TableHead className="font-semibold text-slate-700 w-[120px]"></TableHead>
                 </TableRow>
               </TableHeader>
@@ -184,7 +184,7 @@ export default function Reports() {
                         <span className="font-medium text-slate-900">{report.title}</span>
                       </div>
                       <p className="text-xs text-slate-500 mt-1">
-                        Generated {format(parseISO(report.created_date), "MMM d, yyyy 'at' h:mm a")}
+                        {t('reportsGenerated') || 'Generated'} {format(parseISO(report.created_date), "MMM d, yyyy 'at' h:mm a")}
                       </p>
                     </TableCell>
                     <TableCell>
@@ -204,14 +204,14 @@ export default function Reports() {
                     <TableCell>
                       <div className="space-y-1 text-sm">
                         <div className="flex items-center gap-2 text-slate-600">
-                          <span>{report.summary?.total_pages || 0} pages</span>
+                          <span>{report.summary?.total_pages || 0} {t('reportsPages')}</span>
                           <span>•</span>
-                          <span>{report.summary?.total_issues || 0} issues</span>
+                          <span>{report.summary?.total_issues || 0} {t('reportsTotalIssues').replace('total ', '') || 'issues'}</span>
                         </div>
                         {report.summary?.critical_issues > 0 && (
                           <div className="flex items-center gap-1 text-red-600">
                             <AlertCircle className="w-3.5 h-3.5" />
-                            <span className="font-medium">{report.summary.critical_issues} critical</span>
+                            <span className="font-medium">{report.summary.critical_issues} {t('issuesCritical').toLowerCase()}</span>
                           </div>
                         )}
                         {report.ai_summary && (
@@ -241,7 +241,7 @@ export default function Reports() {
                       >
                         <Button variant="outline" size="sm" className="w-full">
                           <Download className="w-3.5 h-3.5 mr-1.5" />
-                          Download
+                          {t('reportsDownload')}
                         </Button>
                       </a>
                     </TableCell>
