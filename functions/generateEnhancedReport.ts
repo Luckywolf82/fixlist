@@ -263,7 +263,58 @@ Deno.serve(async (req) => {
       console.error('Failed to fetch Ahrefs data:', error);
     }
 
-    const openIssues = issues.filter(i => i.status === 'open');
+    // Translate issues if not in English
+    let translatedIssues = issues;
+    if (language !== 'en' && issues.length > 0) {
+      try {
+        const issuesText = JSON.stringify(issues.map(i => ({
+          type: i.type,
+          message: i.message,
+          how_to_fix: i.how_to_fix
+        })));
+        
+        const translationPrompt = `${languageInstructions[language]}
+
+Translate the following SEO issues to the target language. Keep the same JSON structure and the 'type' field unchanged (in English). Only translate 'message' and 'how_to_fix' fields:
+
+${issuesText}
+
+Return only the translated JSON array.`;
+
+        const translatedResponse = await base44.asServiceRole.integrations.Core.InvokeLLM({
+          prompt: translationPrompt,
+          response_json_schema: {
+            type: "object",
+            properties: {
+              issues: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    type: { type: "string" },
+                    message: { type: "string" },
+                    how_to_fix: { type: "string" }
+                  }
+                }
+              }
+            }
+          }
+        });
+
+        // Map translated content back to issues
+        if (translatedResponse.issues && translatedResponse.issues.length === issues.length) {
+          translatedIssues = issues.map((issue, idx) => ({
+            ...issue,
+            message: translatedResponse.issues[idx].message,
+            how_to_fix: translatedResponse.issues[idx].how_to_fix
+          }));
+        }
+      } catch (error) {
+        console.error('Translation failed, using original text:', error);
+      }
+    }
+
+    const openIssues = translatedIssues.filter(i => i.status === 'open');
     const criticalIssues = openIssues.filter(i => i.severity === 'critical');
     const highIssues = openIssues.filter(i => i.severity === 'high');
     const mediumIssues = openIssues.filter(i => i.severity === 'medium');
