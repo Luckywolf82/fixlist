@@ -3,19 +3,22 @@ import { Link } from "react-router-dom";
 import { createPageUrl } from "./utils";
 import { base44 } from "@/api/base44Client";
 import { usePermissions } from "@/components/usePermissions";
+import { useLanguage } from "@/components/LanguageContext";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { Globe, LayoutDashboard, Bug, FileText, Search, BarChart3, Settings, Users, CreditCard, Shield } from "lucide-react";
 
 export default function Layout({ children, currentPageName }) {
   const { canAccessSettings, canManageUsers, canAccessSuperAdmin } = usePermissions();
+  const { t } = useLanguage();
   
   const navigation = [
-    { name: "Sites", page: "Sites", icon: Globe, show: true },
-    { name: "Analytics", page: "Analytics", icon: BarChart3, show: true },
-    { name: "Reports", page: "Reports", icon: FileText, show: true },
-    { name: "Templates", page: "ReportTemplates", icon: Settings, show: canAccessSettings },
-    { name: "Users", page: "UserManagement", icon: Users, show: canManageUsers },
-    { name: "Billing", page: "Billing", icon: CreditCard, show: true },
-    { name: "Settings", page: "Settings", icon: Settings, show: canAccessSettings },
+    { name: t("sites"), page: "Sites", icon: Globe, show: true },
+    { name: t("analytics"), page: "Analytics", icon: BarChart3, show: true },
+    { name: t("reports"), page: "Reports", icon: FileText, show: true },
+    { name: t("templates"), page: "ReportTemplates", icon: Settings, show: canAccessSettings },
+    { name: t("users"), page: "UserManagement", icon: Users, show: canManageUsers },
+    { name: t("billing"), page: "Billing", icon: CreditCard, show: true },
+    { name: t("settings"), page: "Settings", icon: Settings, show: canAccessSettings },
     { name: "SuperAdmin", page: "SuperAdmin", icon: Shield, show: canAccessSuperAdmin },
   ].filter(item => item.show);
 
@@ -36,12 +39,15 @@ export default function Layout({ children, currentPageName }) {
             </Link>
             
             {isLandingPage ? (
-              <button
-                onClick={() => base44.auth.redirectToLogin()}
-                className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors"
-              >
-                Logg inn
-              </button>
+              <div className="flex items-center gap-3">
+                <LanguageSwitcher />
+                <button
+                  onClick={() => base44.auth.redirectToLogin()}
+                  className="px-4 py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 transition-colors"
+                >
+                  {t("login")}
+                </button>
+              </div>
             ) : (
               <nav className="flex items-center gap-1">
                 {navigation.map((item) => {
