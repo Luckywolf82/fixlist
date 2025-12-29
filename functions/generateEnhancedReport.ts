@@ -636,11 +636,11 @@ Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", .
           yPos += msgLines.length * 4 + 2;
 
           doc.setTextColor(100);
-          doc.text(`URL: ${issue.url.substring(0, 70)}`, 25, yPos);
+          doc.text(`${t.url}: ${issue.url.substring(0, 70)}`, 25, yPos);
           yPos += 5;
 
           doc.setTextColor(0, 100, 0);
-          const fixLines = doc.splitTextToSize(`Fix: ${issue.how_to_fix}`, 170);
+          const fixLines = doc.splitTextToSize(`${t.fix}: ${issue.how_to_fix}`, 170);
           doc.text(fixLines, 25, yPos);
           yPos += fixLines.length * 4 + 7;
 
@@ -680,11 +680,11 @@ Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", .
           yPos += msgLines.length * 4 + 2;
 
           doc.setTextColor(100);
-          doc.text(`URL: ${issue.url.substring(0, 70)}`, 25, yPos);
+          doc.text(`${t.url}: ${issue.url.substring(0, 70)}`, 25, yPos);
           yPos += 5;
 
           doc.setTextColor(0, 100, 0);
-          const fixLines = doc.splitTextToSize(`Fix: ${issue.how_to_fix}`, 170);
+          const fixLines = doc.splitTextToSize(`${t.fix}: ${issue.how_to_fix}`, 170);
           doc.text(fixLines, 25, yPos);
           yPos += fixLines.length * 4 + 7;
 
@@ -724,11 +724,11 @@ Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", .
           yPos += msgLines.length * 4 + 2;
 
           doc.setTextColor(100);
-          doc.text(`URL: ${issue.url.substring(0, 70)}`, 25, yPos);
+          doc.text(`${t.url}: ${issue.url.substring(0, 70)}`, 25, yPos);
           yPos += 5;
 
           doc.setTextColor(0, 100, 0);
-          const fixLines = doc.splitTextToSize(`Fix: ${issue.how_to_fix}`, 170);
+          const fixLines = doc.splitTextToSize(`${t.fix}: ${issue.how_to_fix}`, 170);
           doc.text(fixLines, 25, yPos);
           yPos += fixLines.length * 4 + 7;
 
