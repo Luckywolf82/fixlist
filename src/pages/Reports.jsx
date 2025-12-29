@@ -90,7 +90,8 @@ export default function Reports() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t('reportsTitle')}</h1>
-          <parameter name="replace">          <p className="text-slate-500 mt-1">{t('reportsSubtitle') || 'Generate and download SEO reports'}</p>
+          <p className="text-slate-500 mt-1">{t('reportsSubtitle') || 'Generate and download SEO reports'}</p>
+        </div>
         </div>
       </div>
 
