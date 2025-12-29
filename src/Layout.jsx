@@ -49,7 +49,9 @@ function LayoutContent({ children, currentPageName }) {
                 </button>
               </div>
             ) : (
-              <nav className="flex items-center gap-1">
+              <div className="flex items-center gap-4">
+                <LanguageSwitcher />
+                <nav className="flex items-center gap-1">
                 {navigation.map((item) => {
                   const isActive = currentPageName === item.page;
                   return (
@@ -66,8 +68,9 @@ function LayoutContent({ children, currentPageName }) {
                       {item.name}
                     </Link>
                   );
-                })}
-              </nav>
+                  })}
+                  </nav>
+                  </div>
             )}
           </div>
         </div>

@@ -164,7 +164,412 @@ export const translations = {
     
     // Landing - Footer
     footerCopyright: "Alle rettigheter forbeholdt.",
-  }
+  },
+  sv: {
+    // Navigation
+    sites: "Webbplatser",
+    analytics: "Analys",
+    reports: "Rapporter",
+    templates: "Mallar",
+    users: "Användare",
+    billing: "Fakturering",
+    settings: "Inställningar",
+    login: "Logga in",
+    
+    // Landing - Hero
+    heroPreline: "AI-driven SEO-analys för moderna webbplatser",
+    heroTitle1: "Håll din webbplats",
+    heroTitle2: "SEO-optimerad",
+    heroSubtitle: "Automatisk skanning, AI-prioritering och omfattande rapporter. Allt du behöver för att upprätthålla och förbättra din webbplats SEO-hälsa.",
+    heroCtaPrimary: "Starta Gratis Provperiod",
+    heroCtaSecondary: "Se Demo",
+    
+    // Landing - Features
+    featuresTitle: "Allt du behöver för SEO-övervakning",
+    featuresSubtitle: "Från automatisk skanning till detaljerade rapporter - vi har alla verktyg du behöver",
+    
+    feature1Title: "Automatisk Webbplatsskanning",
+    feature1Desc: "Crawlar alla sidor på din webbplats och identifierar SEO-problem automatiskt",
+    
+    feature2Title: "Prioriterade Problem",
+    feature2Desc: "AI-driven analys som rankar problem efter viktighet och påverkan",
+    
+    feature3Title: "Prestandamätningar",
+    feature3Desc: "Övervaka Core Web Vitals, sidtid och andra viktiga prestandamätningar",
+    
+    feature4Title: "Automatiska Rapporter",
+    feature4Desc: "Schemalägg veckovisa eller månatliga PDF-rapporter till kunder",
+    
+    feature5Title: "Schemalagda Crawls",
+    feature5Desc: "Automatisk övervakning av webbplatsändringar och nya problem",
+    
+    feature6Title: "Teamhantering",
+    feature6Desc: "Hantera åtkomst för ditt team med roller och behörigheter",
+    
+    // Landing - Use Cases
+    useCasesTitle: "Perfekt för alla som arbetar med SEO",
+    useCasesSubtitle: "Oavsett om du hanterar din egen webbplats eller levererar tjänster till kunder",
+    
+    useCase1Title: "För Företag",
+    useCase1Desc: "Perfekt för företag som vill ha full kontroll över sin SEO-hälsa",
+    useCase1Benefit1: "Identifiera och åtgärda SEO-problem innan de påverkar rankningar",
+    useCase1Benefit2: "Övervaka konkurrerande mått som backlinks och domain rating",
+    useCase1Benefit3: "Få AI-drivna rekommendationer för förbättringar",
+    useCase1Benefit4: "Exportera data för djupare analys",
+    useCase1Cta: "Starta Gratis Provperiod",
+    
+    useCase2Title: "För Byråer & Konsulter",
+    useCase2Desc: "Perfekt för de som levererar SEO-tjänster till flera kunder",
+    useCase2Benefit1: "White-label rapporter med din egen branding",
+    useCase2Benefit2: "Hantera flera kunders webbplatser från ett konto",
+    useCase2Benefit3: "Automatisera repetitiva SEO-uppgifter",
+    useCase2Benefit4: "Visa värdet av dina tjänster med detaljerade rapporter",
+    useCase2Cta: "Utforska Enterprise",
+    
+    // Landing - Pricing
+    pricingTitle: "Välj planen som passar dig",
+    pricingSubtitle: "Alla planer inkluderar 14 dagars gratis provperiod. Inget kreditkort krävs.",
+    pricingPopular: "Populär",
+    pricingPerMonth: "/månad",
+    pricingSites: "webbplatser",
+    pricingCrawls: "crawls/månad",
+    pricingUnlimited: "Obegränsade",
+    pricingCtaFree: "Kom igång",
+    pricingCtaPaid: "Välj plan",
+    
+    // Landing - Final CTA
+    ctaTitle: "Redo att optimera din webbplats?",
+    ctaSubtitle: "Gå med tusentals företag och byråer som använder Fixlist för att hålla sina webbplatser SEO-optimerade.",
+    ctaButton: "Starta Gratis Provperiod Idag",
+    ctaNotice: "Inget kreditkort krävs • 14 dagars gratis provperiod • Avbryt när som helst",
+    
+    // Landing - Footer
+    footerCopyright: "Alla rättigheter förbehållna.",
+  },
+  da: {
+    // Navigation
+    sites: "Websites",
+    analytics: "Analyse",
+    reports: "Rapporter",
+    templates: "Skabeloner",
+    users: "Brugere",
+    billing: "Fakturering",
+    settings: "Indstillinger",
+    login: "Log ind",
+    
+    // Landing - Hero
+    heroPreline: "AI-drevet SEO-analyse til moderne websites",
+    heroTitle1: "Hold dit website",
+    heroTitle2: "SEO-optimeret",
+    heroSubtitle: "Automatisk scanning, AI-prioritering og omfattende rapporter. Alt du behøver for at vedligeholde og forbedre dit websites SEO-sundhed.",
+    heroCtaPrimary: "Start Gratis Prøveperiode",
+    heroCtaSecondary: "Se Demo",
+    
+    // Landing - Features
+    featuresTitle: "Alt du behøver til SEO-overvågning",
+    featuresSubtitle: "Fra automatisk scanning til detaljerede rapporter - vi har alle de værktøjer du behøver",
+    
+    feature1Title: "Automatisk Websitescanning",
+    feature1Desc: "Crawler alle sider på dit website og identificerer SEO-problemer automatisk",
+    
+    feature2Title: "Prioriterede Problemer",
+    feature2Desc: "AI-drevet analyse der rangerer problemer efter vigtighed og indvirkning",
+    
+    feature3Title: "Ydeevnemålinger",
+    feature3Desc: "Overvåg Core Web Vitals, sidetid og andre vigtige ydeevnemålinger",
+    
+    feature4Title: "Automatiske Rapporter",
+    feature4Desc: "Planlæg ugentlige eller månedlige PDF-rapporter til kunder",
+    
+    feature5Title: "Planlagte Crawls",
+    feature5Desc: "Automatisk overvågning af websiteændringer og nye problemer",
+    
+    feature6Title: "Teamstyring",
+    feature6Desc: "Administrer adgang for dit team med roller og tilladelser",
+    
+    // Landing - Use Cases
+    useCasesTitle: "Perfekt til alle der arbejder med SEO",
+    useCasesSubtitle: "Uanset om du administrerer dit eget website eller leverer tjenester til kunder",
+    
+    useCase1Title: "Til Virksomheder",
+    useCase1Desc: "Perfekt til virksomheder der ønsker fuld kontrol over deres SEO-sundhed",
+    useCase1Benefit1: "Identificer og ret SEO-problemer før de påvirker placeringer",
+    useCase1Benefit2: "Overvåg konkurrencedygtige målinger som backlinks og domænevurdering",
+    useCase1Benefit3: "Få AI-drevne anbefalinger til forbedringer",
+    useCase1Benefit4: "Eksporter data til dybere analyse",
+    useCase1Cta: "Start Gratis Prøveperiode",
+    
+    useCase2Title: "Til Bureauer & Konsulenter",
+    useCase2Desc: "Perfekt til dem der leverer SEO-tjenester til flere kunder",
+    useCase2Benefit1: "White-label rapporter med din egen branding",
+    useCase2Benefit2: "Administrer flere kunders websites fra én konto",
+    useCase2Benefit3: "Automatiser gentagne SEO-opgaver",
+    useCase2Benefit4: "Vis værdien af dine tjenester med detaljerede rapporter",
+    useCase2Cta: "Udforsk Enterprise",
+    
+    // Landing - Pricing
+    pricingTitle: "Vælg planen der passer til dig",
+    pricingSubtitle: "Alle planer inkluderer 14 dages gratis prøveperiode. Intet kreditkort påkrævet.",
+    pricingPopular: "Populær",
+    pricingPerMonth: "/måned",
+    pricingSites: "websites",
+    pricingCrawls: "crawls/måned",
+    pricingUnlimited: "Ubegrænset",
+    pricingCtaFree: "Kom i gang",
+    pricingCtaPaid: "Vælg plan",
+    
+    // Landing - Final CTA
+    ctaTitle: "Klar til at optimere dit website?",
+    ctaSubtitle: "Slut dig til tusindvis af virksomheder og bureauer der bruger Fixlist til at holde deres websites SEO-optimerede.",
+    ctaButton: "Start Gratis Prøveperiode I Dag",
+    ctaNotice: "Intet kreditkort påkrævet • 14 dages gratis prøveperiode • Annuller når som helst",
+    
+    // Landing - Footer
+    footerCopyright: "Alle rettigheder forbeholdes.",
+  },
+  de: {
+    // Navigation
+    sites: "Websites",
+    analytics: "Analytics",
+    reports: "Berichte",
+    templates: "Vorlagen",
+    users: "Benutzer",
+    billing: "Abrechnung",
+    settings: "Einstellungen",
+    login: "Anmelden",
+    
+    // Landing - Hero
+    heroPreline: "KI-gestützte SEO-Analyse für moderne Websites",
+    heroTitle1: "Halten Sie Ihre Website",
+    heroTitle2: "SEO-optimiert",
+    heroSubtitle: "Automatisches Scannen, KI-Priorisierung und umfassende Berichte. Alles, was Sie brauchen, um die SEO-Gesundheit Ihrer Website zu erhalten und zu verbessern.",
+    heroCtaPrimary: "Kostenlose Testversion Starten",
+    heroCtaSecondary: "Demo Ansehen",
+    
+    // Landing - Features
+    featuresTitle: "Alles, was Sie für SEO-Überwachung brauchen",
+    featuresSubtitle: "Von automatischem Scannen bis zu detaillierten Berichten - wir haben alle Tools, die Sie brauchen",
+    
+    feature1Title: "Automatisches Website-Crawling",
+    feature1Desc: "Crawlt alle Seiten Ihrer Website und identifiziert automatisch SEO-Probleme",
+    
+    feature2Title: "Priorisierte Probleme",
+    feature2Desc: "KI-gestützte Analyse, die Probleme nach Wichtigkeit und Auswirkung ordnet",
+    
+    feature3Title: "Leistungsmetriken",
+    feature3Desc: "Überwachen Sie Core Web Vitals, Ladezeit und andere wichtige Leistungsmetriken",
+    
+    feature4Title: "Automatisierte Berichte",
+    feature4Desc: "Planen Sie wöchentliche oder monatliche PDF-Berichte für Kunden",
+    
+    feature5Title: "Geplante Crawls",
+    feature5Desc: "Automatische Überwachung von Website-Änderungen und neuen Problemen",
+    
+    feature6Title: "Teamverwaltung",
+    feature6Desc: "Verwalten Sie den Zugriff für Ihr Team mit Rollen und Berechtigungen",
+    
+    // Landing - Use Cases
+    useCasesTitle: "Perfekt für alle, die mit SEO arbeiten",
+    useCasesSubtitle: "Egal, ob Sie Ihre eigene Website verwalten oder Dienstleistungen für Kunden erbringen",
+    
+    useCase1Title: "Für Unternehmen",
+    useCase1Desc: "Perfekt für Unternehmen, die volle Kontrolle über ihre SEO-Gesundheit wollen",
+    useCase1Benefit1: "Identifizieren und beheben Sie SEO-Probleme, bevor sie Rankings beeinflussen",
+    useCase1Benefit2: "Überwachen Sie Wettbewerbsmetriken wie Backlinks und Domain Rating",
+    useCase1Benefit3: "Erhalten Sie KI-gestützte Empfehlungen für Verbesserungen",
+    useCase1Benefit4: "Exportieren Sie Daten für tiefere Analysen",
+    useCase1Cta: "Kostenlose Testversion Starten",
+    
+    useCase2Title: "Für Agenturen & Berater",
+    useCase2Desc: "Perfekt für diejenigen, die SEO-Dienstleistungen für mehrere Kunden erbringen",
+    useCase2Benefit1: "White-Label-Berichte mit Ihrem eigenen Branding",
+    useCase2Benefit2: "Verwalten Sie mehrere Kunden-Websites von einem Konto aus",
+    useCase2Benefit3: "Automatisieren Sie sich wiederholende SEO-Aufgaben",
+    useCase2Benefit4: "Zeigen Sie den Wert Ihrer Dienstleistungen mit detaillierten Berichten",
+    useCase2Cta: "Enterprise Erkunden",
+    
+    // Landing - Pricing
+    pricingTitle: "Wählen Sie den Plan, der zu Ihnen passt",
+    pricingSubtitle: "Alle Pläne beinhalten eine 14-tägige kostenlose Testversion. Keine Kreditkarte erforderlich.",
+    pricingPopular: "Beliebt",
+    pricingPerMonth: "/Monat",
+    pricingSites: "Websites",
+    pricingCrawls: "Crawls/Monat",
+    pricingUnlimited: "Unbegrenzt",
+    pricingCtaFree: "Loslegen",
+    pricingCtaPaid: "Plan Wählen",
+    
+    // Landing - Final CTA
+    ctaTitle: "Bereit, Ihre Website zu optimieren?",
+    ctaSubtitle: "Schließen Sie sich Tausenden von Unternehmen und Agenturen an, die Fixlist verwenden, um ihre Websites SEO-optimiert zu halten.",
+    ctaButton: "Kostenlose Testversion Heute Starten",
+    ctaNotice: "Keine Kreditkarte erforderlich • 14-tägige kostenlose Testversion • Jederzeit kündbar",
+    
+    // Landing - Footer
+    footerCopyright: "Alle Rechte vorbehalten.",
+  },
+  fr: {
+    // Navigation
+    sites: "Sites",
+    analytics: "Analytique",
+    reports: "Rapports",
+    templates: "Modèles",
+    users: "Utilisateurs",
+    billing: "Facturation",
+    settings: "Paramètres",
+    login: "Se connecter",
+    
+    // Landing - Hero
+    heroPreline: "Analyse SEO alimentée par l'IA pour les sites web modernes",
+    heroTitle1: "Gardez votre site web",
+    heroTitle2: "optimisé pour le SEO",
+    heroSubtitle: "Scan automatique, priorisation par IA et rapports complets. Tout ce dont vous avez besoin pour maintenir et améliorer la santé SEO de votre site web.",
+    heroCtaPrimary: "Démarrer l'Essai Gratuit",
+    heroCtaSecondary: "Voir la Démo",
+    
+    // Landing - Features
+    featuresTitle: "Tout ce dont vous avez besoin pour la surveillance SEO",
+    featuresSubtitle: "Du scan automatique aux rapports détaillés - nous avons tous les outils dont vous avez besoin",
+    
+    feature1Title: "Crawl Automatique du Site",
+    feature1Desc: "Crawle toutes les pages de votre site web et identifie automatiquement les problèmes SEO",
+    
+    feature2Title: "Problèmes Priorisés",
+    feature2Desc: "Analyse pilotée par l'IA qui classe les problèmes par importance et impact",
+    
+    feature3Title: "Métriques de Performance",
+    feature3Desc: "Surveillez les Core Web Vitals, le temps de chargement et d'autres métriques de performance importantes",
+    
+    feature4Title: "Rapports Automatisés",
+    feature4Desc: "Planifiez des rapports PDF hebdomadaires ou mensuels pour les clients",
+    
+    feature5Title: "Crawls Planifiés",
+    feature5Desc: "Surveillance automatique des changements de site web et des nouveaux problèmes",
+    
+    feature6Title: "Gestion d'Équipe",
+    feature6Desc: "Gérez l'accès de votre équipe avec des rôles et des permissions",
+    
+    // Landing - Use Cases
+    useCasesTitle: "Parfait pour tous ceux qui travaillent avec le SEO",
+    useCasesSubtitle: "Que vous gériez votre propre site web ou que vous fournissiez des services aux clients",
+    
+    useCase1Title: "Pour les Entreprises",
+    useCase1Desc: "Parfait pour les entreprises qui veulent un contrôle total sur leur santé SEO",
+    useCase1Benefit1: "Identifiez et corrigez les problèmes SEO avant qu'ils n'affectent les classements",
+    useCase1Benefit2: "Surveillez les métriques concurrentielles comme les backlinks et le domain rating",
+    useCase1Benefit3: "Obtenez des recommandations basées sur l'IA pour les améliorations",
+    useCase1Benefit4: "Exportez les données pour une analyse plus approfondie",
+    useCase1Cta: "Démarrer l'Essai Gratuit",
+    
+    useCase2Title: "Pour les Agences & Consultants",
+    useCase2Desc: "Parfait pour ceux qui fournissent des services SEO à plusieurs clients",
+    useCase2Benefit1: "Rapports en marque blanche avec votre propre image de marque",
+    useCase2Benefit2: "Gérez plusieurs sites web de clients depuis un seul compte",
+    useCase2Benefit3: "Automatisez les tâches SEO répétitives",
+    useCase2Benefit4: "Montrez la valeur de vos services avec des rapports détaillés",
+    useCase2Cta: "Explorer Enterprise",
+    
+    // Landing - Pricing
+    pricingTitle: "Choisissez le plan qui vous convient",
+    pricingSubtitle: "Tous les plans incluent un essai gratuit de 14 jours. Aucune carte de crédit requise.",
+    pricingPopular: "Populaire",
+    pricingPerMonth: "/mois",
+    pricingSites: "sites web",
+    pricingCrawls: "crawls/mois",
+    pricingUnlimited: "Illimité",
+    pricingCtaFree: "Commencer",
+    pricingCtaPaid: "Choisir le plan",
+    
+    // Landing - Final CTA
+    ctaTitle: "Prêt à optimiser votre site web ?",
+    ctaSubtitle: "Rejoignez des milliers d'entreprises et d'agences qui utilisent Fixlist pour garder leurs sites web optimisés pour le SEO.",
+    ctaButton: "Démarrer l'Essai Gratuit Aujourd'hui",
+    ctaNotice: "Aucune carte de crédit requise • Essai gratuit de 14 jours • Annulez à tout moment",
+    
+    // Landing - Footer
+    footerCopyright: "Tous droits réservés.",
+  },
+  es: {
+    // Navigation
+    sites: "Sitios",
+    analytics: "Analítica",
+    reports: "Informes",
+    templates: "Plantillas",
+    users: "Usuarios",
+    billing: "Facturación",
+    settings: "Configuración",
+    login: "Iniciar sesión",
+    
+    // Landing - Hero
+    heroPreline: "Análisis SEO impulsado por IA para sitios web modernos",
+    heroTitle1: "Mantén tu sitio web",
+    heroTitle2: "optimizado para SEO",
+    heroSubtitle: "Escaneo automático, priorización por IA e informes completos. Todo lo que necesitas para mantener y mejorar la salud SEO de tu sitio web.",
+    heroCtaPrimary: "Iniciar Prueba Gratuita",
+    heroCtaSecondary: "Ver Demo",
+    
+    // Landing - Features
+    featuresTitle: "Todo lo que necesitas para la monitorización SEO",
+    featuresSubtitle: "Desde escaneo automático hasta informes detallados - tenemos todas las herramientas que necesitas",
+    
+    feature1Title: "Rastreo Automático del Sitio",
+    feature1Desc: "Rastrea todas las páginas de tu sitio web e identifica automáticamente problemas SEO",
+    
+    feature2Title: "Problemas Priorizados",
+    feature2Desc: "Análisis impulsado por IA que clasifica los problemas por importancia e impacto",
+    
+    feature3Title: "Métricas de Rendimiento",
+    feature3Desc: "Monitorea Core Web Vitals, tiempo de carga y otras métricas de rendimiento importantes",
+    
+    feature4Title: "Informes Automatizados",
+    feature4Desc: "Programa informes PDF semanales o mensuales para clientes",
+    
+    feature5Title: "Rastreos Programados",
+    feature5Desc: "Monitorización automática de cambios en el sitio web y nuevos problemas",
+    
+    feature6Title: "Gestión de Equipo",
+    feature6Desc: "Gestiona el acceso de tu equipo con roles y permisos",
+    
+    // Landing - Use Cases
+    useCasesTitle: "Perfecto para todos los que trabajan con SEO",
+    useCasesSubtitle: "Ya sea que gestiones tu propio sitio web o prestes servicios a clientes",
+    
+    useCase1Title: "Para Empresas",
+    useCase1Desc: "Perfecto para empresas que quieren control total sobre su salud SEO",
+    useCase1Benefit1: "Identifica y corrige problemas SEO antes de que afecten las clasificaciones",
+    useCase1Benefit2: "Monitorea métricas competitivas como backlinks y domain rating",
+    useCase1Benefit3: "Obtén recomendaciones impulsadas por IA para mejoras",
+    useCase1Benefit4: "Exporta datos para análisis más profundos",
+    useCase1Cta: "Iniciar Prueba Gratuita",
+    
+    useCase2Title: "Para Agencias y Consultores",
+    useCase2Desc: "Perfecto para quienes prestan servicios SEO a múltiples clientes",
+    useCase2Benefit1: "Informes de marca blanca con tu propia identidad",
+    useCase2Benefit2: "Gestiona múltiples sitios web de clientes desde una cuenta",
+    useCase2Benefit3: "Automatiza tareas SEO repetitivas",
+    useCase2Benefit4: "Muestra el valor de tus servicios con informes detallados",
+    useCase2Cta: "Explorar Enterprise",
+    
+    // Landing - Pricing
+    pricingTitle: "Elige el plan que se ajuste a ti",
+    pricingSubtitle: "Todos los planes incluyen 14 días de prueba gratuita. No se requiere tarjeta de crédito.",
+    pricingPopular: "Popular",
+    pricingPerMonth: "/mes",
+    pricingSites: "sitios web",
+    pricingCrawls: "rastreos/mes",
+    pricingUnlimited: "Ilimitado",
+    pricingCtaFree: "Comenzar",
+    pricingCtaPaid: "Elegir plan",
+    
+    // Landing - Final CTA
+    ctaTitle: "¿Listo para optimizar tu sitio web?",
+    ctaSubtitle: "Únete a miles de empresas y agencias que usan Fixlist para mantener sus sitios web optimizados para SEO.",
+    ctaButton: "Iniciar Prueba Gratuita Hoy",
+    ctaNotice: "No se requiere tarjeta de crédito • 14 días de prueba gratuita • Cancela en cualquier momento",
+    
+    // Landing - Footer
+    footerCopyright: "Todos los derechos reservados.",
+  },
 };
 
 async function detectLanguageFromIP() {
@@ -173,12 +578,20 @@ async function detectLanguageFromIP() {
     const data = await response.json();
     const countryCode = data.country_code;
     
-    // Norwegian-speaking countries
-    const norwegianCountries = ['NO', 'SJ'];
-    return norwegianCountries.includes(countryCode) ? 'no' : 'en';
+    // Map country codes to languages
+    const countryLanguageMap = {
+      'NO': 'no', 'SJ': 'no',
+      'SE': 'sv',
+      'DK': 'da',
+      'DE': 'de', 'AT': 'de', 'CH': 'de',
+      'FR': 'fr', 'BE': 'fr', 'LU': 'fr',
+      'ES': 'es', 'MX': 'es', 'AR': 'es', 'CO': 'es', 'CL': 'es', 'PE': 'es',
+    };
+    
+    return countryLanguageMap[countryCode] || 'en';
   } catch (error) {
     console.error('Failed to detect language:', error);
-    return 'en'; // Default to English
+    return 'en';
   }
 }
 
@@ -206,7 +619,7 @@ export function LanguageProvider({ children }) {
   };
 
   const t = (key) => {
-    return translations[language]?.[key] || key;
+    return translations[language]?.[key] || translations['en']?.[key] || key;
   };
 
   return (
