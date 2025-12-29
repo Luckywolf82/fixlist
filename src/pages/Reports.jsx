@@ -36,9 +36,14 @@ export default function Reports() {
 
   const generateReportMutation = useMutation({
     mutationFn: async ({ siteId, days }) => {
+      // Get default template
+      const templates = await base44.entities.ReportTemplate.filter({ is_default: true });
+      const defaultTemplate = templates[0];
+      
       const response = await base44.functions.invoke('generateEnhancedReport', { 
         site_id: siteId,
-        period_days: parseInt(days)
+        period_days: parseInt(days),
+        template_id: defaultTemplate?.id
       });
       return response.data;
     },
