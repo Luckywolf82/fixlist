@@ -219,6 +219,23 @@ Respond in JSON format: {"summary": "...", "recommendations": ["rec1", "rec2", .
     };
     const brandColor = hexToRgb(primaryColor);
 
+    // Logo if available
+    if (template?.logo_url) {
+      try {
+        const logoResponse = await fetch(template.logo_url);
+        const logoBlob = await logoResponse.blob();
+        const logoBase64 = await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(logoBlob);
+        });
+        doc.addImage(logoBase64, 'PNG', 20, yPos, 30, 15);
+        yPos += 20;
+      } catch (error) {
+        console.error('Failed to load logo:', error);
+      }
+    }
+
     // Header
     doc.setFontSize(24);
     doc.setTextColor(brandColor.r, brandColor.g, brandColor.b);
