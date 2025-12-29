@@ -125,13 +125,13 @@ function LayoutContent({ children, currentPageName }) {
         {children}
       </main>
     </div>
-    );
-    }
+  );
+}
 
-    export default function Layout(props) {
-    return (
+export default function Layout(props) {
+  return (
     <LanguageProvider>
-    <LayoutContent {...props} />
+      <LayoutContent {...props} />
     </LanguageProvider>
-    );
-    }
+  );
+}
