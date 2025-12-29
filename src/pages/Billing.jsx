@@ -111,9 +111,9 @@ export default function Billing() {
               )}
             </div>
             <div className="space-y-1 text-sm text-slate-600">
-              <p>• {limits.max_sites === -1 ? 'Unlimited' : limits.max_sites} sites</p>
-              <p>• {limits.max_crawls_per_month === -1 ? 'Unlimited' : limits.max_crawls_per_month} crawls per month</p>
-              <p>• {organization.crawls_this_month} crawls used this month</p>
+              <p>• {limits.max_sites === -1 ? t('pricingUnlimited') : limits.max_sites} {t('pricingSites')}</p>
+              <p>• {limits.max_crawls_per_month === -1 ? t('pricingUnlimited') : limits.max_crawls_per_month} {t('pricingCrawls')}</p>
+              <p>• {organization.crawls_this_month} {t('superAdminCrawlsThisMonth')?.toLowerCase() || 'crawls used this month'}</p>
               {isTrialing && organization.trial_ends_at && (
                 <p className="text-blue-600 font-medium">Trial ends {format(new Date(organization.trial_ends_at), "MMM d, yyyy")}</p>
               )}
@@ -172,13 +172,13 @@ export default function Billing() {
 
                 <div className="space-y-2">
                   <p className="text-xs text-slate-500">
-                    • {planData.max_sites === -1 ? 'Unlimited' : planData.max_sites} sites
+                    • {planData.max_sites === -1 ? t('pricingUnlimited') : planData.max_sites} {t('pricingSites')}
                   </p>
                   <p className="text-xs text-slate-500">
-                    • {planData.max_crawls_per_month === -1 ? 'Unlimited' : planData.max_crawls_per_month} crawls/month
+                    • {planData.max_crawls_per_month === -1 ? t('pricingUnlimited') : planData.max_crawls_per_month} {t('pricingCrawls')}
                   </p>
                   <p className="text-xs text-slate-500">
-                    • {planData.max_users === -1 ? 'Unlimited' : planData.max_users} team members
+                    • {planData.max_users === -1 ? t('pricingUnlimited') : planData.max_users} team members
                   </p>
                 </div>
 
