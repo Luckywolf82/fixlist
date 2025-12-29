@@ -18,6 +18,7 @@ export default function Reports() {
   const [selectedSiteId, setSelectedSiteId] = useState("all");
   const [generatingForSite, setGeneratingForSite] = useState(null);
   const [periodDays, setPeriodDays] = useState("30");
+  const [reportLanguage, setReportLanguage] = useState("en");
 
   const queryClient = useQueryClient();
 
@@ -37,7 +38,7 @@ export default function Reports() {
   });
 
   const generateReportMutation = useMutation({
-    mutationFn: async ({ siteId, days }) => {
+    mutationFn: async ({ siteId, days, language }) => {
       // Get default template
       const templates = await base44.entities.ReportTemplate.filter({ is_default: true });
       const defaultTemplate = templates[0];
@@ -45,7 +46,8 @@ export default function Reports() {
       const response = await base44.functions.invoke('generateEnhancedReport', { 
         site_id: siteId,
         period_days: parseInt(days),
-        template_id: defaultTemplate?.id
+        template_id: defaultTemplate?.id,
+        language: language
       });
       return response.data;
     },
@@ -64,7 +66,7 @@ export default function Reports() {
 
   const handleGenerateReport = (siteId) => {
     setGeneratingForSite(siteId);
-    generateReportMutation.mutate({ siteId, days: periodDays });
+    generateReportMutation.mutate({ siteId, days: periodDays, language: reportLanguage });
   };
 
   const getSiteName = (siteId) => {
@@ -125,6 +127,21 @@ export default function Reports() {
                 <SelectItem value="7">{t('reportsLast7Days') || 'Last 7 days'}</SelectItem>
                 <SelectItem value="30">{t('reportsLast30Days') || 'Last 30 days'}</SelectItem>
                 <SelectItem value="90">{t('reportsLast90Days') || 'Last 90 days'}</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={reportLanguage} onValueChange={setReportLanguage}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="en">English</SelectItem>
+                <SelectItem value="no">Norsk</SelectItem>
+                <SelectItem value="sv">Svenska</SelectItem>
+                <SelectItem value="da">Dansk</SelectItem>
+                <SelectItem value="de">Deutsch</SelectItem>
+                <SelectItem value="fr">Français</SelectItem>
+                <SelectItem value="es">Español</SelectItem>
               </SelectContent>
             </Select>
 
