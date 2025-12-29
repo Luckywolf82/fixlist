@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/components/useAuth";
 import { usePermissions } from "@/components/usePermissions";
+import { useLanguage } from "@/components/LanguageContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,6 +17,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 export default function UserManagement() {
   useAuth();
   const { canManageUsers, user: currentUser } = usePermissions();
+  const { t } = useLanguage();
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteRole, setInviteRole] = useState("editor");
   const queryClient = useQueryClient();
@@ -39,10 +41,10 @@ export default function UserManagement() {
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
       setInviteEmail("");
       setInviteRole("editor");
-      toast.success("User invited successfully");
+      toast.success(t("usersInviteSuccess"));
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to invite user");
+      toast.error(error.message || t("usersInviteFailed"));
     },
   });
 
@@ -52,16 +54,16 @@ export default function UserManagement() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["allUsers"] });
-      toast.success("User role updated");
+      toast.success(t("usersRoleUpdated"));
     },
     onError: (error) => {
-      toast.error(error.message || "Failed to update role");
+      toast.error(error.message || t("usersRoleUpdateFailed"));
     },
   });
 
   const handleInvite = () => {
     if (!inviteEmail || !inviteEmail.includes("@")) {
-      toast.error("Please enter a valid email");
+      toast.error(t("usersInvalidEmail"));
       return;
     }
     inviteMutation.mutate({ email: inviteEmail, role: inviteRole });
@@ -88,11 +90,11 @@ export default function UserManagement() {
   if (!canManageUsers) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-slate-900">Access Denied</h1>
+        <h1 className="text-2xl font-semibold text-slate-900">{t("settingsAccessDenied")}</h1>
         <Card className="p-12 text-center">
           <Shield className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-          <p className="text-slate-600">You don't have permission to access user management.</p>
-          <p className="text-sm text-slate-500 mt-2">Contact an administrator for access.</p>
+          <p className="text-slate-600">{t("usersNoPermission")}</p>
+          <p className="text-sm text-slate-500 mt-2">{t("usersContactAdmin")}</p>
         </Card>
       </div>
     );
@@ -110,19 +112,19 @@ export default function UserManagement() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">User Management</h1>
-        <p className="text-slate-500 mt-1">Manage team members and their permissions</p>
+        <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t("usersTitle")}</h1>
+        <p className="text-slate-500 mt-1">{t("usersSubtitle")}</p>
       </div>
 
       {/* Invite User */}
       <Card className="p-6">
         <div className="flex items-center gap-2 mb-4">
           <UserPlus className="w-5 h-5 text-slate-600" />
-          <h2 className="font-semibold text-slate-900">Invite New User</h2>
+          <h2 className="font-semibold text-slate-900">{t("usersInviteNew")}</h2>
         </div>
         <div className="flex gap-3">
           <Input
-            placeholder="user@example.com"
+            placeholder={t("usersInvitePlaceholder")}
             value={inviteEmail}
             onChange={(e) => setInviteEmail(e.target.value)}
             className="flex-1"
@@ -133,9 +135,9 @@ export default function UserManagement() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="viewer">Viewer</SelectItem>
-              <SelectItem value="editor">Editor</SelectItem>
-              <SelectItem value="administrator">Administrator</SelectItem>
+              <SelectItem value="viewer">{t("usersViewer")}</SelectItem>
+              <SelectItem value="editor">{t("usersEditor")}</SelectItem>
+              <SelectItem value="administrator">{t("usersAdministrator")}</SelectItem>
             </SelectContent>
           </Select>
           <Button
@@ -143,7 +145,7 @@ export default function UserManagement() {
             disabled={inviteMutation.isPending}
             className="bg-slate-900 hover:bg-slate-800"
           >
-            {inviteMutation.isPending ? "Inviting..." : "Invite"}
+            {inviteMutation.isPending ? t("usersInviting") : t("usersInvite")}
           </Button>
         </div>
       </Card>
@@ -153,38 +155,38 @@ export default function UserManagement() {
         <Card className="p-5 border-slate-200">
           <div className="flex items-center gap-2 mb-3">
             <Eye className="w-5 h-5 text-slate-600" />
-            <h3 className="font-semibold text-slate-900">Viewer</h3>
+            <h3 className="font-semibold text-slate-900">{t("usersViewer")}</h3>
           </div>
           <ul className="text-sm text-slate-600 space-y-1">
-            <li>• View sites and reports</li>
-            <li>• View crawl history</li>
-            <li>• View issues</li>
-            <li className="text-slate-400">• Cannot make changes</li>
+            <li>{t("usersViewerDesc1")}</li>
+            <li>{t("usersViewerDesc2")}</li>
+            <li>{t("usersViewerDesc3")}</li>
+            <li className="text-slate-400">{t("usersViewerDesc4")}</li>
           </ul>
         </Card>
         <Card className="p-5 border-blue-200 bg-blue-50/30">
           <div className="flex items-center gap-2 mb-3">
             <Edit3 className="w-5 h-5 text-blue-600" />
-            <h3 className="font-semibold text-slate-900">Editor</h3>
+            <h3 className="font-semibold text-slate-900">{t("usersEditor")}</h3>
           </div>
           <ul className="text-sm text-slate-600 space-y-1">
-            <li>• Everything Viewer can do</li>
-            <li>• Add sites and start crawls</li>
-            <li>• Manage schedules</li>
-            <li>• Update issue statuses</li>
-            <li className="text-slate-400">• Cannot delete sites</li>
+            <li>{t("usersEditorDesc1")}</li>
+            <li>{t("usersEditorDesc2")}</li>
+            <li>{t("usersEditorDesc3")}</li>
+            <li>{t("usersEditorDesc4")}</li>
+            <li className="text-slate-400">{t("usersEditorDesc5")}</li>
           </ul>
         </Card>
         <Card className="p-5 border-purple-200 bg-purple-50/30">
           <div className="flex items-center gap-2 mb-3">
             <Crown className="w-5 h-5 text-purple-600" />
-            <h3 className="font-semibold text-slate-900">Administrator</h3>
+            <h3 className="font-semibold text-slate-900">{t("usersAdministrator")}</h3>
           </div>
           <ul className="text-sm text-slate-600 space-y-1">
-            <li>• Full access to all features</li>
-            <li>• Delete sites</li>
-            <li>• Access settings</li>
-            <li>• Manage users and roles</li>
+            <li>{t("usersAdminDesc1")}</li>
+            <li>{t("usersAdminDesc2")}</li>
+            <li>{t("usersAdminDesc3")}</li>
+            <li>{t("usersAdminDesc4")}</li>
           </ul>
         </Card>
       </div>
@@ -194,16 +196,16 @@ export default function UserManagement() {
         <div className="p-5 border-b border-slate-100">
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-slate-600" />
-            <h2 className="font-semibold text-slate-900">Team Members ({users.length})</h2>
+            <h2 className="font-semibold text-slate-900">{t("usersTeamMembers")} ({users.length})</h2>
           </div>
         </div>
         <Table>
           <TableHeader>
             <TableRow className="bg-slate-50/50">
-              <TableHead className="font-semibold text-slate-700">User</TableHead>
-              <TableHead className="font-semibold text-slate-700">Email</TableHead>
-              <TableHead className="font-semibold text-slate-700">Role</TableHead>
-              <TableHead className="font-semibold text-slate-700">Actions</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("usersUser")}</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("usersEmail")}</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("usersRole")}</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("usersActions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -218,7 +220,7 @@ export default function UserManagement() {
                       {getRoleIcon(userRole)}
                       <span className="font-medium text-slate-900">{user.full_name}</span>
                       {isCurrentUser && (
-                        <Badge variant="outline" className="text-xs">You</Badge>
+                        <Badge variant="outline" className="text-xs">{t("usersYou")}</Badge>
                       )}
                     </div>
                   </TableCell>
@@ -238,13 +240,13 @@ export default function UserManagement() {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="viewer">Viewer</SelectItem>
-                          <SelectItem value="editor">Editor</SelectItem>
-                          <SelectItem value="administrator">Administrator</SelectItem>
+                          <SelectItem value="viewer">{t("usersViewer")}</SelectItem>
+                          <SelectItem value="editor">{t("usersEditor")}</SelectItem>
+                          <SelectItem value="administrator">{t("usersAdministrator")}</SelectItem>
                         </SelectContent>
                       </Select>
                     ) : (
-                      <span className="text-sm text-slate-500">Cannot change own role</span>
+                      <span className="text-sm text-slate-500">{t("usersCannotChangeOwnRole")}</span>
                     )}
                   </TableCell>
                 </TableRow>
