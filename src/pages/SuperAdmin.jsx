@@ -11,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shield, Building2, Users, Globe, TrendingUp, DollarSign, Search, Package, Plus, Trash2, Edit } from "lucide-react";
+import { Shield, Building2, Users, Globe, TrendingUp, DollarSign, Search, Package, Plus, Trash2, Edit, Key } from "lucide-react";
 import { format } from "date-fns";
 import toast from "react-hot-toast";
 
@@ -20,6 +20,8 @@ export default function SuperAdmin() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+  const [stripeSecretKey, setStripeSecretKey] = useState("");
+  const [stripeWebhookSecret, setStripeWebhookSecret] = useState("");
   const [productForm, setProductForm] = useState({
     name: "",
     plan_key: "starter",
@@ -273,6 +275,70 @@ export default function SuperAdmin() {
           </div>
         </Card>
       </div>
+
+      {/* Stripe Configuration */}
+      <Card className="overflow-hidden">
+        <div className="p-5 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <Key className="w-5 h-5 text-orange-600" />
+            <h2 className="font-semibold text-slate-900">Stripe Configuration</h2>
+          </div>
+        </div>
+        <div className="p-5 space-y-4">
+          <div>
+            <Label>Stripe Secret Key</Label>
+            <Input
+              type="password"
+              value={stripeSecretKey}
+              onChange={(e) => setStripeSecretKey(e.target.value)}
+              placeholder="sk_live_..."
+              className="font-mono text-sm"
+            />
+            <p className="text-xs text-slate-500 mt-1">
+              Used for backend API calls to Stripe
+            </p>
+          </div>
+          <div>
+            <Label>Stripe Webhook Secret</Label>
+            <Input
+              type="password"
+              value={stripeWebhookSecret}
+              onChange={(e) => setStripeWebhookSecret(e.target.value)}
+              placeholder="whsec_..."
+              className="font-mono text-sm"
+            />
+            <p className="text-xs text-slate-500 mt-1">
+              Used to validate webhook events from Stripe
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              onClick={async () => {
+                try {
+                  const response = await base44.functions.invoke('setStripeSecrets', {
+                    secret_key: stripeSecretKey,
+                    webhook_secret: stripeWebhookSecret
+                  });
+                  if (response.data.success) {
+                    toast.success("Stripe secrets updated");
+                    setStripeSecretKey("");
+                    setStripeWebhookSecret("");
+                  }
+                } catch (error) {
+                  toast.error("Failed to update secrets");
+                }
+              }}
+              disabled={!stripeSecretKey && !stripeWebhookSecret}
+              className="bg-orange-600 hover:bg-orange-700"
+            >
+              Save Secrets
+            </Button>
+            <Button variant="outline" onClick={() => { setStripeSecretKey(""); setStripeWebhookSecret(""); }}>
+              Clear
+            </Button>
+          </div>
+        </div>
+      </Card>
 
       {/* Products Section */}
       <Card className="overflow-hidden">
