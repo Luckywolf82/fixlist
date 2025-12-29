@@ -4,6 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/components/useAuth";
 import { usePermissions } from "@/components/usePermissions";
 import { usePlanLimits } from "@/components/usePlanLimits";
+import { useLanguage } from "@/components/LanguageContext";
 import UserNotRegisteredError from "@/components/UserNotRegisteredError";
 import PlanLimitWarning from "@/components/PlanLimitWarning";
 import OnboardingWizard from "@/components/OnboardingWizard";
@@ -24,6 +25,7 @@ import { toast } from "sonner";
 import ScheduleCrawlDialog from "@/components/ScheduleCrawlDialog";
 
 export default function Sites() {
+  const { t } = useLanguage();
   const { user, isLoading: authLoading } = useAuth();
   const { canAddSite, canDeleteSite, canStartCrawl, canManageSchedules } = usePermissions();
   const { organization, limits, canAddSite: canAddSiteByPlan, canCrawl } = usePlanLimits();
@@ -236,7 +238,7 @@ export default function Sites() {
 
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Sites</h1>
+          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t('sitesTitle')}</h1>
           <p className="text-slate-500 mt-1">Manage and monitor your websites</p>
         </div>
         {canAddSite && (
@@ -244,19 +246,19 @@ export default function Sites() {
           <DialogTrigger asChild>
             <Button className="bg-slate-900 hover:bg-slate-800">
               <Plus className="w-4 h-4 mr-2" />
-              Add Site
+              {t('sitesAddSite')}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Site</DialogTitle>
+              <DialogTitle>{t('sitesAddSiteDialogTitle')}</DialogTitle>
               <DialogDescription>
-                Enter the domain of the website you want to monitor
+                {t('sitesAddSiteDialogDesc')}
               </DialogDescription>
             </DialogHeader>
             <div className="py-4">
               <Input
-                placeholder="example.com"
+                placeholder={t('sitesDomainPlaceholder')}
                 value={newDomain}
                 onChange={(e) => setNewDomain(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAddSite()}
@@ -264,7 +266,7 @@ export default function Sites() {
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>
-                Cancel
+                {t('sitesCancel')}
               </Button>
               <Button 
                 onClick={handleAddSite}
@@ -277,7 +279,7 @@ export default function Sites() {
                     Adding...
                   </>
                 ) : (
-                  'Add Site'
+                  t('sitesAdd')
                 )}
               </Button>
             </DialogFooter>
@@ -291,19 +293,19 @@ export default function Sites() {
           <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Globe className="w-6 h-6 text-slate-400" />
           </div>
-          <h3 className="text-lg font-medium text-slate-900 mb-2">No sites yet</h3>
-          <p className="text-slate-500 mb-6">Add your first website to start monitoring</p>
+          <h3 className="text-lg font-medium text-slate-900 mb-2">{t('sitesNoSites')}</h3>
+          <p className="text-slate-500 mb-6">{t('sitesNoSitesDesc')}</p>
         </Card>
       ) : (
         <Card className="overflow-hidden border-slate-200">
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50/50">
-                <TableHead className="font-semibold text-slate-700">Domain</TableHead>
-                <TableHead className="font-semibold text-slate-700">Schedule</TableHead>
-                <TableHead className="font-semibold text-slate-700">Last Crawl</TableHead>
-                <TableHead className="font-semibold text-slate-700">Open Issues</TableHead>
-                <TableHead className="font-semibold text-slate-700 text-right">Actions</TableHead>
+                <TableHead className="font-semibold text-slate-700">{t('sitesDomain')}</TableHead>
+                <TableHead className="font-semibold text-slate-700">{t('sitesSchedule')}</TableHead>
+                <TableHead className="font-semibold text-slate-700">{t('sitesLastCrawl')}</TableHead>
+                <TableHead className="font-semibold text-slate-700">{t('sitesIssues')}</TableHead>
+                <TableHead className="font-semibold text-slate-700 text-right">{t('sitesActions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

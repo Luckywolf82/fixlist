@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/components/useAuth";
 import { usePermissions } from "@/components/usePermissions";
+import { useLanguage } from "@/components/LanguageContext";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Card } from "@/components/ui/card";
@@ -17,6 +18,7 @@ import { ArrowLeft, MoreHorizontal, CheckCircle, EyeOff, ExternalLink, Filter } 
 
 export default function Issues() {
   useAuth();
+  const { t } = useLanguage();
   const { canUpdateIssues } = usePermissions();
   const urlParams = new URLSearchParams(window.location.search);
   const siteId = urlParams.get("siteId");

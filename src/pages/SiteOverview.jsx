@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { usePermissions } from "@/components/usePermissions";
+import { useLanguage } from "@/components/LanguageContext";
 import { Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
@@ -17,6 +18,7 @@ import { format } from "date-fns";
 import toast from "react-hot-toast";
 
 export default function SiteOverview() {
+  const { t } = useLanguage();
   const { canStartCrawl } = usePermissions();
   const [isCrawling, setIsCrawling] = useState(false);
   const [renderJs, setRenderJs] = useState(false);
