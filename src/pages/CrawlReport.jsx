@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useLanguage } from "@/components/LanguageContext";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Card } from "@/components/ui/card";
@@ -13,6 +14,7 @@ import { ArrowLeft, ExternalLink, AlertCircle, CheckCircle, Clock, FileText, Bug
 import { format } from "date-fns";
 
 export default function CrawlReport() {
+  const { t } = useLanguage();
   const urlParams = new URLSearchParams(window.location.search);
   const crawlId = urlParams.get("crawlId");
   const siteId = urlParams.get("siteId");
@@ -105,9 +107,9 @@ export default function CrawlReport() {
   if (!crawl) {
     return (
       <div className="text-center py-12">
-        <p className="text-slate-500">Crawl not found</p>
+        <p className="text-slate-500">{t("crawlReportNotFound")}</p>
         <Link to={createPageUrl(`Crawls?siteId=${siteId}`)}>
-          <Button variant="outline" className="mt-4">Back to Crawls</Button>
+          <Button variant="outline" className="mt-4">{t("crawlReportBackToCrawls")}</Button>
         </Link>
       </div>
     );
@@ -122,11 +124,11 @@ export default function CrawlReport() {
           className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 mb-3"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Crawl History
+          {t("crawlReportBackTo")}
         </Link>
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Crawl Report</h1>
+            <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t("crawlReportTitle")}</h1>
             <div className="flex items-center gap-3 mt-2">
               <p className="text-slate-600">{site?.domain || "Unknown Site"}</p>
               <span className="text-slate-300">•</span>
@@ -139,7 +141,7 @@ export default function CrawlReport() {
           {crawl.status === "done" && (
             <div className="flex items-center gap-2 text-sm text-slate-600">
               <Clock className="w-4 h-4" />
-              Duration: {crawl.finished_at 
+              {t("crawlReportDuration")}: {crawl.finished_at 
                 ? Math.round((new Date(crawl.finished_at) - new Date(crawl.started_at)) / 1000) + "s"
                 : "N/A"}
             </div>
@@ -152,7 +154,7 @@ export default function CrawlReport() {
         <Card className="p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-500 mb-1">Total Pages</p>
+              <p className="text-sm text-slate-500 mb-1">{t("crawlReportTotalPages")}</p>
               <p className="text-2xl font-semibold text-slate-900">{stats.totalPages}</p>
             </div>
             <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
@@ -161,14 +163,14 @@ export default function CrawlReport() {
           </div>
           <div className="flex items-center gap-2 mt-3 text-sm">
             <CheckCircle className="w-4 h-4 text-emerald-500" />
-            <span className="text-emerald-600">{stats.successfulPages} successful</span>
+            <span className="text-emerald-600">{stats.successfulPages} {t("crawlReportSuccessful")}</span>
           </div>
         </Card>
 
         <Card className="p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-500 mb-1">Total Issues</p>
+              <p className="text-sm text-slate-500 mb-1">{t("crawlReportTotalIssues")}</p>
               <p className="text-2xl font-semibold text-slate-900">{stats.totalIssues}</p>
             </div>
             <div className="w-12 h-12 bg-amber-50 rounded-lg flex items-center justify-center">
@@ -177,14 +179,14 @@ export default function CrawlReport() {
           </div>
           <div className="flex items-center gap-2 mt-3 text-sm">
             <AlertCircle className="w-4 h-4 text-amber-500" />
-            <span className="text-amber-600">{stats.openIssues} open</span>
+            <span className="text-amber-600">{stats.openIssues} {t("crawlReportOpen")}</span>
           </div>
         </Card>
 
         <Card className="p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-500 mb-1">Critical Issues</p>
+              <p className="text-sm text-slate-500 mb-1">{t("crawlReportCriticalIssues")}</p>
               <p className="text-2xl font-semibold text-red-600">{stats.criticalIssues}</p>
             </div>
             <div className="w-12 h-12 bg-red-50 rounded-lg flex items-center justify-center">
@@ -192,14 +194,14 @@ export default function CrawlReport() {
             </div>
           </div>
           <div className="flex items-center gap-2 mt-3 text-sm text-slate-500">
-            Requires immediate attention
+            {t("crawlReportRequiresAttention")}
           </div>
         </Card>
 
         <Card className="p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-500 mb-1">Error Pages</p>
+              <p className="text-sm text-slate-500 mb-1">{t("crawlReportErrorPages")}</p>
               <p className="text-2xl font-semibold text-slate-900">{stats.errorPages}</p>
             </div>
             <div className="w-12 h-12 bg-slate-50 rounded-lg flex items-center justify-center">
@@ -207,7 +209,7 @@ export default function CrawlReport() {
             </div>
           </div>
           <div className="flex items-center gap-2 mt-3 text-sm text-slate-500">
-            Failed to crawl properly
+            {t("crawlReportFailedCrawl")}
           </div>
         </Card>
       </div>
@@ -215,15 +217,15 @@ export default function CrawlReport() {
       {/* Issues by Type */}
       <Card className="overflow-hidden">
         <div className="p-5 border-b border-slate-100">
-          <h2 className="font-semibold text-slate-900">Issues by Type</h2>
-          <p className="text-sm text-slate-500 mt-1">Breakdown of all identified SEO issues</p>
+          <h2 className="font-semibold text-slate-900">{t("crawlReportIssuesByType")}</h2>
+          <p className="text-sm text-slate-500 mt-1">{t("crawlReportBreakdown")}</p>
         </div>
         <div className="divide-y divide-slate-100">
           {Object.keys(issuesByType).length === 0 ? (
             <div className="p-12 text-center">
               <CheckCircle className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
-              <h3 className="text-lg font-medium text-slate-900 mb-2">No issues found</h3>
-              <p className="text-slate-500">All pages passed the SEO checks successfully</p>
+              <h3 className="text-lg font-medium text-slate-900 mb-2">{t("crawlReportNoIssues")}</h3>
+              <p className="text-slate-500">{t("crawlReportAllPassed")}</p>
             </div>
           ) : (
             Object.entries(issuesByType).map(([type, typeIssues]) => {
@@ -238,16 +240,16 @@ export default function CrawlReport() {
                         {type.replace(/_/g, " ")}
                       </h3>
                       <p className="text-sm text-slate-500 mt-1">
-                        {openCount} open issue{openCount !== 1 ? "s" : ""} 
+                        {openCount} {openCount !== 1 ? t("crawlReportOpenIssues") : t("crawlReportOpenIssue")}
                         {criticalCount > 0 && (
                           <span className="text-red-600 ml-2">
-                            ({criticalCount} critical)
+                            ({criticalCount} {t("crawlReportCritical")})
                           </span>
                         )}
                       </p>
                     </div>
                     <Badge variant="outline" className="bg-slate-50">
-                      {typeIssues.length} total
+                      {typeIssues.length} {t("crawlReportTotal")}
                     </Badge>
                   </div>
                   
@@ -260,7 +262,7 @@ export default function CrawlReport() {
                             <p className="text-sm text-slate-900 font-medium truncate">{issue.url}</p>
                             <p className="text-sm text-slate-600 mt-1">{issue.message}</p>
                             <p className="text-xs text-slate-500 mt-2 flex items-start gap-1">
-                              <span className="font-medium">Fix:</span>
+                              <span className="font-medium">{t("crawlReportFix")}</span>
                               <span>{issue.how_to_fix}</span>
                             </p>
                           </div>
@@ -269,7 +271,7 @@ export default function CrawlReport() {
                     ))}
                     {typeIssues.length > 3 && (
                       <p className="text-sm text-slate-500 text-center pt-2">
-                        +{typeIssues.length - 3} more issue{typeIssues.length - 3 !== 1 ? "s" : ""}
+                        +{typeIssues.length - 3} {typeIssues.length - 3 !== 1 ? t("crawlReportMoreIssues") : t("crawlReportMoreIssue")}
                       </p>
                     )}
                   </div>
@@ -283,16 +285,16 @@ export default function CrawlReport() {
       {/* Crawled Pages */}
       <Card className="overflow-hidden">
         <div className="p-5 border-b border-slate-100">
-          <h2 className="font-semibold text-slate-900">Crawled Pages</h2>
-          <p className="text-sm text-slate-500 mt-1">{pages.length} pages discovered and analyzed</p>
+          <h2 className="font-semibold text-slate-900">{t("crawlReportCrawledPages")}</h2>
+          <p className="text-sm text-slate-500 mt-1">{pages.length} {t("crawlReportPagesDiscovered")}</p>
         </div>
         <Table>
           <TableHeader>
             <TableRow className="bg-slate-50/50">
-              <TableHead className="font-semibold text-slate-700">URL</TableHead>
-              <TableHead className="font-semibold text-slate-700 w-[100px]">Status</TableHead>
-              <TableHead className="font-semibold text-slate-700">Title</TableHead>
-              <TableHead className="font-semibold text-slate-700 w-[100px]">Issues</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("crawlReportURL")}</TableHead>
+              <TableHead className="font-semibold text-slate-700 w-[100px]">{t("crawlReportStatus")}</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("crawlReportTitle")}</TableHead>
+              <TableHead className="font-semibold text-slate-700 w-[100px]">{t("crawlReportIssues")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -323,7 +325,7 @@ export default function CrawlReport() {
                   </TableCell>
                   <TableCell>
                     <p className="text-sm text-slate-600 truncate max-w-[250px]" title={page.title}>
-                      {page.title || <span className="text-slate-400 italic">No title</span>}
+                      {page.title || <span className="text-slate-400 italic">{t("crawlReportNoTitle")}</span>}
                     </p>
                   </TableCell>
                   <TableCell>
@@ -335,7 +337,7 @@ export default function CrawlReport() {
                     ) : (
                       <div className="flex items-center gap-1.5">
                         <CheckCircle className="w-4 h-4 text-emerald-500" />
-                        <span className="text-sm text-emerald-600">OK</span>
+                        <span className="text-sm text-emerald-600">{t("crawlReportOK")}</span>
                       </div>
                     )}
                   </TableCell>

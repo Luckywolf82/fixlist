@@ -1,6 +1,7 @@
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useLanguage } from "@/components/LanguageContext";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Card } from "@/components/ui/card";
@@ -12,6 +13,7 @@ import StatusBadge from "@/components/ui/StatusBadge";
 import { ArrowLeft, ExternalLink, FileText, Hash, Type, AlignLeft, Link as LinkIcon, Heading1 } from "lucide-react";
 
 export default function PageDetail() {
+  const { t } = useLanguage();
   const urlParams = new URLSearchParams(window.location.search);
   const siteId = urlParams.get("siteId");
   const pageId = urlParams.get("pageId");
@@ -65,9 +67,9 @@ export default function PageDetail() {
   if (!page) {
     return (
       <div className="text-center py-12">
-        <p className="text-slate-500">Page not found</p>
+        <p className="text-slate-500">{t("pageDetailNotFound")}</p>
         <Link to={createPageUrl(`Pages?siteId=${siteId}`)}>
-          <Button variant="outline" className="mt-4">Back to Pages</Button>
+          <Button variant="outline" className="mt-4">{t("pageDetailBackToPages")}</Button>
         </Link>
       </div>
     );
@@ -82,7 +84,7 @@ export default function PageDetail() {
           className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 mb-3"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to Pages
+          {t("pageDetailBackTo")}
         </Link>
         <div className="flex items-start justify-between">
           <div>
@@ -99,7 +101,7 @@ export default function PageDetail() {
                 rel="noopener noreferrer"
                 className="text-sm text-slate-500 hover:text-slate-700 flex items-center gap-1"
               >
-                Open page <ExternalLink className="w-3.5 h-3.5" />
+                {t("pageDetailOpenPage")} <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </div>
           </div>
@@ -109,7 +111,7 @@ export default function PageDetail() {
       {/* Page Details */}
       <Card className="overflow-hidden">
         <div className="p-5 border-b border-slate-100 bg-slate-50/50">
-          <h2 className="font-semibold text-slate-900">Page Information</h2>
+          <h2 className="font-semibold text-slate-900">{t("pageDetailPageInfo")}</h2>
         </div>
         <div className="divide-y divide-slate-100">
           <div className="p-5 flex items-start gap-4">
@@ -117,9 +119,9 @@ export default function PageDetail() {
               <Type className="w-5 h-5 text-slate-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-500">Title</p>
+              <p className="text-sm font-medium text-slate-500">{t("pageDetailTitle")}</p>
               <p className="text-slate-900 mt-1">
-                {page.title || <span className="text-slate-400 italic">No title found</span>}
+                {page.title || <span className="text-slate-400 italic">{t("pageDetailNoTitle")}</span>}
               </p>
             </div>
           </div>
@@ -129,9 +131,9 @@ export default function PageDetail() {
               <AlignLeft className="w-5 h-5 text-slate-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-500">Meta Description</p>
+              <p className="text-sm font-medium text-slate-500">{t("pageDetailMetaDesc")}</p>
               <p className="text-slate-900 mt-1">
-                {page.meta_description || <span className="text-slate-400 italic">No meta description found</span>}
+                {page.meta_description || <span className="text-slate-400 italic">{t("pageDetailNoMetaDesc")}</span>}
               </p>
             </div>
           </div>
@@ -141,9 +143,9 @@ export default function PageDetail() {
               <LinkIcon className="w-5 h-5 text-slate-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-500">Canonical URL</p>
+              <p className="text-sm font-medium text-slate-500">{t("pageDetailCanonical")}</p>
               <p className="text-slate-900 mt-1 break-all">
-                {page.canonical || <span className="text-slate-400 italic">No canonical URL set</span>}
+                {page.canonical || <span className="text-slate-400 italic">{t("pageDetailNoCanonical")}</span>}
               </p>
             </div>
           </div>
@@ -153,12 +155,12 @@ export default function PageDetail() {
               <Heading1 className="w-5 h-5 text-slate-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-500">H1 Tag</p>
+              <p className="text-sm font-medium text-slate-500">{t("pageDetailH1")}</p>
               <p className="text-slate-900 mt-1">
-                {page.h1 || <span className="text-slate-400 italic">No H1 found</span>}
+                {page.h1 || <span className="text-slate-400 italic">{t("pageDetailNoH1")}</span>}
               </p>
               <p className="text-sm text-slate-500 mt-1">
-                {page.h1_count} H1 tag{page.h1_count !== 1 ? "s" : ""} on page
+                {page.h1_count} {t("pageDetailH1Count")}
               </p>
             </div>
           </div>
@@ -168,9 +170,9 @@ export default function PageDetail() {
               <Hash className="w-5 h-5 text-slate-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-500">Word Count</p>
+              <p className="text-sm font-medium text-slate-500">{t("pageDetailWordCount")}</p>
               <p className="text-slate-900 mt-1">
-                ~{page.word_count_estimate?.toLocaleString() || 0} words
+                ~{page.word_count_estimate?.toLocaleString() || 0} {t("pageDetailWords")}
               </p>
             </div>
           </div>
@@ -181,7 +183,7 @@ export default function PageDetail() {
       <Card className="overflow-hidden">
         <div className="p-5 border-b border-slate-100 bg-slate-50/50">
           <h2 className="font-semibold text-slate-900">
-            Issues on this page ({issues.length})
+            {t("pageDetailIssuesOnPage")} ({issues.length})
           </h2>
         </div>
         {issues.length === 0 ? (
@@ -189,8 +191,8 @@ export default function PageDetail() {
             <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-3">
               <FileText className="w-6 h-6 text-emerald-600" />
             </div>
-            <p className="text-slate-600 font-medium">No issues found</p>
-            <p className="text-sm text-slate-500 mt-1">This page looks good!</p>
+            <p className="text-slate-600 font-medium">{t("pageDetailNoIssuesFound")}</p>
+            <p className="text-sm text-slate-500 mt-1">{t("pageDetailPageLooksGood")}</p>
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
@@ -208,7 +210,7 @@ export default function PageDetail() {
                     <p className="text-slate-900 font-medium">{issue.message}</p>
                     <div className="mt-3 p-3 bg-slate-50 rounded-lg">
                       <p className="text-sm text-slate-600">
-                        <strong className="text-slate-700">How to fix:</strong> {issue.how_to_fix}
+                        <strong className="text-slate-700">{t("pageDetailHowToFix")}</strong> {issue.how_to_fix}
                       </p>
                     </div>
                   </div>

@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useLanguage } from "@/components/LanguageContext";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { Card } from "@/components/ui/card";
@@ -11,6 +12,7 @@ import { format, subDays } from "date-fns";
 import { ArrowLeft, TrendingUp, AlertCircle, Clock, Zap } from "lucide-react";
 
 export default function HealthReport() {
+  const { t } = useLanguage();
   const urlParams = new URLSearchParams(window.location.search);
   const siteId = urlParams.get("siteId");
   const [dateRange, setDateRange] = useState("30");
@@ -168,9 +170,9 @@ export default function HealthReport() {
   if (!site) {
     return (
       <div className="text-center py-12">
-        <p className="text-slate-500">Site not found</p>
+        <p className="text-slate-500">{t("pageDetailNotFound")}</p>
         <Link to={createPageUrl("Sites")}>
-          <Button variant="outline" className="mt-4">Back to Sites</Button>
+          <Button variant="outline" className="mt-4">{t("siteOverviewBackToSites")}</Button>
         </Link>
       </div>
     );
@@ -186,20 +188,20 @@ export default function HealthReport() {
             className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 mb-3"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to {site.domain}
+            {t("healthReportBackTo")} {site.domain}
           </Link>
-          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Health Report</h1>
-          <p className="text-slate-500 mt-1">Performance and health trends for {site.domain}</p>
+          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t("healthReportTitle")}</h1>
+          <p className="text-slate-500 mt-1">{t("healthReportSubtitle")} {site.domain}</p>
         </div>
         <Select value={dateRange} onValueChange={setDateRange}>
           <SelectTrigger className="w-[180px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="7">Last 7 days</SelectItem>
-            <SelectItem value="14">Last 14 days</SelectItem>
-            <SelectItem value="30">Last 30 days</SelectItem>
-            <SelectItem value="90">Last 90 days</SelectItem>
+            <SelectItem value="7">{t("healthReportLast7Days")}</SelectItem>
+            <SelectItem value="14">{t("healthReportLast14Days")}</SelectItem>
+            <SelectItem value="30">{t("healthReportLast30Days")}</SelectItem>
+            <SelectItem value="90">{t("healthReportLast90Days")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -213,7 +215,7 @@ export default function HealthReport() {
                 <TrendingUp className="w-5 h-5 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm text-slate-500">Total Pages</p>
+                <p className="text-sm text-slate-500">{t("healthReportTotalPages")}</p>
                 <p className="text-2xl font-semibold text-slate-900">{currentStats.totalPages}</p>
               </div>
             </div>
@@ -225,7 +227,7 @@ export default function HealthReport() {
                 <AlertCircle className="w-5 h-5 text-red-600" />
               </div>
               <div>
-                <p className="text-sm text-slate-500">Error Rate</p>
+                <p className="text-sm text-slate-500">{t("healthReportErrorRate")}</p>
                 <p className="text-2xl font-semibold text-slate-900">{currentStats.errorRate}%</p>
               </div>
             </div>
@@ -237,7 +239,7 @@ export default function HealthReport() {
                 <Zap className="w-5 h-5 text-emerald-600" />
               </div>
               <div>
-                <p className="text-sm text-slate-500">Avg Load Time</p>
+                <p className="text-sm text-slate-500">{t("healthReportAvgLoadTime")}</p>
                 <p className="text-2xl font-semibold text-slate-900">{currentStats.avgLoadTime}ms</p>
               </div>
             </div>
@@ -249,7 +251,7 @@ export default function HealthReport() {
                 <Clock className="w-5 h-5 text-amber-600" />
               </div>
               <div>
-                <p className="text-sm text-slate-500">Critical Issues</p>
+                <p className="text-sm text-slate-500">{t("healthReportCriticalIssues")}</p>
                 <p className="text-2xl font-semibold text-slate-900">{currentStats.criticalIssues}</p>
               </div>
             </div>
@@ -259,7 +261,7 @@ export default function HealthReport() {
 
       {/* Crawl History Chart */}
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Pages Crawled Over Time</h3>
+        <h3 className="text-lg font-semibold text-slate-900 mb-4">{t("healthReportPagesCrawled")}</h3>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={crawlHistoryData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -267,46 +269,46 @@ export default function HealthReport() {
             <YAxis stroke="#64748b" />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey="pages" stroke="#3b82f6" strokeWidth={2} name="Total Pages" />
-            <Line type="monotone" dataKey="success" stroke="#10b981" strokeWidth={2} name="Successful" />
-            <Line type="monotone" dataKey="errors" stroke="#ef4444" strokeWidth={2} name="Errors" />
+            <Line type="monotone" dataKey="pages" stroke="#3b82f6" strokeWidth={2} name={t("healthReportTotalPagesLabel")} />
+            <Line type="monotone" dataKey="success" stroke="#10b981" strokeWidth={2} name={t("healthReportSuccessful")} />
+            <Line type="monotone" dataKey="errors" stroke="#ef4444" strokeWidth={2} name={t("healthReportErrors")} />
           </LineChart>
         </ResponsiveContainer>
       </Card>
 
       {/* Error Rate Chart */}
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Error Rate Trend</h3>
+        <h3 className="text-lg font-semibold text-slate-900 mb-4">{t("healthReportErrorTrend")}</h3>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={errorRateData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis dataKey="date" stroke="#64748b" />
-            <YAxis stroke="#64748b" label={{ value: 'Error Rate (%)', angle: -90, position: 'insideLeft' }} />
+            <YAxis stroke="#64748b" label={{ value: t("healthReportErrorRate"), angle: -90, position: 'insideLeft' }} />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey="errorRate" stroke="#ef4444" strokeWidth={2} name="Error Rate %" />
+            <Line type="monotone" dataKey="errorRate" stroke="#ef4444" strokeWidth={2} name={t("healthReportErrorRate")} />
           </LineChart>
         </ResponsiveContainer>
       </Card>
 
       {/* Load Time Chart */}
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Average Page Load Time</h3>
+        <h3 className="text-lg font-semibold text-slate-900 mb-4">{t("healthReportLoadTime")}</h3>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart data={loadTimeData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis dataKey="date" stroke="#64748b" />
-            <YAxis stroke="#64748b" label={{ value: 'Load Time (ms)', angle: -90, position: 'insideLeft' }} />
+            <YAxis stroke="#64748b" label={{ value: t("healthReportLoadTimeLabel"), angle: -90, position: 'insideLeft' }} />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey="avgLoadTime" stroke="#10b981" strokeWidth={2} name="Avg Load Time (ms)" />
+            <Line type="monotone" dataKey="avgLoadTime" stroke="#10b981" strokeWidth={2} name={t("healthReportLoadTimeLabel")} />
           </LineChart>
         </ResponsiveContainer>
       </Card>
 
       {/* Issue Trends Chart */}
       <Card className="p-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Issue Trends by Severity</h3>
+        <h3 className="text-lg font-semibold text-slate-900 mb-4">{t("healthReportIssueTrends")}</h3>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={issueTrendsData}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
@@ -314,9 +316,9 @@ export default function HealthReport() {
             <YAxis stroke="#64748b" />
             <Tooltip />
             <Legend />
-            <Bar dataKey="critical" fill="#ef4444" name="Critical" />
-            <Bar dataKey="high" fill="#f59e0b" name="High" />
-            <Bar dataKey="medium" fill="#3b82f6" name="Medium" />
+            <Bar dataKey="critical" fill="#ef4444" name={t("issuesCritical")} />
+            <Bar dataKey="high" fill="#f59e0b" name={t("issuesHigh")} />
+            <Bar dataKey="medium" fill="#3b82f6" name={t("issuesMedium")} />
           </BarChart>
         </ResponsiveContainer>
       </Card>

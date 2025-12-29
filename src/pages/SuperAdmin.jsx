@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { usePermissions } from "@/components/usePermissions";
+import { useLanguage } from "@/components/LanguageContext";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ import toast from "react-hot-toast";
 
 export default function SuperAdmin() {
   const { user } = usePermissions();
+  const { t } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [isProductDialogOpen, setIsProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -72,10 +74,10 @@ export default function SuperAdmin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["allOrganizations"] });
-      toast.success("Organization updated");
+      toast.success(t("superAdminOrgUpdated"));
     },
     onError: () => {
-      toast.error("Failed to update organization");
+      toast.error(t("superAdminOrgUpdateFailed"));
     },
   });
 
@@ -89,12 +91,12 @@ export default function SuperAdmin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      toast.success("Product created in Stripe");
+      toast.success(t("superAdminProductCreated"));
       setIsProductDialogOpen(false);
       resetProductForm();
     },
     onError: (error) => {
-      toast.error("Failed to create product: " + error.message);
+      toast.error(t("superAdminProductCreateFailed") + ": " + error.message);
     },
   });
 
@@ -109,13 +111,13 @@ export default function SuperAdmin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      toast.success("Product updated in Stripe");
+      toast.success(t("superAdminProductUpdated"));
       setIsProductDialogOpen(false);
       setEditingProduct(null);
       resetProductForm();
     },
     onError: (error) => {
-      toast.error("Failed to update product: " + error.message);
+      toast.error(t("superAdminProductUpdateFailed") + ": " + error.message);
     },
   });
 
@@ -129,10 +131,10 @@ export default function SuperAdmin() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["products"] });
-      toast.success("Product archived in Stripe");
+      toast.success(t("superAdminProductDeleted"));
     },
     onError: (error) => {
-      toast.error("Failed to delete product: " + error.message);
+      toast.error(t("superAdminProductDeleteFailed") + ": " + error.message);
     },
   });
 
@@ -175,10 +177,10 @@ export default function SuperAdmin() {
   if (!isSuperAdmin) {
     return (
       <div className="space-y-6">
-        <h1 className="text-2xl font-semibold text-slate-900">Access Denied</h1>
+        <h1 className="text-2xl font-semibold text-slate-900">{t("settingsAccessDenied")}</h1>
         <Card className="p-12 text-center">
           <Shield className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-          <p className="text-slate-600">Only superadmins can access this panel.</p>
+          <p className="text-slate-600">{t("superAdminOnlySuperAdmin")}</p>
         </Card>
       </div>
     );
@@ -216,12 +218,12 @@ export default function SuperAdmin() {
         <div>
           <h1 className="text-2xl font-semibold text-slate-900 tracking-tight flex items-center gap-2">
             <Shield className="w-6 h-6 text-purple-600" />
-            SuperAdmin Dashboard
+            {t("superAdminTitle")}
           </h1>
-          <p className="text-slate-500 mt-1">Platform-wide analytics and management</p>
+          <p className="text-slate-500 mt-1">{t("superAdminSubtitle")}</p>
         </div>
         <Badge className="bg-purple-100 text-purple-700 border-purple-300">
-          SuperAdmin Access
+          {t("superAdminAccess")}
         </Badge>
       </div>
 
@@ -233,7 +235,7 @@ export default function SuperAdmin() {
               <Building2 className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm text-slate-600">Organizations</p>
+              <p className="text-sm text-slate-600">{t("superAdminOrganizations")}</p>
               <p className="text-2xl font-bold text-slate-900">{organizations.length}</p>
             </div>
           </div>
@@ -245,7 +247,7 @@ export default function SuperAdmin() {
               <Users className="w-5 h-5 text-green-600" />
             </div>
             <div>
-              <p className="text-sm text-slate-600">Total Users</p>
+              <p className="text-sm text-slate-600">{t("superAdminTotalUsers")}</p>
               <p className="text-2xl font-bold text-slate-900">{allUsers.length}</p>
             </div>
           </div>
@@ -257,7 +259,7 @@ export default function SuperAdmin() {
               <Globe className="w-5 h-5 text-purple-600" />
             </div>
             <div>
-              <p className="text-sm text-slate-600">Total Sites</p>
+              <p className="text-sm text-slate-600">{t("superAdminTotalSites")}</p>
               <p className="text-2xl font-bold text-slate-900">{sites.length}</p>
             </div>
           </div>
@@ -269,7 +271,7 @@ export default function SuperAdmin() {
               <DollarSign className="w-5 h-5 text-emerald-600" />
             </div>
             <div>
-              <p className="text-sm text-slate-600">MRR</p>
+              <p className="text-sm text-slate-600">{t("superAdminMRR")}</p>
               <p className="text-2xl font-bold text-slate-900">${totalRevenue.toLocaleString()}</p>
             </div>
           </div>
@@ -281,12 +283,12 @@ export default function SuperAdmin() {
         <div className="p-5 border-b border-slate-100">
           <div className="flex items-center gap-2">
             <Key className="w-5 h-5 text-orange-600" />
-            <h2 className="font-semibold text-slate-900">Stripe Configuration</h2>
+            <h2 className="font-semibold text-slate-900">{t("superAdminStripeConfig")}</h2>
           </div>
         </div>
         <div className="p-5 space-y-4">
           <div>
-            <Label>Stripe Secret Key</Label>
+            <Label>{t("superAdminStripeSecretKey")}</Label>
             <Input
               type="password"
               value={stripeSecretKey}
@@ -299,7 +301,7 @@ export default function SuperAdmin() {
             </p>
           </div>
           <div>
-            <Label>Stripe Webhook Secret</Label>
+            <Label>{t("superAdminStripeWebhookSecret")}</Label>
             <Input
               type="password"
               value={stripeWebhookSecret}
@@ -320,21 +322,21 @@ export default function SuperAdmin() {
                     webhook_secret: stripeWebhookSecret
                   });
                   if (response.data.success) {
-                    toast.success("Stripe secrets updated");
+                    toast.success(t("superAdminSecretsUpdated"));
                     setStripeSecretKey("");
                     setStripeWebhookSecret("");
                   }
                 } catch (error) {
-                  toast.error("Failed to update secrets");
+                  toast.error(t("superAdminSecretsUpdateFailed"));
                 }
               }}
               disabled={!stripeSecretKey && !stripeWebhookSecret}
               className="bg-orange-600 hover:bg-orange-700"
             >
-              Save Secrets
+              {t("superAdminSaveSecrets")}
             </Button>
             <Button variant="outline" onClick={() => { setStripeSecretKey(""); setStripeWebhookSecret(""); }}>
-              Clear
+              {t("superAdminClear")}
             </Button>
           </div>
         </div>
@@ -346,22 +348,22 @@ export default function SuperAdmin() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Package className="w-5 h-5 text-purple-600" />
-              <h2 className="font-semibold text-slate-900">Products & Pricing</h2>
+              <h2 className="font-semibold text-slate-900">{t("superAdminProductsPricing")}</h2>
             </div>
             <Dialog open={isProductDialogOpen} onOpenChange={setIsProductDialogOpen}>
               <DialogTrigger asChild>
                 <Button className="bg-purple-600 hover:bg-purple-700" onClick={() => { setEditingProduct(null); resetProductForm(); }}>
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Product
+                  {t("superAdminAddProduct")}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-lg">
                 <DialogHeader>
-                  <DialogTitle>{editingProduct ? "Edit Product" : "Create Product"}</DialogTitle>
+                  <DialogTitle>{editingProduct ? t("superAdminEditProduct") : t("superAdminCreateProduct")}</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div>
-                    <Label>Product Name</Label>
+                    <Label>{t("superAdminProductName")}</Label>
                     <Input
                       value={productForm.name}
                       onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
@@ -369,7 +371,7 @@ export default function SuperAdmin() {
                     />
                   </div>
                   <div>
-                    <Label>Plan Key</Label>
+                    <Label>{t("superAdminPlanKey")}</Label>
                     <Select value={productForm.plan_key} onValueChange={(value) => setProductForm({ ...productForm, plan_key: value })}>
                       <SelectTrigger>
                         <SelectValue />
@@ -383,7 +385,7 @@ export default function SuperAdmin() {
                     </Select>
                   </div>
                   <div>
-                    <Label>Price (Monthly)</Label>
+                    <Label>{t("superAdminPriceMonthly")}</Label>
                     <Input
                       type="number"
                       value={productForm.price}
@@ -392,7 +394,7 @@ export default function SuperAdmin() {
                     />
                   </div>
                   <div>
-                    <Label>Stripe Price ID</Label>
+                    <Label>{t("superAdminStripePriceId")}</Label>
                     <Input
                       value={productForm.stripe_price_id}
                       onChange={(e) => setProductForm({ ...productForm, stripe_price_id: e.target.value })}
@@ -401,7 +403,7 @@ export default function SuperAdmin() {
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label>Max Sites</Label>
+                      <Label>{t("superAdminMaxSites")}</Label>
                       <Input
                         type="number"
                         value={productForm.max_sites}
@@ -409,7 +411,7 @@ export default function SuperAdmin() {
                       />
                     </div>
                     <div>
-                      <Label>Max Crawls/Month</Label>
+                      <Label>{t("superAdminMaxCrawls")}</Label>
                       <Input
                         type="number"
                         value={productForm.max_crawls_per_month}
@@ -420,10 +422,10 @@ export default function SuperAdmin() {
                 </div>
                 <DialogFooter>
                   <Button variant="outline" onClick={() => { setIsProductDialogOpen(false); setEditingProduct(null); resetProductForm(); }}>
-                    Cancel
+                    {t("commonCancel")}
                   </Button>
                   <Button onClick={handleSaveProduct} disabled={!productForm.name || !productForm.price}>
-                    {editingProduct ? "Update" : "Create"}
+                    {editingProduct ? t("templatesUpdate") : t("templatesCreate")}
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -433,12 +435,12 @@ export default function SuperAdmin() {
         <Table>
           <TableHeader>
             <TableRow className="bg-slate-50/50">
-              <TableHead className="font-semibold text-slate-700">Product</TableHead>
-              <TableHead className="font-semibold text-slate-700">Plan Key</TableHead>
-              <TableHead className="font-semibold text-slate-700">Price</TableHead>
-              <TableHead className="font-semibold text-slate-700">Limits</TableHead>
-              <TableHead className="font-semibold text-slate-700">Status</TableHead>
-              <TableHead className="font-semibold text-slate-700">Actions</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("superAdminProduct")}</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("superAdminPlanKey")}</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("superAdminPrice")}</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("superAdminLimits")}</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("templatesStatus")}</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("usersActions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -456,7 +458,7 @@ export default function SuperAdmin() {
                 </TableCell>
                 <TableCell>
                   <Badge className={product.active ? "bg-green-100 text-green-700" : "bg-slate-100 text-slate-700"}>
-                    {product.active ? "Active" : "Inactive"}
+                    {product.active ? t("superAdminActive") : t("superAdminInactive")}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -469,7 +471,7 @@ export default function SuperAdmin() {
                       size="sm"
                       className="text-red-600 hover:text-red-700"
                       onClick={() => {
-                        if (confirm(`Delete ${product.name}?`)) {
+                        if (confirm(`${t("superAdminDeleteProduct")} ${product.name}?`)) {
                           deleteProductMutation.mutate(product.id);
                         }
                       }}
@@ -483,7 +485,7 @@ export default function SuperAdmin() {
             {products.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6} className="text-center py-8 text-slate-500">
-                  No products yet. Create your first product.
+                  {t("superAdminNoProducts")}
                 </TableCell>
               </TableRow>
             )}
@@ -496,7 +498,7 @@ export default function SuperAdmin() {
         <Card className="p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600">Active Subscriptions</p>
+              <p className="text-sm text-slate-600">{t("superAdminActiveSubscriptions")}</p>
               <p className="text-xl font-bold text-green-600">{activeSubscriptions}</p>
             </div>
             <TrendingUp className="w-8 h-8 text-green-600" />
@@ -506,7 +508,7 @@ export default function SuperAdmin() {
         <Card className="p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600">Trial Users</p>
+              <p className="text-sm text-slate-600">{t("superAdminTrialUsers")}</p>
               <p className="text-xl font-bold text-blue-600">{trialUsers}</p>
             </div>
             <Users className="w-8 h-8 text-blue-600" />
@@ -516,7 +518,7 @@ export default function SuperAdmin() {
         <Card className="p-5">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-slate-600">Total Crawls</p>
+              <p className="text-sm text-slate-600">{t("superAdminTotalCrawls")}</p>
               <p className="text-xl font-bold text-slate-900">{crawls.length}</p>
             </div>
             <Globe className="w-8 h-8 text-slate-600" />
@@ -528,11 +530,11 @@ export default function SuperAdmin() {
       <Card className="overflow-hidden">
         <div className="p-5 border-b border-slate-100">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-slate-900">Organizations</h2>
+            <h2 className="font-semibold text-slate-900">{t("superAdminOrganizations")}</h2>
             <div className="relative w-64">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <Input
-                placeholder="Search organizations..."
+                placeholder={t("superAdminSearchOrgs")}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
@@ -543,14 +545,14 @@ export default function SuperAdmin() {
         <Table>
           <TableHeader>
             <TableRow className="bg-slate-50/50">
-              <TableHead className="font-semibold text-slate-700">Organization</TableHead>
-              <TableHead className="font-semibold text-slate-700">Plan</TableHead>
-              <TableHead className="font-semibold text-slate-700">Status</TableHead>
-              <TableHead className="font-semibold text-slate-700">Sites</TableHead>
-              <TableHead className="font-semibold text-slate-700">Users</TableHead>
-              <TableHead className="font-semibold text-slate-700">Crawls This Month</TableHead>
-              <TableHead className="font-semibold text-slate-700">Created</TableHead>
-              <TableHead className="font-semibold text-slate-700">Actions</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("superAdminOrganizations")}</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("superAdminPlan")}</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("templatesStatus")}</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("superAdminSites")}</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("superAdminUsers")}</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("superAdminCrawlsThisMonth")}</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("superAdminCreated")}</TableHead>
+              <TableHead className="font-semibold text-slate-700">{t("usersActions")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -596,7 +598,7 @@ export default function SuperAdmin() {
                   </TableCell>
                   <TableCell>
                     <Button variant="outline" size="sm">
-                      View Details
+                      {t("superAdminViewDetails")}
                     </Button>
                   </TableCell>
                 </TableRow>
