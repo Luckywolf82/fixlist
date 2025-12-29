@@ -1283,7 +1283,13 @@ export const translations = {
     
     // Billing Page
     billingTitle: "Fakturering & Prenumeration",
+    billingSubtitle: "Hantera din prenumeration och fakturering",
     billingCurrentPlan: "Nuvarande plan",
+    billingTrial: "Provperiod",
+    billingPastDue: "Förfallen",
+    billingChoosePlan: "Välj din plan",
+    billingDefaultPlan: "Standardplan",
+    billingAdminOnly: "Endast administratörer kan hantera fakturering.",
     billingManageBilling: "Hantera fakturering",
     billingUpgrade: "Uppgradera plan",
     billingDowngrade: "Nedgradera",
@@ -1701,7 +1707,13 @@ export const translations = {
     
     // Billing Page
     billingTitle: "Fakturering & Abonnement",
+    billingSubtitle: "Administrer dit abonnement og fakturering",
     billingCurrentPlan: "Nuværende plan",
+    billingTrial: "Prøveperiode",
+    billingPastDue: "Forfalt",
+    billingChoosePlan: "Vælg din plan",
+    billingDefaultPlan: "Standardplan",
+    billingAdminOnly: "Kun administratorer kan administrere fakturering.",
     billingManageBilling: "Administrer fakturering",
     billingUpgrade: "Opgrader plan",
     billingDowngrade: "Nedgrader",
@@ -2119,7 +2131,13 @@ export const translations = {
     
     // Billing Page
     billingTitle: "Abrechnung & Abonnement",
+    billingSubtitle: "Verwalten Sie Ihr Abonnement und Ihre Abrechnung",
     billingCurrentPlan: "Aktueller Plan",
+    billingTrial: "Testversion",
+    billingPastDue: "Überfällig",
+    billingChoosePlan: "Wählen Sie Ihren Plan",
+    billingDefaultPlan: "Standardplan",
+    billingAdminOnly: "Nur Administratoren können die Abrechnung verwalten.",
     billingManageBilling: "Abrechnung verwalten",
     billingUpgrade: "Plan upgraden",
     billingDowngrade: "Downgraden",
@@ -2537,7 +2555,13 @@ export const translations = {
     
     // Billing Page
     billingTitle: "Facturation & Abonnement",
+    billingSubtitle: "Gérez votre abonnement et votre facturation",
     billingCurrentPlan: "Plan actuel",
+    billingTrial: "Essai",
+    billingPastDue: "En retard",
+    billingChoosePlan: "Choisissez votre plan",
+    billingDefaultPlan: "Plan par défaut",
+    billingAdminOnly: "Seuls les administrateurs peuvent gérer la facturation.",
     billingManageBilling: "Gérer la facturation",
     billingUpgrade: "Mettre à niveau le plan",
     billingDowngrade: "Rétrograder",
@@ -2955,7 +2979,13 @@ export const translations = {
     
     // Billing Page
     billingTitle: "Facturación y Suscripción",
+    billingSubtitle: "Gestiona tu suscripción y facturación",
     billingCurrentPlan: "Plan actual",
+    billingTrial: "Prueba",
+    billingPastDue: "Vencido",
+    billingChoosePlan: "Elige tu plan",
+    billingDefaultPlan: "Plan predeterminado",
+    billingAdminOnly: "Solo los administradores pueden gestionar la facturación.",
     billingManageBilling: "Gestionar facturación",
     billingUpgrade: "Actualizar plan",
     billingDowngrade: "Bajar de categoría",
