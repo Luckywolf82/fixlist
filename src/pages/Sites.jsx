@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/components/useAuth";
 import { usePermissions } from "@/components/usePermissions";
 import { usePlanLimits } from "@/components/usePlanLimits";
 import UserNotRegisteredError from "@/components/UserNotRegisteredError";
@@ -23,7 +24,8 @@ import { toast } from "sonner";
 import ScheduleCrawlDialog from "@/components/ScheduleCrawlDialog";
 
 export default function Sites() {
-  const { user, canAddSite, canDeleteSite, canStartCrawl, canManageSchedules } = usePermissions();
+  const { user, isLoading: authLoading } = useAuth();
+  const { canAddSite, canDeleteSite, canStartCrawl, canManageSchedules } = usePermissions();
   const { organization, limits, canAddSite: canAddSiteByPlan, canCrawl } = usePlanLimits();
   const [crawlingIds, setCrawlingIds] = useState(new Set());
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -196,7 +198,7 @@ export default function Sites() {
 
   const showOnboarding = user && !user.onboarding_completed && sites.length === 0;
 
-  if (sitesLoading) {
+  if (authLoading || sitesLoading) {
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between">
