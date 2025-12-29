@@ -155,7 +155,7 @@ export default function SiteOverview() {
             className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 mb-3"
           >
             <ArrowLeft className="w-4 h-4" />
-            Back to Sites
+            {t('siteOverviewBackToSites')}
           </Link>
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{site.domain}</h1>
@@ -170,7 +170,7 @@ export default function SiteOverview() {
           </div>
           {latestCrawl && (
             <p className="text-slate-500 mt-1">
-              Last crawled {format(new Date(latestCrawl.started_at), "MMMM d, yyyy 'at' h:mm a")}
+              {t('siteOverviewLastCrawled')} {format(new Date(latestCrawl.started_at), "MMMM d, yyyy 'at' h:mm a")}
             </p>
           )}
         </div>
@@ -184,21 +184,21 @@ export default function SiteOverview() {
               disabled={isCrawling}
             />
             <Label htmlFor="renderJs" className="text-sm text-slate-600 cursor-pointer">
-              Render JavaScript (langsommere, men bedre for SPA-er)
+              {t('siteOverviewRenderJs')}
             </Label>
-          </div>
-          <Button 
+            </div>
+            <Button 
             onClick={handleStartCrawl}
             disabled={isCrawling}
             className="bg-slate-900 hover:bg-slate-800"
-          >
+            >
             {isCrawling ? (
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
             ) : (
               <Play className="w-4 h-4 mr-2" />
             )}
-            {isCrawling ? 'Starting Crawl...' : 'Start New Crawl'}
-          </Button>
+            {isCrawling ? t('siteOverviewStartingCrawl') : t('siteOverviewStartCrawl')}
+            </Button>
         </div>
         )}
       </div>
@@ -206,21 +206,21 @@ export default function SiteOverview() {
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StatCard
-          label="Critical Issues"
+          label={t('siteOverviewCriticalIssues')}
           value={criticalCount}
           change={getChange(criticalCount, prevCriticalCount)}
           icon={AlertCircle}
           variant="critical"
         />
         <StatCard
-          label="High Priority"
+          label={t('siteOverviewHighPriority')}
           value={highCount}
           change={getChange(highCount, prevHighCount)}
           icon={AlertTriangle}
           variant="high"
         />
         <StatCard
-          label="Medium Priority"
+          label={t('siteOverviewMediumPriority')}
           value={mediumCount}
           change={getChange(mediumCount, prevMediumCount)}
           icon={Info}

@@ -107,49 +107,49 @@ export default function Issues() {
           className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-700 mb-3"
         >
           <ArrowLeft className="w-4 h-4" />
-          Back to {site?.domain || "Site"}
+          {t('siteOverviewBackToSites')}
         </Link>
-        <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Issues</h1>
-        <p className="text-slate-500 mt-1">{filteredIssues.length} issues found</p>
+        <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t('issuesTitle')}</h1>
+        <p className="text-slate-500 mt-1">{filteredIssues.length} {t('issuesFound')}</p>
       </div>
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 items-center">
         <div className="flex items-center gap-2 text-sm text-slate-500">
           <Filter className="w-4 h-4" />
-          Filters:
+          {t('issuesFilters')}:
         </div>
-        
+
         <Select value={severityFilter} onValueChange={setSeverityFilter}>
           <SelectTrigger className="w-[140px] h-9">
-            <SelectValue placeholder="Severity" />
+            <SelectValue placeholder={t('issuesSeverity')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Severity</SelectItem>
-            <SelectItem value="critical">Critical</SelectItem>
-            <SelectItem value="high">High</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
+            <SelectItem value="all">{t('issuesAllSeverity')}</SelectItem>
+            <SelectItem value="critical">{t('issuesCritical')}</SelectItem>
+            <SelectItem value="high">{t('issuesHigh')}</SelectItem>
+            <SelectItem value="medium">{t('issuesMedium')}</SelectItem>
           </SelectContent>
         </Select>
 
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-[130px] h-9">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder={t('issuesStatus')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="open">Open</SelectItem>
-            <SelectItem value="ignored">Ignored</SelectItem>
-            <SelectItem value="fixed">Fixed</SelectItem>
+            <SelectItem value="all">{t('issuesAllStatus')}</SelectItem>
+            <SelectItem value="open">{t('issuesOpen')}</SelectItem>
+            <SelectItem value="ignored">{t('issuesIgnored')}</SelectItem>
+            <SelectItem value="fixed">{t('issuesFixed')}</SelectItem>
           </SelectContent>
         </Select>
 
         <Select value={typeFilter} onValueChange={setTypeFilter}>
           <SelectTrigger className="w-[160px] h-9">
-            <SelectValue placeholder="Type" />
+            <SelectValue placeholder={t('issuesType')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
+            <SelectItem value="all">{t('issuesAllTypes')}</SelectItem>
             {issueTypes.map(type => (
               <SelectItem key={type} value={type}>{type.replace(/_/g, " ")}</SelectItem>
             ))}
@@ -166,7 +166,7 @@ export default function Issues() {
               setTypeFilter("all");
             }}
           >
-            Clear filters
+            {t('issuesClearFilters')}
           </Button>
         )}
       </div>
@@ -174,19 +174,19 @@ export default function Issues() {
       {/* Issues Table */}
       {filteredIssues.length === 0 ? (
         <Card className="p-12 text-center">
-          <h3 className="text-lg font-medium text-slate-900 mb-2">No issues found</h3>
-          <p className="text-slate-500">Try adjusting your filters</p>
+          <h3 className="text-lg font-medium text-slate-900 mb-2">{t('issuesNoIssues')}</h3>
+          <p className="text-slate-500">{t('issuesNoIssuesDesc')}</p>
         </Card>
       ) : (
         <Card className="overflow-hidden border-slate-200">
           <Table>
             <TableHeader>
               <TableRow className="bg-slate-50/50">
-                <TableHead className="font-semibold text-slate-700 w-[100px]">Severity</TableHead>
-                <TableHead className="font-semibold text-slate-700 w-[140px]">Type</TableHead>
-                <TableHead className="font-semibold text-slate-700">URL</TableHead>
-                <TableHead className="font-semibold text-slate-700">Message</TableHead>
-                <TableHead className="font-semibold text-slate-700 w-[100px]">Status</TableHead>
+                <TableHead className="font-semibold text-slate-700 w-[100px]">{t('issuesSeverity')}</TableHead>
+                <TableHead className="font-semibold text-slate-700 w-[140px]">{t('issuesType')}</TableHead>
+                <TableHead className="font-semibold text-slate-700">{t('issuesUrl')}</TableHead>
+                <TableHead className="font-semibold text-slate-700">{t('issuesMessage')}</TableHead>
+                <TableHead className="font-semibold text-slate-700 w-[100px]">{t('issuesStatus')}</TableHead>
                 <TableHead className="font-semibold text-slate-700 w-[60px]"></TableHead>
               </TableRow>
             </TableHeader>
@@ -236,26 +236,26 @@ export default function Issues() {
                           disabled={issue.status === "fixed"}
                         >
                           <CheckCircle className="w-4 h-4 mr-2 text-emerald-600" />
-                          Mark as Fixed
+                          {t('issuesMarkFixed')}
                         </DropdownMenuItem>
                         <DropdownMenuItem 
                           onClick={() => handleStatusChange(issue.id, "ignored")}
                           disabled={issue.status === "ignored"}
                         >
                           <EyeOff className="w-4 h-4 mr-2 text-slate-500" />
-                          Mark as Ignored
+                          {t('issuesMarkIgnored')}
                         </DropdownMenuItem>
                         {issue.status !== "open" && (
                           <DropdownMenuItem 
                             onClick={() => handleStatusChange(issue.id, "open")}
                           >
-                            Reopen Issue
+                            {t('issuesReopen')}
                           </DropdownMenuItem>
                         )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                     ) : (
-                      <span className="text-xs text-slate-500">View only</span>
+                      <span className="text-xs text-slate-500">{t('issuesViewOnly')}</span>
                     )}
                   </TableCell>
                 </TableRow>

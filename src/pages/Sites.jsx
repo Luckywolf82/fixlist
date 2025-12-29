@@ -336,9 +336,9 @@ export default function Sites() {
                         <div className="space-y-1">
                           <div className="flex items-center gap-1.5 text-slate-600">
                             <Calendar className="w-4 h-4 text-green-600" />
-                            <span className="text-xs font-medium text-green-600">Enabled</span>
+                            <span className="text-xs font-medium text-green-600">{t('sitesSchedule' + site.schedule_frequency.charAt(0).toUpperCase() + site.schedule_frequency.slice(1))}</span>
                           </div>
-                          <p className="text-xs text-slate-500 capitalize">{site.schedule_frequency} at {site.schedule_time}</p>
+                          <p className="text-xs text-slate-500">{site.schedule_time}</p>
                           {site.next_crawl_at && (
                             <p className="text-xs text-slate-400">
                               Next: {format(new Date(site.next_crawl_at), "MMM d, HH:mm")}
@@ -346,7 +346,7 @@ export default function Sites() {
                           )}
                         </div>
                       ) : (
-                        <span className="text-slate-400 text-sm">Not scheduled</span>
+                        <span className="text-slate-400 text-sm">{t('sitesScheduleDisabled')}</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -374,35 +374,35 @@ export default function Sites() {
                       <div className="flex items-center justify-end gap-2">
                         {canManageSchedules && (
                         <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="h-8"
-                          onClick={() => setScheduleDialogSite(site)}
+                         variant="outline" 
+                         size="sm" 
+                         className="h-8"
+                         onClick={() => setScheduleDialogSite(site)}
                         >
-                          <Calendar className="w-3.5 h-3.5 mr-1.5" />
-                          Schedule
+                         <Calendar className="w-3.5 h-3.5 mr-1.5" />
+                         {t('sitesManageSchedule')}
                         </Button>
                         )}
                         {canStartCrawl && (
                         <Button 
-                          variant="outline" 
-                          size="sm" 
-                          className="h-8"
-                          onClick={() => handleStartCrawl(site.id)}
-                          disabled={crawlingIds.has(site.id)}
+                         variant="outline" 
+                         size="sm" 
+                         className="h-8"
+                         onClick={() => handleStartCrawl(site.id)}
+                         disabled={crawlingIds.has(site.id)}
                         >
-                          {crawlingIds.has(site.id) ? (
-                            <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-                          ) : (
-                            <Play className="w-3.5 h-3.5 mr-1.5" />
-                          )}
-                          {crawlingIds.has(site.id) ? 'Crawling...' : 'Crawl Now'}
+                         {crawlingIds.has(site.id) ? (
+                           <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+                         ) : (
+                           <Play className="w-3.5 h-3.5 mr-1.5" />
+                         )}
+                         {crawlingIds.has(site.id) ? t('sitesStartCrawl') + '...' : t('sitesStartCrawl')}
                         </Button>
                         )}
                         <Link to={createPageUrl(`SiteOverview?siteId=${site.id}`)}>
-                          <Button size="sm" className="h-8 bg-slate-900 hover:bg-slate-800">
-                            View
-                          </Button>
+                         <Button size="sm" className="h-8 bg-slate-900 hover:bg-slate-800">
+                           {t('sitesViewDetails')}
+                         </Button>
                         </Link>
                         {canDeleteSite && (
                         <Button
