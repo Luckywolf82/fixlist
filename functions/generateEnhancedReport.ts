@@ -290,7 +290,19 @@ Competitors average:
 Competitive gaps to address:
 ${competitorMetrics.map(c => `- ${c.domain}: DR ${c.domain_rating}, ${c.backlinks} backlinks, ${c.organic_keywords} keywords`).join('\n')}` : '';
 
-    const aiPrompt = `Analyze this SEO audit data and provide:
+    const languageInstructions = {
+      en: 'Respond in English.',
+      no: 'Svar på norsk.',
+      sv: 'Svara på svenska.',
+      da: 'Svar på dansk.',
+      de: 'Antworte auf Deutsch.',
+      fr: 'Répondez en français.',
+      es: 'Responde en español.'
+    };
+
+    const aiPrompt = `${languageInstructions[language] || languageInstructions.en}
+
+Analyze this SEO audit data and provide:
 1. A concise executive summary (3-4 sentences) highlighting the most important findings
 2. Top 5 actionable recommendations prioritized by impact
 
