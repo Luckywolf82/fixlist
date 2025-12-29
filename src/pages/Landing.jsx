@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
+import { useLanguage } from "@/components/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -23,6 +24,7 @@ import {
 } from "lucide-react";
 
 export default function Landing() {
+  const { t } = useLanguage();
   const { data: products = [], isLoading } = useQuery({
     queryKey: ["products"],
     queryFn: () => base44.entities.Product.filter({ active: true }),
