@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/components/useAuth";
+import { useLanguage } from "@/components/LanguageContext";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,6 +13,7 @@ import { format, parseISO, subDays, isAfter } from "date-fns";
 
 export default function Analytics() {
   useAuth();
+  const { t } = useLanguage();
   const [selectedSiteId, setSelectedSiteId] = useState("all");
   const [dateRange, setDateRange] = useState("30");
 
@@ -213,8 +215,8 @@ export default function Analytics() {
     <div className="space-y-6">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Analytics</h1>
-          <p className="text-slate-500 mt-1">Visualize crawl data and issue trends</p>
+          <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">{t('analyticsTitle')}</h1>
+          <p className="text-slate-500 mt-1">{t('analyticsSubtitle')}</p>
         </div>
         <div className="flex items-center gap-3">
           <Select value={selectedSiteId} onValueChange={setSelectedSiteId}>
