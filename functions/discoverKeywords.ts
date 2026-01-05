@@ -23,15 +23,20 @@ Deno.serve(async (req) => {
     }
 
     // Use AI to discover keywords the site is ranking for
-    const prompt = `Analyze the website ${site.domain} and find what keywords it's currently ranking for on Google.
-    
-For each keyword found:
-- The actual keyword/search query
-- Estimated current ranking position (1-100)
-- Estimated monthly search volume
-- The URL on the site that ranks for this keyword
+    const prompt = `Analyze the website ${site.domain} and identify ACTUAL keywords it is currently ranking for on Google, based on real search data you can find.
 
-Return the top 20 most relevant keywords as JSON.`;
+IMPORTANT: Only provide keywords that you can verify the site actually ranks for. Do NOT speculate or invent data.
+
+For each keyword identified:
+- The exact keyword/search query that real users search for
+- A realistic current ranking position (1-100) based on actual search results you find
+- A realistic estimated monthly search volume (use typical ranges for similar queries)
+- The specific URL on ${site.domain} that ranks for this keyword
+- A brief relevance_reason explaining why this keyword is relevant (reference actual content/industry)
+
+Focus on realistic, verifiable data. If the site is new or has limited visibility, return fewer keywords rather than speculative ones.
+
+Return up to 20 keywords as JSON.`;
 
     const result = await base44.integrations.Core.InvokeLLM({
       prompt,
@@ -47,7 +52,8 @@ Return the top 20 most relevant keywords as JSON.`;
                 keyword: { type: "string" },
                 position: { type: "number" },
                 search_volume: { type: "number" },
-                ranking_url: { type: "string" }
+                ranking_url: { type: "string" },
+                relevance_reason: { type: "string" }
               }
             }
           }
