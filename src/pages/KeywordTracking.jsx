@@ -12,7 +12,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, TrendingUp, TrendingDown, Minus, Search, RefreshCw, Trash2, Eye } from "lucide-react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
+import { Plus, TrendingUp, TrendingDown, Minus, Search, RefreshCw, Trash2, Eye, BarChart3 } from "lucide-react";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 
@@ -22,6 +23,7 @@ export default function KeywordTracking() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedSiteId, setSelectedSiteId] = useState("");
   const [checkingKeywordId, setCheckingKeywordId] = useState(null);
+  const [viewingHistoryId, setViewingHistoryId] = useState(null);
   const [formData, setFormData] = useState({
     keyword: "",
     target_url: "",
@@ -43,6 +45,15 @@ export default function KeywordTracking() {
       return base44.entities.Keyword.filter({ site_id: selectedSiteId }, "-created_date");
     },
     enabled: !!selectedSiteId,
+  });
+
+  const { data: keywordHistory = [] } = useQuery({
+    queryKey: ["keywordHistory", viewingHistoryId],
+    queryFn: async () => {
+      if (!viewingHistoryId) return [];
+      return base44.entities.KeywordHistory.filter({ keyword_id: viewingHistoryId }, "checked_at");
+    },
+    enabled: !!viewingHistoryId,
   });
 
   const addKeywordMutation = useMutation({
@@ -117,6 +128,32 @@ export default function KeywordTracking() {
     return { direction: "same", value: 0 };
   };
 
+  const getTrend = (keywordId) => {
+    const history = keywordHistory.filter(h => h.keyword_id === keywordId).slice(-5);
+    if (history.length < 3) return "insufficient";
+    
+    const positions = history.map(h => h.position).filter(p => p !== null);
+    if (positions.length < 3) return "unstable";
+    
+    const recentAvg = positions.slice(-3).reduce((a, b) => a + b, 0) / 3;
+    const olderAvg = positions.slice(0, -3).reduce((a, b) => a + b, 0) / (positions.length - 3);
+    
+    const diff = olderAvg - recentAvg; // Lower is better
+    if (diff > 2) return "up";
+    if (diff < -2) return "down";
+    return "stable";
+  };
+
+  const formatChartData = (history) => {
+    return history
+      .filter(h => h.position !== null)
+      .map(h => ({
+        date: format(new Date(h.checked_at), "MMM d"),
+        position: h.position,
+        fullDate: format(new Date(h.checked_at), "MMM d, yyyy HH:mm")
+      }));
+  };
+
   if (sites.length === 0) {
     return (
       <div className="space-y-6">
@@ -174,15 +211,17 @@ export default function KeywordTracking() {
                   <TableHead>Keyword</TableHead>
                   <TableHead>Position</TableHead>
                   <TableHead>Change</TableHead>
+                  <TableHead>Trend</TableHead>
+                  <TableHead>Volume</TableHead>
                   <TableHead>Best</TableHead>
                   <TableHead>Last Checked</TableHead>
-                  <TableHead>Frequency</TableHead>
-                  <TableHead className="w-[140px]">Actions</TableHead>
+                  <TableHead className="w-[160px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {keywords.map((keyword) => {
                   const change = getRankingChange(keyword.current_position, keyword.previous_position);
+                  const trend = getTrend(keyword.id);
                   return (
                     <TableRow key={keyword.id}>
                       <TableCell>
@@ -220,6 +259,38 @@ export default function KeywordTracking() {
                         )}
                       </TableCell>
                       <TableCell>
+                        {trend === "up" && (
+                          <Badge className="bg-green-100 text-green-700">
+                            <TrendingUp className="w-3 h-3 mr-1" />
+                            Up
+                          </Badge>
+                        )}
+                        {trend === "down" && (
+                          <Badge className="bg-red-100 text-red-700">
+                            <TrendingDown className="w-3 h-3 mr-1" />
+                            Down
+                          </Badge>
+                        )}
+                        {trend === "stable" && (
+                          <Badge className="bg-blue-100 text-blue-700">
+                            <Minus className="w-3 h-3 mr-1" />
+                            Stable
+                          </Badge>
+                        )}
+                        {trend === "insufficient" && (
+                          <span className="text-xs text-slate-400">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {keyword.search_volume ? (
+                          <span className="text-sm text-slate-600 font-mono">
+                            {keyword.search_volume.toLocaleString()}
+                          </span>
+                        ) : (
+                          <span className="text-slate-400">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
                         {keyword.best_position ? (
                           <span className="text-sm text-slate-600">#{keyword.best_position}</span>
                         ) : (
@@ -236,12 +307,14 @@ export default function KeywordTracking() {
                         )}
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline" className="capitalize">
-                          {keyword.check_frequency}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
                         <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setViewingHistoryId(viewingHistoryId === keyword.id ? null : keyword.id)}
+                          >
+                            <BarChart3 className="w-3.5 h-3.5" />
+                          </Button>
                           <Button
                             variant="outline"
                             size="sm"
@@ -270,6 +343,70 @@ export default function KeywordTracking() {
               </TableBody>
             </Table>
           )}
+        </Card>
+      )}
+
+      {viewingHistoryId && keywordHistory.length > 0 && (
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">
+              Ranking History: {keywords.find(k => k.id === viewingHistoryId)?.keyword}
+            </h3>
+            <Button variant="outline" size="sm" onClick={() => setViewingHistoryId(null)}>
+              Close
+            </Button>
+          </div>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={formatChartData(keywordHistory)}>
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="date" />
+              <YAxis 
+                reversed 
+                domain={[1, 100]} 
+                label={{ value: 'Position', angle: -90, position: 'insideLeft' }}
+              />
+              <Tooltip 
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="bg-white p-3 border rounded shadow-lg">
+                        <p className="text-sm font-medium">Position: #{payload[0].value}</p>
+                        <p className="text-xs text-slate-500">{payload[0].payload.fullDate}</p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="position" 
+                stroke="#3b82f6" 
+                strokeWidth={2}
+                dot={{ fill: '#3b82f6', r: 4 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+          <div className="mt-4 grid grid-cols-3 gap-4 text-center">
+            <div>
+              <div className="text-2xl font-bold text-slate-900">
+                {keywordHistory.filter(h => h.position !== null).length}
+              </div>
+              <div className="text-sm text-slate-500">Checks</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-slate-900">
+                {Math.min(...keywordHistory.filter(h => h.position !== null).map(h => h.position)) || '-'}
+              </div>
+              <div className="text-sm text-slate-500">Best Position</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-slate-900">
+                {keywordHistory[keywordHistory.length - 1]?.position || '-'}
+              </div>
+              <div className="text-sm text-slate-500">Latest Position</div>
+            </div>
+          </div>
         </Card>
       )}
 
