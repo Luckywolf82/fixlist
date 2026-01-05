@@ -40,8 +40,13 @@ export default function KeywordTracking() {
 
   const { data: sites = [], isLoading: sitesLoading } = useQuery({
     queryKey: ["sites"],
-    queryFn: () => base44.entities.Site.filter({ organization_id: user?.organization_id }),
-    enabled: !!user?.organization_id,
+    queryFn: async () => {
+      // Fetch all sites without filtering by organization
+      const allSites = await base44.entities.Site.list();
+      console.log('All sites:', allSites);
+      return allSites;
+    },
+    enabled: !!user,
   });
 
   // Auto-select first site if none selected
