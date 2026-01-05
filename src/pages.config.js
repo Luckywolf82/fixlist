@@ -16,6 +16,7 @@ import Sites from './pages/Sites';
 import SuperAdmin from './pages/SuperAdmin';
 import UserManagement from './pages/UserManagement';
 import KeywordTracking from './pages/KeywordTracking';
+import Dashboard from './pages/Dashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -38,6 +39,7 @@ export const PAGES = {
     "SuperAdmin": SuperAdmin,
     "UserManagement": UserManagement,
     "KeywordTracking": KeywordTracking,
+    "Dashboard": Dashboard,
 }
 
 export const pagesConfig = {

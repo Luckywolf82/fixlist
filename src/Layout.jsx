@@ -5,7 +5,7 @@ import { base44 } from "@/api/base44Client";
 import { usePermissions } from "@/components/usePermissions";
 import { LanguageProvider, useLanguage } from "@/components/LanguageContext";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
-import { Globe, LayoutDashboard, Bug, FileText, Search, BarChart3, Settings, Users, CreditCard, Shield, Menu, X } from "lucide-react";
+import { Globe, LayoutDashboard, FileText, Search, BarChart3, Settings, Users, CreditCard, Shield, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 function LayoutContent({ children, currentPageName }) {
@@ -14,7 +14,9 @@ function LayoutContent({ children, currentPageName }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const navigation = [
+    { name: "Dashboard", page: "Dashboard", icon: LayoutDashboard, show: true },
     { name: t("sites"), page: "Sites", icon: Globe, show: true },
+    { name: "Keywords", page: "KeywordTracking", icon: Search, show: true },
     { name: t("analytics"), page: "Analytics", icon: BarChart3, show: true },
     { name: t("reports"), page: "Reports", icon: FileText, show: true },
     { name: t("templates"), page: "ReportTemplates", icon: Settings, show: canAccessSettings },
@@ -33,7 +35,7 @@ function LayoutContent({ children, currentPageName }) {
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            <Link to={createPageUrl(isLandingPage ? "Landing" : "Sites")} className="flex items-center gap-2.5 shrink-0">
+            <Link to={createPageUrl(isLandingPage ? "Landing" : "Dashboard")} className="flex items-center gap-2.5 shrink-0">
               <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
                 <Search className="w-4 h-4 text-white" />
               </div>
