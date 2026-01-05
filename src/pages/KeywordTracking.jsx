@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { base44 } from "@/api/base44Client";
 import { useAuth } from "@/components/useAuth";
@@ -43,6 +43,13 @@ export default function KeywordTracking() {
     queryFn: () => base44.entities.Site.filter({ organization_id: user?.organization_id }),
     enabled: !!user?.organization_id,
   });
+
+  // Auto-select first site if none selected
+  useEffect(() => {
+    if (sites.length > 0 && !selectedSiteId) {
+      setSelectedSiteId(sites[0].id);
+    }
+  }, [sites, selectedSiteId]);
 
   const { data: keywords = [], isLoading } = useQuery({
     queryKey: ["keywords", selectedSiteId],
