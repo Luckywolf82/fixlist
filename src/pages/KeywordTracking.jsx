@@ -294,16 +294,17 @@ export default function KeywordTracking() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-start justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Keyword Tracking</h1>
           <p className="text-slate-500 mt-1">Monitor your search engine rankings</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <Button 
             variant="outline" 
             onClick={handleDiscoverKeywords} 
             disabled={!selectedSiteId || isDiscovering}
+            className="w-full sm:w-auto"
           >
             {isDiscovering ? (
               <>
@@ -313,7 +314,7 @@ export default function KeywordTracking() {
             ) : (
               <>
                 <Search className="w-4 h-4 mr-2" />
-                Discover Keywords
+                Discover
               </>
             )}
           </Button>
@@ -321,6 +322,7 @@ export default function KeywordTracking() {
             variant="outline" 
             onClick={handleSuggestKeywords} 
             disabled={!selectedSiteId || isSuggesting}
+            className="w-full sm:w-auto"
           >
             {isSuggesting ? (
               <>
@@ -330,13 +332,13 @@ export default function KeywordTracking() {
             ) : (
               <>
                 <Target className="w-4 h-4 mr-2" />
-                Suggest Keywords
+                Suggest
               </>
             )}
           </Button>
-          <Button onClick={() => setIsDialogOpen(true)} disabled={!selectedSiteId}>
+          <Button onClick={() => setIsDialogOpen(true)} disabled={!selectedSiteId} className="w-full sm:w-auto">
             <Plus className="w-4 h-4 mr-2" />
-            Add Manually
+            Add
           </Button>
         </div>
       </div>
@@ -356,7 +358,7 @@ export default function KeywordTracking() {
       </Card>
 
       {selectedSiteId && (
-        <Card className="overflow-hidden">
+        <Card className="overflow-x-auto">
           {isLoading ? (
             <div className="p-8 space-y-4">
               {[1, 2, 3].map(i => <Skeleton key={i} className="h-12" />)}
@@ -368,7 +370,8 @@ export default function KeywordTracking() {
               <p className="text-slate-500">Add keywords to start tracking rankings</p>
             </div>
           ) : (
-            <Table>
+            <div className="min-w-[800px]">
+              <Table>
               <TableHeader>
                 <TableRow className="bg-slate-50/50">
                   <TableHead>Keyword</TableHead>
@@ -505,6 +508,7 @@ export default function KeywordTracking() {
                 })}
               </TableBody>
             </Table>
+            </div>
           )}
         </Card>
       )}
@@ -575,7 +579,7 @@ export default function KeywordTracking() {
 
       {/* Discovery/Suggestion Dialog */}
       <Dialog open={showDiscoveryDialog} onOpenChange={setShowDiscoveryDialog}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto w-[95vw] sm:w-full">
           <DialogHeader>
             <DialogTitle>
               {discoveredKeywords.length > 0 ? "Discovered Keywords" : "Suggested Keywords"}
@@ -646,7 +650,7 @@ export default function KeywordTracking() {
 
       {/* Manual Add Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
+        <DialogContent className="w-[95vw] sm:w-full">
           <DialogHeader>
             <DialogTitle>Add Keyword to Track</DialogTitle>
           </DialogHeader>
