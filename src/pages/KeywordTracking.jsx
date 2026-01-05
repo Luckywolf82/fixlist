@@ -18,7 +18,7 @@ import toast from "react-hot-toast";
 import { format } from "date-fns";
 
 export default function KeywordTracking() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const { t } = useLanguage();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedSiteId, setSelectedSiteId] = useState("");
@@ -38,7 +38,7 @@ export default function KeywordTracking() {
 
   const queryClient = useQueryClient();
 
-  const { data: sites = [] } = useQuery({
+  const { data: sites = [], isLoading: sitesLoading } = useQuery({
     queryKey: ["sites"],
     queryFn: () => base44.entities.Site.filter({ organization_id: user?.organization_id }),
     enabled: !!user?.organization_id,
@@ -251,12 +251,37 @@ export default function KeywordTracking() {
       }));
   };
 
+  if (authLoading || sitesLoading) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-semibold text-slate-900">Keyword Tracking</h1>
+        <Card className="p-12 text-center">
+          <p className="text-slate-600">Loading...</p>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!user?.organization_id) {
+    return (
+      <div className="space-y-6">
+        <h1 className="text-2xl font-semibold text-slate-900">Keyword Tracking</h1>
+        <Card className="p-12 text-center">
+          <p className="text-slate-600">Please complete your registration first</p>
+        </Card>
+      </div>
+    );
+  }
+
   if (sites.length === 0) {
     return (
       <div className="space-y-6">
         <h1 className="text-2xl font-semibold text-slate-900">Keyword Tracking</h1>
         <Card className="p-12 text-center">
           <p className="text-slate-600">Add a site first to start tracking keywords</p>
+          <Button className="mt-4" onClick={() => window.location.href = '/Sites'}>
+            Go to Sites
+          </Button>
         </Card>
       </div>
     );
