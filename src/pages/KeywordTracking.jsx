@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import { Plus, TrendingUp, TrendingDown, Minus, Search, RefreshCw, Trash2, Eye, BarChart3 } from "lucide-react";
+import { Plus, TrendingUp, TrendingDown, Minus, Search, RefreshCw, Trash2, Eye, BarChart3, Target, Check } from "lucide-react";
 import toast from "react-hot-toast";
 import { format } from "date-fns";
 
@@ -24,6 +24,12 @@ export default function KeywordTracking() {
   const [selectedSiteId, setSelectedSiteId] = useState("");
   const [checkingKeywordId, setCheckingKeywordId] = useState(null);
   const [viewingHistoryId, setViewingHistoryId] = useState(null);
+  const [isDiscovering, setIsDiscovering] = useState(false);
+  const [isSuggesting, setIsSuggesting] = useState(false);
+  const [discoveredKeywords, setDiscoveredKeywords] = useState([]);
+  const [suggestedKeywords, setSuggestedKeywords] = useState([]);
+  const [showDiscoveryDialog, setShowDiscoveryDialog] = useState(false);
+  const [selectedKeywordsToAdd, setSelectedKeywordsToAdd] = useState([]);
   const [formData, setFormData] = useState({
     keyword: "",
     target_url: "",
@@ -81,6 +87,54 @@ export default function KeywordTracking() {
     },
   });
 
+  const discoverKeywordsMutation = useMutation({
+    mutationFn: async (siteId) => {
+      const response = await base44.functions.invoke('discoverKeywords', { site_id: siteId });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      setDiscoveredKeywords(data.discovered_keywords || []);
+      setShowDiscoveryDialog(true);
+      setIsDiscovering(false);
+      toast.success(`Found ${data.discovered_keywords?.length || 0} keywords`);
+    },
+    onError: () => {
+      setIsDiscovering(false);
+      toast.error("Failed to discover keywords");
+    }
+  });
+
+  const suggestKeywordsMutation = useMutation({
+    mutationFn: async (siteId) => {
+      const response = await base44.functions.invoke('suggestKeywords', { site_id: siteId });
+      return response.data;
+    },
+    onSuccess: (data) => {
+      setSuggestedKeywords(data.suggested_keywords || []);
+      setShowDiscoveryDialog(true);
+      setIsSuggesting(false);
+      toast.success(`Generated ${data.suggested_keywords?.length || 0} suggestions`);
+    },
+    onError: () => {
+      setIsSuggesting(false);
+      toast.error("Failed to suggest keywords");
+    }
+  });
+
+  const bulkAddKeywordsMutation = useMutation({
+    mutationFn: async (keywordsData) => {
+      return base44.entities.Keyword.bulkCreate(keywordsData);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["keywords"] });
+      setShowDiscoveryDialog(false);
+      setDiscoveredKeywords([]);
+      setSuggestedKeywords([]);
+      setSelectedKeywordsToAdd([]);
+      toast.success("Keywords added successfully");
+    },
+  });
+
   const checkRankingMutation = useMutation({
     mutationFn: async ({ keywordId, keyword, target_url }) => {
       const site = sites.find(s => s.id === selectedSiteId);
@@ -109,6 +163,42 @@ export default function KeywordTracking() {
       return;
     }
     addKeywordMutation.mutate(formData);
+  };
+
+  const handleDiscoverKeywords = () => {
+    setIsDiscovering(true);
+    discoverKeywordsMutation.mutate(selectedSiteId);
+  };
+
+  const handleSuggestKeywords = () => {
+    setIsSuggesting(true);
+    suggestKeywordsMutation.mutate(selectedSiteId);
+  };
+
+  const handleBulkAdd = () => {
+    const keywordsToAdd = [...discoveredKeywords, ...suggestedKeywords]
+      .filter((_, idx) => selectedKeywordsToAdd.includes(idx))
+      .map(kw => ({
+        site_id: selectedSiteId,
+        keyword: kw.keyword,
+        target_url: kw.ranking_url || "",
+        search_volume: kw.search_volume || null,
+        current_position: kw.position || null,
+        check_frequency: "weekly"
+      }));
+
+    if (keywordsToAdd.length === 0) {
+      toast.error("Please select at least one keyword");
+      return;
+    }
+
+    bulkAddKeywordsMutation.mutate(keywordsToAdd);
+  };
+
+  const toggleKeywordSelection = (idx) => {
+    setSelectedKeywordsToAdd(prev =>
+      prev.includes(idx) ? prev.filter(i => i !== idx) : [...prev, idx]
+    );
   };
 
   const handleCheckRanking = (keyword) => {
@@ -172,10 +262,46 @@ export default function KeywordTracking() {
           <h1 className="text-2xl font-semibold text-slate-900 tracking-tight">Keyword Tracking</h1>
           <p className="text-slate-500 mt-1">Monitor your search engine rankings</p>
         </div>
-        <Button onClick={() => setIsDialogOpen(true)} disabled={!selectedSiteId}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Keyword
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="outline" 
+            onClick={handleDiscoverKeywords} 
+            disabled={!selectedSiteId || isDiscovering}
+          >
+            {isDiscovering ? (
+              <>
+                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                Discovering...
+              </>
+            ) : (
+              <>
+                <Search className="w-4 h-4 mr-2" />
+                Discover Keywords
+              </>
+            )}
+          </Button>
+          <Button 
+            variant="outline" 
+            onClick={handleSuggestKeywords} 
+            disabled={!selectedSiteId || isSuggesting}
+          >
+            {isSuggesting ? (
+              <>
+                <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                Suggesting...
+              </>
+            ) : (
+              <>
+                <Target className="w-4 h-4 mr-2" />
+                Suggest Keywords
+              </>
+            )}
+          </Button>
+          <Button onClick={() => setIsDialogOpen(true)} disabled={!selectedSiteId}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Manually
+          </Button>
+        </div>
       </div>
 
       <Card className="p-4">
@@ -410,6 +536,78 @@ export default function KeywordTracking() {
         </Card>
       )}
 
+      {/* Discovery/Suggestion Dialog */}
+      <Dialog open={showDiscoveryDialog} onOpenChange={setShowDiscoveryDialog}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {discoveredKeywords.length > 0 ? "Discovered Keywords" : "Suggested Keywords"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 py-4">
+            {[...discoveredKeywords, ...suggestedKeywords].map((kw, idx) => (
+              <div
+                key={idx}
+                onClick={() => toggleKeywordSelection(idx)}
+                className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                  selectedKeywordsToAdd.includes(idx)
+                    ? "border-blue-500 bg-blue-50"
+                    : "border-slate-200 hover:border-slate-300"
+                }`}
+              >
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-slate-900">{kw.keyword}</span>
+                      {kw.position && (
+                        <Badge variant="outline" className="font-mono">#{kw.position}</Badge>
+                      )}
+                      {kw.difficulty && (
+                        <Badge className={
+                          kw.difficulty === "low" ? "bg-green-100 text-green-700" :
+                          kw.difficulty === "medium" ? "bg-yellow-100 text-yellow-700" :
+                          "bg-red-100 text-red-700"
+                        }>
+                          {kw.difficulty}
+                        </Badge>
+                      )}
+                    </div>
+                    {kw.search_volume && (
+                      <p className="text-sm text-slate-600 mt-1">
+                        Est. {kw.search_volume.toLocaleString()} searches/month
+                      </p>
+                    )}
+                    {kw.ranking_url && (
+                      <p className="text-xs text-slate-500 mt-1">{kw.ranking_url}</p>
+                    )}
+                    {kw.relevance_reason && (
+                      <p className="text-sm text-slate-600 mt-2">{kw.relevance_reason}</p>
+                    )}
+                  </div>
+                  {selectedKeywordsToAdd.includes(idx) && (
+                    <Check className="w-5 h-5 text-blue-600" />
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowDiscoveryDialog(false);
+              setDiscoveredKeywords([]);
+              setSuggestedKeywords([]);
+              setSelectedKeywordsToAdd([]);
+            }}>
+              Cancel
+            </Button>
+            <Button onClick={handleBulkAdd} disabled={selectedKeywordsToAdd.length === 0}>
+              Add {selectedKeywordsToAdd.length} Keywords
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Manual Add Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent>
           <DialogHeader>
