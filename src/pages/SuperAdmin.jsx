@@ -354,6 +354,22 @@ export default function SuperAdmin() {
           </div>
         </div>
         <div className="p-5 space-y-4">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <p className="text-sm text-slate-700 mb-2">
+              <strong>Setup Instructions:</strong>
+            </p>
+            <ol className="text-sm text-slate-600 space-y-1 list-decimal list-inside">
+              <li>Go to <a href="https://console.cloud.google.com/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">Google Cloud Console</a></li>
+              <li>Create a new project or select an existing one</li>
+              <li>Enable the "Google Search Console API"</li>
+              <li>Create OAuth 2.0 credentials (Desktop app type)</li>
+              <li>Generate a refresh token using the OAuth Playground or your own flow</li>
+              <li>Enter the credentials below</li>
+            </ol>
+            <p className="text-xs text-slate-500 mt-2">
+              Need help? See <a href="https://developers.google.com/webmaster-tools/v1/how-tos/authorizing" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">official documentation</a>
+            </p>
+          </div>
           <div>
             <Label>Client ID</Label>
             <Input
