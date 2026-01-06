@@ -101,14 +101,22 @@ export default function KeywordTracking() {
 
   const discoverKeywordsMutation = useMutation({
     mutationFn: async (siteId) => {
-      const response = await base44.functions.invoke('discoverKeywords', { site_id: siteId });
-      return response.data;
+      // Try GSC first, fallback to AI if GSC fails
+      try {
+        const gscResponse = await base44.functions.invoke('discoverKeywordsGSC', { site_id: siteId });
+        return gscResponse.data;
+      } catch (gscError) {
+        console.warn('GSC discovery failed, falling back to AI:', gscError);
+        const aiResponse = await base44.functions.invoke('discoverKeywords', { site_id: siteId });
+        return aiResponse.data;
+      }
     },
     onSuccess: (data) => {
       setDiscoveredKeywords(data.discovered_keywords || []);
       setShowDiscoveryDialog(true);
       setIsDiscovering(false);
-      toast.success(`Found ${data.discovered_keywords?.length || 0} keywords`);
+      const source = data.source === 'google_search_console' ? ' from Google Search Console' : ' using AI';
+      toast.success(`Found ${data.discovered_keywords?.length || 0} keywords${source}`);
     },
     onError: () => {
       setIsDiscovering(false);
