@@ -24,6 +24,9 @@ export default function SuperAdmin() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [stripeSecretKey, setStripeSecretKey] = useState("");
   const [stripeWebhookSecret, setStripeWebhookSecret] = useState("");
+  const [gscClientId, setGscClientId] = useState("");
+  const [gscClientSecret, setGscClientSecret] = useState("");
+  const [gscRefreshToken, setGscRefreshToken] = useState("");
   const [productForm, setProductForm] = useState({
     name: "",
     plan_key: "starter",
@@ -336,6 +339,85 @@ export default function SuperAdmin() {
               {t("superAdminSaveSecrets")}
             </Button>
             <Button variant="outline" onClick={() => { setStripeSecretKey(""); setStripeWebhookSecret(""); }}>
+              {t("superAdminClear")}
+            </Button>
+          </div>
+        </div>
+      </Card>
+
+      {/* Google Search Console Configuration */}
+      <Card className="overflow-hidden">
+        <div className="p-5 border-b border-slate-100">
+          <div className="flex items-center gap-2">
+            <Search className="w-5 h-5 text-blue-600" />
+            <h2 className="font-semibold text-slate-900">Google Search Console API</h2>
+          </div>
+        </div>
+        <div className="p-5 space-y-4">
+          <div>
+            <Label>Client ID</Label>
+            <Input
+              type="password"
+              value={gscClientId}
+              onChange={(e) => setGscClientId(e.target.value)}
+              placeholder="xxxxx.apps.googleusercontent.com"
+              className="font-mono text-sm"
+            />
+            <p className="text-xs text-slate-500 mt-1">
+              OAuth 2.0 Client ID from Google Cloud Console
+            </p>
+          </div>
+          <div>
+            <Label>Client Secret</Label>
+            <Input
+              type="password"
+              value={gscClientSecret}
+              onChange={(e) => setGscClientSecret(e.target.value)}
+              placeholder="GOCSPX-..."
+              className="font-mono text-sm"
+            />
+            <p className="text-xs text-slate-500 mt-1">
+              OAuth 2.0 Client Secret from Google Cloud Console
+            </p>
+          </div>
+          <div>
+            <Label>Refresh Token</Label>
+            <Input
+              type="password"
+              value={gscRefreshToken}
+              onChange={(e) => setGscRefreshToken(e.target.value)}
+              placeholder="1//..."
+              className="font-mono text-sm"
+            />
+            <p className="text-xs text-slate-500 mt-1">
+              OAuth 2.0 Refresh Token for accessing GSC API
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <Button 
+              onClick={async () => {
+                try {
+                  const response = await base44.functions.invoke('setGSCSecrets', {
+                    client_id: gscClientId,
+                    client_secret: gscClientSecret,
+                    refresh_token: gscRefreshToken
+                  });
+                  if (response.data.success) {
+                    toast.success("GSC credentials updated successfully");
+                    setGscClientId("");
+                    setGscClientSecret("");
+                    setGscRefreshToken("");
+                  }
+                } catch (error) {
+                  toast.error("Failed to update GSC credentials");
+                }
+              }}
+              disabled={!gscClientId && !gscClientSecret && !gscRefreshToken}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              Save GSC Credentials
+            </Button>
+            <Button variant="outline" onClick={() => { setGscClientId(""); setGscClientSecret(""); setGscRefreshToken(""); }}>
               {t("superAdminClear")}
             </Button>
           </div>

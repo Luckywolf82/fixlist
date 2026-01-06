@@ -3,8 +3,10 @@ import Billing from './pages/Billing';
 import CompetitorAnalysis from './pages/CompetitorAnalysis';
 import CrawlReport from './pages/CrawlReport';
 import Crawls from './pages/Crawls';
+import Dashboard from './pages/Dashboard';
 import HealthReport from './pages/HealthReport';
 import Issues from './pages/Issues';
+import KeywordTracking from './pages/KeywordTracking';
 import Landing from './pages/Landing';
 import PageDetail from './pages/PageDetail';
 import Pages from './pages/Pages';
@@ -15,8 +17,6 @@ import SiteOverview from './pages/SiteOverview';
 import Sites from './pages/Sites';
 import SuperAdmin from './pages/SuperAdmin';
 import UserManagement from './pages/UserManagement';
-import KeywordTracking from './pages/KeywordTracking';
-import Dashboard from './pages/Dashboard';
 import __Layout from './Layout.jsx';
 
 
@@ -26,8 +26,10 @@ export const PAGES = {
     "CompetitorAnalysis": CompetitorAnalysis,
     "CrawlReport": CrawlReport,
     "Crawls": Crawls,
+    "Dashboard": Dashboard,
     "HealthReport": HealthReport,
     "Issues": Issues,
+    "KeywordTracking": KeywordTracking,
     "Landing": Landing,
     "PageDetail": PageDetail,
     "Pages": Pages,
@@ -38,8 +40,6 @@ export const PAGES = {
     "Sites": Sites,
     "SuperAdmin": SuperAdmin,
     "UserManagement": UserManagement,
-    "KeywordTracking": KeywordTracking,
-    "Dashboard": Dashboard,
 }
 
 export const pagesConfig = {
